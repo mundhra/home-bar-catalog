@@ -94,6 +94,30 @@ function jumpToIngredient(id) {
 
 let openRecipeId = null; // which recipe the recipe view is showing (for live re-render)
 
+// Deep links: …/#recipe=<id> opens that drink. The address follows the open recipe
+// (replaceState, so no extra history entries); guest menus keep their #menu= link.
+function recipeLink(id) { return `${appBaseUrl()}#recipe=${id}`; }
+function parseRecipeHash(hash) {
+  const m = /^#recipe=([^&#]+)$/.exec(hash || "");
+  return m && ID_RE.test(m[1]) ? m[1] : null;
+}
+function clearRecipeHash() {
+  if (parseRecipeHash(location.hash)) history.replaceState(null, "", location.pathname + location.search);
+}
+// Drinks that exist only in this browser's edited copy: their links won't work elsewhere.
+function isLocalOnlyRecipe(id) {
+  return !shippedCatalog || !shippedCatalog.recipes.some(r => r.id === id);
+}
+async function copyRecipeLink(id) {
+  const link = recipeLink(id);
+  try {
+    await navigator.clipboard.writeText(link);
+    showToast("Link copied.");
+  } catch (e) {
+    prompt("Copy this link:", link);
+  }
+}
+
 function openRecipeModal(id) {
   const r = recipeById(id);
   if (!r) return;
@@ -245,9 +269,15 @@ function openRecipeModal(id) {
     </div>`;
 
   showModal("recipeModal");
+  // Full path, not a bare "#…": a relative hash would resolve against any <base> element.
+  if (!guest && location.hash !== `#recipe=${id}`) history.replaceState(null, "", `${location.pathname}${location.search}#recipe=${id}`);
 }
 
-function closeRecipeModal() { hideModal("recipeModal"); }
+function closeRecipeModal() {
+  hideModal("recipeModal");
+  openRecipeId = null;
+  if (!guestMenu) clearRecipeHash();
+}
 
 function openShoppingModal() {
   renderShoppingChecklist();

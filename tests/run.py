@@ -34,7 +34,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 TESTS = ROOT / "tests"
 GENERATED = TESTS / ".generated.html"
-SCENARIOS = ["main", "legacy", "stale", "same", "broken", "guest"]
+SCENARIOS = ["main", "legacy", "stale", "same", "broken", "guest", "deeplink"]
 HTTP_SCENARIOS = ["share", "update"]      # need real time (canvas, fonts): served over local http
 EXTRA = HTTP_SCENARIOS + ["offline"]
 
@@ -193,6 +193,8 @@ def scenario_url(base, scenario):
         # The app needs the hash for the guest link, so the scenario goes in the query string.
         ids = [r["id"] for r in load_catalog()["recipes"][:3]] + ["no-such-drink"]
         return f"{base}?mode=guest#menu=Zz%20Guest%20Night~{','.join(ids)}"
+    if scenario == "deeplink":
+        return f"{base}?mode=deeplink#recipe={load_catalog()['recipes'][2]['id']}"
     return f"{base}#{scenario}"
 
 

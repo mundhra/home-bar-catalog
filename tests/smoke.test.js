@@ -113,6 +113,9 @@ window.addEventListener("load", () => setTimeout(async () => {
       ok("Escape closes the share dialog", !isModalOpen("shareModal"));
       openRecipeModal(first.id);
       ok("recipe view has Share as Image", document.getElementById("modalContent").textContent.includes("Share as Image"));
+      await openShareDialog(first.id);
+      ok("share dialog offers the recipe link", document.getElementById("shareLink").value === recipeLink(first.id));
+      closeShareDialog();
       closeRecipeModal();
       release();
 
@@ -177,6 +180,14 @@ window.addEventListener("load", () => setTimeout(async () => {
       ok("guests get no hearts or stars", !document.querySelector('#modalContent button[aria-label^="Rate"], #modalContent button[aria-pressed], #guestGrid button[aria-pressed]'));
       ok("guest still sees amounts", RAW.recipes.find(r => r.id === guestMenu.ids[0]).ingredients.every(i => gt.includes(i.amount)));
       closeRecipeModal();
+
+    } else if (mode === "deeplink") {
+      // Opened as ?mode=deeplink#recipe=<3rd recipe id>
+      const want = RAW.recipes[2];
+      ok("recipe link opens that drink", isModalOpen("recipeModal") && openRecipeId === want.id
+        && document.getElementById("modalContent").textContent.includes(want.name));
+      closeRecipeModal();
+      ok("closing clears the link", location.hash === "");
 
     } else if (mode === "broken") {
       ok("missing catalog: error state shown", document.getElementById("recipeGrid").textContent.includes("couldn't be loaded"));
@@ -344,6 +355,20 @@ window.addEventListener("load", () => setTimeout(async () => {
       await handleImportFile(fileOf(JSON.stringify(prefBackup), "b.json"));
       ok("backup restores favourites and ratings", ratingOf(f1) === 5 && isFavourite(f2) && isFavourite(f3) && ratingOf(f3) === 3);
       recipePrefs = {}; savePrefs(); resetToShippedCatalog();
+
+      // ---------- deep links ----------
+      const dl = RAW.recipes[1].id;
+      openRecipeModal(dl);
+      ok("address follows the open recipe", location.hash === `#recipe=${dl}`);
+      closeRecipeModal();
+      ok("address cleared on close", location.hash === "");
+      ok("recipe link format", recipeLink(dl).endsWith(`#recipe=${dl}`) && parseRecipeHash(`#recipe=${dl}`) === dl
+        && parseRecipeHash("#recipe=Bad Id") === null && parseRecipeHash("#menu=x~a") === null);
+      location.hash = `#recipe=${RAW.recipes[3].id}`;
+      await new Promise(r => setTimeout(r, 30));
+      ok("following a recipe link while open", isModalOpen("recipeModal") && openRecipeId === RAW.recipes[3].id);
+      closeRecipeModal();
+      ok("published drinks aren't local-only", !isLocalOnlyRecipe(dl) && isLocalOnlyRecipe("zz-not-published"));
 
       // ---------- party menus ----------
       const ids3 = RAW.recipes.slice(0, 3).map(r => r.id);

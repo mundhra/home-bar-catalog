@@ -189,6 +189,14 @@ async function openShareDialog(recipeId) {
         ${canCopy ? `<button onclick="copyShareImage()" class="px-4 py-2 rounded-xl text-sm text-gray-200 bg-white/5 hover:bg-white/15 border border-white/10">Copy</button>` : ""}
         <button onclick="downloadShareImage()" class="px-4 py-2 rounded-xl text-sm text-gray-200 bg-white/5 hover:bg-white/15 border border-white/10">Download</button>
         ${canShareFile ? `<button onclick="shareShareImage()" class="px-5 py-2 rounded-xl bg-gold hover:bg-gold-light text-obsidian font-semibold text-sm">Share…</button>` : ""}
+      </div>
+      <div class="pt-3 border-t border-white/10 space-y-2">
+        <p class="text-[11px] text-gray-400">Or send a link that opens this recipe:</p>
+        ${isLocalOnlyRecipe(recipe.id) ? `<p class="text-[11px] text-amber-300">This drink is only on this device, so the link won't open it for anyone else until you publish catalog.js.</p>` : ""}
+        <div class="flex gap-2">
+          <input id="shareLink" readonly value="${esc(recipeLink(recipe.id))}" onclick="this.select()" class="flex-1 min-w-0 px-3 py-2 rounded-xl bg-obsidian border border-white/10 text-[11px] text-gray-300" aria-label="Recipe link" />
+          <button onclick="copyRecipeLink('${recipe.id}')" class="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold text-gold bg-gold/10 hover:bg-gold/20 border border-gold/30">Copy link</button>
+        </div>
       </div>`;
   } catch (e) {
     console.warn("Share image failed", e);

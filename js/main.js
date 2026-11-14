@@ -28,7 +28,12 @@ window.addEventListener("DOMContentLoaded", () => {
   refreshAllViews();
   renderGlasswareGuide();
   const guest = parseMenuHash(location.hash);
-  if (guest) enterGuestMode(guest);
+  if (guest) {
+    enterGuestMode(guest);
+  } else {
+    const linked = parseRecipeHash(location.hash);
+    if (linked && recipeById(linked)) openRecipeModal(linked);
+  }
   if (shippedChangedSinceEdit()) {
     showToast("The shipped catalog changed since your edits. See Catalog Data.", "warn");
   } else if (shippedErrors.length && !usingLocalCopy) {
@@ -38,7 +43,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
 // Opening or leaving a guest-menu link while the page is open: reload into the right mode.
 window.addEventListener("hashchange", () => {
-  if (!!parseMenuHash(location.hash) !== !!guestMenu) location.reload();
+  if (!!parseMenuHash(location.hash) !== !!guestMenu) return location.reload();
+  const linked = parseRecipeHash(location.hash); // a recipe link opened while the app is open
+  if (linked && linked !== openRecipeId && recipeById(linked)) openRecipeModal(linked);
 });
 
 // New-version check. GitHub Pages stamps every file with the deploy time, so one

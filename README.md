@@ -19,6 +19,7 @@ An installable, offline-capable web app that catalogs a personal home bar and se
 * **What can I make tonight?** Every card says *✓ Can make now*, *Need: Fresh Lime Juice* or *Missing 2*, based on your stock levels and the mixers you have on hand. The line above the grid shows how many drinks you can make now and how many are one ingredient away; tap either to filter.
 * **Shopping & mixers on hand:** tick the mixers and juices in the fridge (staples like soda and tonic start ticked). The dialog ranks the single items that would unlock the most drinks ("Fresh Lime Juice: unlocks 10 drinks") with a *Got it* button, and lists bottles marked Low or Out.
 * **Edit in the app:** add, edit, duplicate and delete recipes and inventory items, with export/import backups to move between devices. See *Editing Recipes & Inventory*.
+* **Direct links:** the address follows the open recipe (`…/#recipe=shirley-temple`), so any drink can be bookmarked or sent; the Share dialog has *Copy link*. Links work for drinks in the published catalog.
 * **Favourites & ratings:** heart any drink and rate it 1–5 stars. Filter to *♥ Favourites* and sort by *Top rated* or *A–Z*. Saved on the device and included in backups.
 * **Party menus:** pick the drinks you'll serve into a named menu (Party tab). Share a guest link or QR code, or print it: guests see a clean, read-only menu with no stock levels or editing, and can tap a drink to see what's in it. Links only show drinks in the published catalog; the app warns if a menu includes drinks that exist only on your phone.
 * **Substitutes & optional ingredients:** a recipe can say "Fresh Lime Juice *or* Fresh Lemon Juice", or mark an ingredient optional. *Can make now* counts a drink as makeable if any listed option is in stock.
@@ -138,7 +139,7 @@ These are plain scripts, not ES modules: browsers block modules on `file://`, an
 
 ```
 python tests/run.py               # everything
-python tests/run.py main          # one scenario: main | legacy | stale | same | broken | guest | share | offline
+python tests/run.py main          # one scenario: main | legacy | stale | same | broken | guest | deeplink | share | offline
 ```
 
 Needs Python 3.8+ and Chrome, Chromium or Edge (set `CHROME=/path/to/browser` if it isn't found). No packages to install.
