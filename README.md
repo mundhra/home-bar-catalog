@@ -62,13 +62,47 @@ Open `index.html` directly in a browser. No build step and no server needed.
 
 ## 🛠️ Tech Stack
 
-* **HTML5 + vanilla JavaScript** in one file, with no build step and no backend.
+* **HTML5 + vanilla JavaScript**, no build step and no backend.
 * **Tailwind CSS** via the Play CDN (`cdn.tailwindcss.com`) and **Google Fonts** (Cormorant Garamond, Inter).
 * **Inline SVG** for glassware and garnishes.
 * **`data/catalog.js`** holds all inventory items and recipes (see below).
 * **`localStorage`** (per browser): `private_reserve_stock_v2` (stock levels by item id; v1 name-keyed data migrates automatically), `private_reserve_shopping_v1` (checklist ticks) and `private_reserve_catalog_v1` (your edited copy of the catalog, if any).
 
 > ⚠️ **Needs a network connection.** Styling comes from the Tailwind CDN at runtime, so without internet the page loads unstyled. It does not work offline yet, even when launched from the home screen.
+
+### Project layout
+
+```
+index.html          page markup only; loads the scripts below in order
+data/catalog.js     inventory items + recipes (strict JSON, see below)
+js/core.js          constants, enums, storage keys, small helpers
+js/glassware.js     glassware guide content + SVG glass/garnish renderer
+js/store.js         catalog validation, loading, saving; stock & checklist state
+js/render.js        drink grid, inventory, stock drawer, checklist, filter chips
+js/ui.js            tabs, filters, recipe modal, dialogs
+js/editors.js       recipe builder + inventory item editor
+js/data-panel.js    export / import / download catalog.js / reset
+js/main.js          key handling and start-up (loaded last)
+tests/              smoke tests (see Testing)
+```
+
+These are plain scripts, not ES modules: browsers block modules on `file://`, and this keeps "open `index.html` directly" working. They share one global scope, so **a name declared in two files breaks the page**. The tests check for that.
+
+---
+
+## ✅ Testing
+
+```
+python tests/run.py               # everything
+python tests/run.py main          # one scenario: main | legacy | stale | same | broken
+```
+
+Needs Python 3.8+ and Chrome, Chromium or Edge (set `CHROME=/path/to/browser` if it isn't found). No packages to install.
+
+* **Static checks:** pasted `... existing code ...` placeholders, the same function or variable declared twice across `js/`, `<script src>` files that don't exist, and a `data/catalog.js` that isn't valid.
+* **Browser scenarios** in headless Chrome, each with empty storage: rendering, filters, Bar-Ready, stock and checklist saving, the recipe and item editors, HTML escaping, export/import/download, migration of old stock data, and stale or broken catalogs.
+* Expected values are computed from `data/catalog.js`, so the tests keep passing as you add or change recipes.
+* GitHub Actions runs the same command on every push and pull request (`.github/workflows/tests.yml`). Check it's green before relying on a deploy.
 
 ---
 

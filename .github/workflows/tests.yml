@@ -1,0 +1,14 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static checks and headless-browser smoke tests
+        run: python3 tests/run.py

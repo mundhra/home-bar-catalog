@@ -1,0 +1,365 @@
+/*
+ * Render: drink grid, inventory, stock drawer, restock checklist, filter chips.
+ * All catalog text is passed through esc() before it reaches innerHTML.
+ */
+
+// =========================================================================
+// RENDERING
+// =========================================================================
+function refreshAllViews() {
+  updateCounts();
+  updateStockBadges();
+  renderMultiFilterControls();
+  renderRecipes();
+  renderInventory();
+  renderStockDrawer();
+  renderShoppingChecklist();
+  if (isModalOpen("dataModal")) renderDataModal();
+}
+
+function updateCounts() {
+  document.getElementById("totalRecipeCount").textContent = catalog.recipes.length;
+  document.getElementById("inventoryTabCount").textContent = trackedItems().length;
+  const badge = document.getElementById("catalogEditedBadge");
+  badge.classList.toggle("hidden", !usingLocalCopy);
+  badge.classList.toggle("bg-amber-400", shippedChangedSinceEdit());
+  badge.title = shippedChangedSinceEdit() ? "Edited copy — the shipped catalog has changed since" : "Using your edited copy";
+}
+
+function updateStockBadges() {
+  const statuses = Object.values(stockStatuses);
+  const lowCount = statuses.filter(s => s === "low").length;
+  const outCount = statuses.filter(s => s === "out").length;
+  const alertTotal = lowCount + outCount;
+
+  const alertBadge = document.getElementById("stockAlertBadge");
+  alertBadge.textContent = alertTotal;
+  alertBadge.classList.toggle("hidden", alertTotal === 0);
+  document.getElementById("lowStockPillCount").textContent = lowCount;
+
+  document.getElementById("stockSummaryStrip").innerHTML = `
+    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> ${trackedItems().length - alertTotal} In Stock</span>
+    <span class="flex items-center gap-1 ${lowCount > 0 ? 'text-amber-300 font-semibold' : ''}"><span class="w-2 h-2 rounded-full bg-amber-400"></span> ${lowCount} Low</span>
+    <span class="flex items-center gap-1 ${outCount > 0 ? 'text-red-400 font-semibold' : ''}"><span class="w-2 h-2 rounded-full bg-red-400"></span> ${outCount} Out</span>
+  `;
+
+  const remainingMixers = itemsOfKind("mixer").filter(m => !checkedShoppingItems.has(m.id)).length;
+  document.getElementById("shoppingBadge").textContent = remainingMixers + alertTotal;
+}
+
+function renderRecipes() {
+  const grid = document.getElementById("recipeGrid");
+  const searchVal = document.getElementById("searchInput").value.toLowerCase().trim();
+  const readinessFilter = document.getElementById("readinessFilter").value;
+  const hideOutOfStock = document.getElementById("hideOutOfStockToggle").checked;
+  const useUpLowStock = document.getElementById("useUpLowStockToggle").checked;
+
+  if (!catalog.recipes.length && shippedErrors.length && !usingLocalCopy) {
+    grid.innerHTML = `
+      <div class="col-span-full glass-card rounded-2xl p-10 text-center space-y-3 border-red-500/40">
+        <p class="font-serif text-2xl text-white">The catalog couldn't be loaded</p>
+        <p class="text-sm text-gray-300">${esc(shippedErrors[0])}</p>
+        <button onclick="openDataModal()" class="mt-2 px-4 py-2 rounded-xl bg-gold text-obsidian text-sm font-semibold">Open Catalog Data</button>
+      </div>`;
+    document.getElementById("visibleCount").textContent = 0;
+    return;
+  }
+
+  const filtered = catalog.recipes.filter(r => {
+    const { lowItems, outItems } = getRecipeStockAnalysis(r);
+    if (hideOutOfStock && outItems.length > 0) return false;
+    if (useUpLowStock && lowItems.length === 0) return false;
+    if (currentTypeFilter !== "ALL" && r.type !== currentTypeFilter) return false;
+    if (currentVibeFilter !== "ALL" && r.vibe !== currentVibeFilter) return false;
+    const ready = isBarReady(r);
+    if (readinessFilter === "READY_NOW" && !ready) return false;
+    if (readinessFilter === "NEEDS_JUICE" && ready) return false;
+
+    if (selectedIngredients.size > 0) {
+      const uses = id => r.ingredients.some(i => i.item === id);
+      const selected = [...selectedIngredients];
+      const isMatch = multiMatchMode === "ALL" ? selected.every(uses) : selected.some(uses);
+      if (!isMatch) return false;
+    }
+
+    if (searchVal) {
+      const haystack = [
+        r.name, r.type, r.vibe, r.glass, r.method, r.servingNotes,
+        ...r.ingredients.map(ingredientLabel)
+      ].join(" ").toLowerCase();
+      if (!haystack.includes(searchVal)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById("visibleCount").textContent = filtered.length;
+  const isFiltered = currentTypeFilter !== "ALL" || currentVibeFilter !== "ALL" || selectedIngredients.size > 0 || readinessFilter !== "ALL" || searchVal !== "" || hideOutOfStock || useUpLowStock;
+  document.getElementById("resetFiltersBtn").classList.toggle("hidden", !isFiltered);
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="col-span-full glass-card rounded-2xl p-12 text-center space-y-3">
+        <p class="font-serif text-2xl text-white">${catalog.recipes.length ? "No matching drinks found" : "No recipes yet"}</p>
+        <p class="text-sm text-gray-400">${catalog.recipes.length ? "Try clearing one of your active filters or updating your stock statuses." : "Add your first recipe to get started."}</p>
+        ${catalog.recipes.length
+          ? `<button onclick="resetAllFilters()" class="mt-2 px-4 py-2 rounded-xl bg-gold text-obsidian text-sm font-semibold">Reset All Filters</button>`
+          : `<button onclick="openRecipeEditor('add')" class="mt-2 px-4 py-2 rounded-xl bg-gold text-obsidian text-sm font-semibold no-print">+ Add Recipe</button>`}
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(r => {
+    const { lowItems, outItems } = getRecipeStockAnalysis(r);
+    const isOut = outItems.length > 0;
+    const isLow = !isOut && lowItems.length > 0;
+
+    const typeBadgeColor = r.type === "Mocktail"
+      ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+      : r.type === "Wine & Low-ABV"
+        ? "bg-purple-500/15 text-purple-300 border-purple-500/30"
+        : "bg-gold/15 text-gold border-gold/30";
+
+    const readyBadge = isBarReady(r)
+      ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Bar-Ready</span>`
+      : `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">+ On-Demand Juice/Citrus</span>`;
+
+    let stockWarningBanner = "";
+    if (isOut) {
+      stockWarningBanner = `
+        <div class="mb-3 px-2.5 py-1.5 rounded-lg bg-red-500/15 border border-red-500/40 text-red-300 text-[11px] font-medium flex items-center gap-1.5">
+          <span>Out of Stock:</span>
+          <strong class="truncate">${esc(outItems.join(", "))}</strong>
+        </div>`;
+    } else if (isLow) {
+      stockWarningBanner = `
+        <div class="mb-3 px-2.5 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-300 text-[11px] font-medium flex items-center gap-1.5">
+          <span>Low Stock:</span>
+          <strong class="truncate">${esc(lowItems.join(", "))}</strong>
+        </div>`;
+    }
+
+    const ingPreview = r.ingredients.map(i => {
+      const it = i.item ? itemsById.get(i.item) : null;
+      const st = isTracked(it) ? getItemStockStatus(it.id) : null;
+      const dotColor = !st ? "bg-sky-400" : st === "out" ? "bg-red-500" : st === "low" ? "bg-amber-400" : "bg-emerald-400";
+      const textStyle = st === "out" ? "line-through text-red-300/80" : st === "low" ? "text-amber-200" : "text-gray-200";
+      return `
+        <li class="flex items-center justify-between gap-3 text-xs py-1 border-b border-white/5 last:border-0">
+          <span class="${textStyle} flex items-center gap-1.5 min-w-0">
+            <span class="w-1.5 h-1.5 rounded-full shrink-0 ${dotColor}"></span>
+            <span class="truncate">${esc(ingredientLabel(i))}</span>
+          </span>
+          <span class="font-mono text-[11px] text-gray-400 shrink-0">${esc(i.amount)}</span>
+        </li>`;
+    }).join("");
+
+    return `
+      <article onclick="openRecipeModal('${r.id}')" class="glass-card rounded-2xl p-5 flex flex-col justify-between cursor-pointer group ${isOut ? 'opacity-55 border-red-500/30 grayscale-[35%]' : isLow ? 'border-amber-500/35' : ''}">
+        <div>
+          <div class="flex flex-wrap items-center justify-between gap-1.5 mb-2.5">
+            <span class="text-[11px] px-2.5 py-0.5 rounded-full border font-semibold ${typeBadgeColor}">${esc(r.type)}</span>
+            ${readyBadge}
+          </div>
+          ${stockWarningBanner}
+          <div class="flex items-center justify-between gap-3 bg-obsidian/60 rounded-xl p-3 border border-white/5 mb-4">
+            <div class="space-y-1 min-w-0">
+              <p class="text-[11px] uppercase tracking-wider text-gold font-medium">${esc(r.vibe)}</p>
+              <h3 class="font-serif text-xl font-bold text-white group-hover:text-gold transition leading-snug">${esc(r.name)}</h3>
+              <div class="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-gray-400">
+                <span class="px-2 py-0.5 rounded bg-white/5 text-gray-200 font-medium">${esc(r.glass)} Glass</span>
+                ${r.method ? `<span>• ${esc(r.method)}</span>` : ""}
+              </div>
+            </div>
+            ${renderGlassSVG(r.glass, r.colors, r.garnishType, r.id)}
+          </div>
+          <ul class="space-y-0.5 mb-4">${ingPreview}</ul>
+        </div>
+        <div class="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
+          <span class="text-gray-400 truncate max-w-[70%]">Ice: <strong class="text-gray-300 font-medium">${esc(r.ice || "—")}</strong></span>
+          <span class="text-gold font-semibold group-hover:translate-x-0.5 transition flex items-center gap-1">
+            <span>Full Spec</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </span>
+        </div>
+      </article>`;
+  }).join("");
+}
+
+function renderStockToggleButtons(id) {
+  const current = getItemStockStatus(id);
+  const btn = (value, label, on) => `
+    <button type="button" onclick="setItemStockStatus('${id}', '${value}')" class="py-1 px-2 rounded-lg transition ${current === value ? on : 'text-gray-400 hover:text-white'}">${label}</button>`;
+  return `
+    <div class="grid grid-cols-3 gap-1 p-1 rounded-xl bg-obsidian border border-white/10 text-[11px] font-semibold">
+      ${btn("in", "In Stock", "bg-emerald-500/25 text-emerald-300 border border-emerald-500/40")}
+      ${btn("low", "Low Stock", "bg-amber-500/25 text-amber-300 border border-amber-500/40")}
+      ${btn("out", "Out", "bg-red-500/25 text-red-300 border border-red-500/40")}
+    </div>`;
+}
+
+function renderInventoryCard(it) {
+  const tracked = isTracked(it);
+  const st = tracked ? getItemStockStatus(it.id) : "in";
+  const uses = recipesUsingItem(it.id).length;
+  const tint = st === "out" ? "border-red-500/40 opacity-75" : st === "low" ? "border-amber-500/40" : "";
+  return `
+    <div class="glass-card rounded-2xl p-4 flex flex-col justify-between gap-3 ${tint}">
+      <div>
+        <div class="flex items-start justify-between gap-2">
+          <h4 class="font-semibold text-base ${st === 'out' ? 'line-through text-red-300' : 'text-white'}">${esc(it.name)}</h4>
+          <span class="shrink-0 text-[11px] px-2 py-0.5 rounded-md bg-white/10 text-gray-200 font-medium">${esc(it.category || ITEM_KINDS[it.kind].singular)}</span>
+        </div>
+        ${it.profile ? `<p class="text-[11px] text-gold mt-0.5">${esc(it.profile)}</p>` : ""}
+        ${it.notes ? `<p class="text-xs text-gray-300 mt-2 leading-relaxed">${esc(it.notes)}</p>` : ""}
+        ${it.staple ? `<p class="text-[11px] text-emerald-300 mt-2">Always on hand: doesn't stop a drink being Bar-Ready</p>` : ""}
+      </div>
+      <div class="space-y-2 pt-1 no-print">
+        ${tracked ? renderStockToggleButtons(it.id) : ""}
+        <div class="flex gap-2">
+          <button onclick="jumpToIngredient('${it.id}')" ${uses ? "" : "disabled"} class="flex-1 py-2 rounded-xl bg-white/5 enabled:hover:bg-gold enabled:hover:text-obsidian text-gold text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed">
+            ${uses ? `View ${uses} drink${uses > 1 ? "s" : ""} →` : "Not used in any drink"}
+          </button>
+          <button onclick="openItemEditor('edit', '${it.id}')" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-gray-200 text-xs font-semibold transition">Edit</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderInventory() {
+  const el = document.getElementById("inventorySections");
+  el.innerHTML = KIND_ORDER.map((kind, idx) => {
+    const list = itemsOfKind(kind);
+    const meta = ITEM_KINDS[kind];
+    const cards = list.map(renderInventoryCard).join("");
+    return `
+      <div class="space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h3 class="font-serif text-xl sm:text-2xl font-bold text-gold">${idx + 1}. ${meta.label} (${list.length})</h3>
+          <div class="flex items-center gap-3 no-print">
+            ${kind === "mixer"
+              ? `<button onclick="openShoppingModal()" class="text-xs text-gold hover:underline font-medium">Open Order Checklist →</button>`
+              : `<span class="hidden sm:inline text-xs text-gray-400">Click status pills to update stock</span>`}
+            <button onclick="openItemEditor('add', null, '${kind}')" class="px-3 py-1.5 rounded-lg bg-gold/15 hover:bg-gold text-gold hover:text-obsidian border border-gold/30 text-xs font-semibold transition">+ Add</button>
+          </div>
+        </div>
+        ${kind === "mixer" ? `<p class="text-xs text-gray-400 -mt-2">Not stock-tracked: these go on the Order &amp; Restock checklist. Mixers marked “always on hand” don't stop a drink counting as Bar-Ready.</p>` : ""}
+        ${cards
+          ? `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">${cards}</div>`
+          : `<p class="text-xs text-gray-400">Nothing here yet.</p>`}
+      </div>`;
+  }).join("");
+}
+
+function renderStockDrawer() {
+  const container = document.getElementById("stockDrawerList");
+  const query = (document.getElementById("stockDrawerSearch")?.value || "").toLowerCase().trim();
+  const items = trackedItems().filter(item =>
+    !query || item.name.toLowerCase().includes(query) || item.category.toLowerCase().includes(query)
+  );
+  container.innerHTML = items.map(item => {
+    const st = getItemStockStatus(item.id);
+    return `
+      <div class="p-3 rounded-xl bg-obsidian/80 border ${st === 'out' ? 'border-red-500/40' : st === 'low' ? 'border-amber-500/40' : 'border-white/10'} space-y-2">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-semibold ${st === 'out' ? 'line-through text-red-300' : 'text-white'}">${esc(item.name)}</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-white/5 text-gray-400">${esc(item.category || ITEM_KINDS[item.kind].singular)}</span>
+        </div>
+        ${renderStockToggleButtons(item.id)}
+      </div>`;
+  }).join("") || `<p class="text-xs text-gray-400 col-span-full">No matching items.</p>`;
+}
+
+function renderShoppingChecklist() {
+  const restockSection = document.getElementById("restockAlertSection");
+  const flagged = trackedItems().filter(item => getItemStockStatus(item.id) !== "in");
+  if (flagged.length === 0) {
+    restockSection.innerHTML = `
+      <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between gap-3 text-xs text-emerald-300">
+        <span>All ${trackedItems().length} tracked bar items are marked <strong>In Stock</strong>.</span>
+        <button onclick="closeShoppingModal(); openStockDrawer();" class="underline font-semibold hover:text-white shrink-0">Edit Stock</button>
+      </div>`;
+  } else {
+    restockSection.innerHTML = `
+      <div class="p-4 rounded-2xl bg-red-500/10 border border-amber-500/35 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs uppercase tracking-wider text-amber-300 font-bold">Automatic Bar Restock Alerts (${flagged.length})</h4>
+          <button onclick="closeShoppingModal(); openStockDrawer();" class="text-[11px] text-gold hover:underline">Manage Stock</button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          ${flagged.map(item => {
+            const st = getItemStockStatus(item.id);
+            return `
+              <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-obsidian/90 border ${st === 'out' ? 'border-red-500/40' : 'border-amber-500/40'} text-xs">
+                <div>
+                  <span class="font-semibold text-white block">${esc(item.name)}</span>
+                  <span class="text-[10px] ${st === 'out' ? 'text-red-400' : 'text-amber-300'} font-bold uppercase">${st === 'out' ? 'Out of Stock' : 'Low Stock'}</span>
+                </div>
+                <button onclick="setItemStockStatus('${item.id}', 'in')" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-obsidian text-[11px] font-semibold transition shrink-0">Restocked ✓</button>
+              </div>`;
+          }).join("")}
+        </div>
+      </div>`;
+  }
+
+  const mixers = itemsOfKind("mixer");
+  document.getElementById("shoppingChecklist").innerHTML = mixers.map(item => {
+    const isChecked = checkedShoppingItems.has(item.id);
+    return `
+      <label class="flex items-center justify-between gap-3 p-3 rounded-xl bg-obsidian/70 border border-white/10 hover:border-gold/40 cursor-pointer transition">
+        <div class="flex items-center gap-3">
+          <input type="checkbox" ${isChecked ? "checked" : ""} onchange="toggleShoppingItem('${item.id}')" class="w-4 h-4 rounded accent-[#d4a359]" />
+          <span class="text-sm ${isChecked ? 'line-through text-gray-500' : 'text-gray-100 font-medium'}">${esc(item.name)}</span>
+        </div>
+        <span class="text-[11px] px-2 py-0.5 rounded bg-white/5 text-gray-400 shrink-0">${esc(item.category || "Mixer")}</span>
+      </label>`;
+  }).join("") || `<p class="text-xs text-gray-400">No on-demand mixers in the inventory.</p>`;
+}
+
+// Ingredient filter chips (item ids). Spirits + bases share the first group.
+function renderMultiFilterControls() {
+  const renderGroup = (containerId, items) => {
+    document.getElementById(containerId).innerHTML = items.map(item => {
+      const active = selectedIngredients.has(item.id);
+      return `
+        <button type="button" onclick="toggleSelectedIngredient('${item.id}')"
+          class="px-2.5 py-1 rounded-lg text-xs font-medium border transition flex items-center gap-1.5 ${
+            active
+              ? "bg-gold text-obsidian border-gold font-semibold shadow-sm"
+              : "bg-charcoal/90 text-gray-300 border-white/10 hover:border-gold/40 hover:text-white"
+          }">
+          <span>${esc(item.name.replace(/ Syrup$/, ""))}</span>
+          ${active ? '<span class="text-[10px] font-bold">✓</span>' : ""}
+        </button>`;
+    }).join("");
+  };
+  renderGroup("multiFilterSpirits", [...itemsOfKind("spirit"), ...itemsOfKind("base")]);
+  renderGroup("multiFilterSyrups", itemsOfKind("syrup"));
+  renderGroup("multiFilterJuices", itemsOfKind("mixer"));
+
+  const count = selectedIngredients.size;
+  const badge = document.getElementById("selectedIngCountBadge");
+  badge.textContent = count;
+  badge.classList.toggle("hidden", count === 0);
+  document.getElementById("multiFilterBtnLabel").textContent = count === 0
+    ? "Filter Alcohol, Syrups & Juices"
+    : `${count} Ingredient${count > 1 ? "s" : ""} Selected (${multiMatchMode === "ALL" ? "Match All" : "Match Any"})`;
+
+  const chipsWrap = document.getElementById("activeIngredientChips");
+  if (count === 0) {
+    chipsWrap.classList.add("hidden");
+    chipsWrap.classList.remove("flex");
+    chipsWrap.innerHTML = "";
+  } else {
+    chipsWrap.classList.remove("hidden");
+    chipsWrap.classList.add("flex");
+    const chipsHtml = [...selectedIngredients].map(id => `
+      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gold/20 border border-gold/40 text-gold text-xs font-medium">
+        <span>${esc(itemsById.get(id)?.name || id)}</span>
+        <button type="button" onclick="toggleSelectedIngredient('${id}')" class="hover:text-white font-bold leading-none" aria-label="Remove filter">&times;</button>
+      </span>`).join("");
+    chipsWrap.innerHTML = `
+      <span class="text-[11px] text-gray-400 mr-1">Selected (${multiMatchMode === "ALL" ? "AND" : "OR"}):</span>
+      ${chipsHtml}
+      <button type="button" onclick="clearSelectedIngredients()" class="text-[11px] text-gray-400 hover:text-white underline ml-1">Clear</button>`;
+  }
+}
