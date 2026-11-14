@@ -120,6 +120,11 @@
             <span class="hidden lg:inline">Order & Restock List</span>
             <span id="shoppingBadge" class="px-1.5 py-0.5 text-[10px] rounded-full bg-gold text-obsidian font-bold">11</span>
           </button>
+          <button onclick="openDataModal()" title="Catalog Data: export, import, publish" aria-label="Catalog Data" class="relative p-2 lg:px-3.5 lg:py-2 rounded-xl bg-surface hover:bg-white/10 border border-white/15 text-gray-200 text-xs sm:text-sm font-medium flex items-center gap-2 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7c0-1.657 3.582-3 8-3s8 1.343 8 3-3.582 3-8 3-8-1.343-8-3zm0 0v10c0 1.657 3.582 3 8 3s8-1.343 8-3V7M4 12c0 1.657 3.582 3 8 3s8-1.343 8-3"/></svg>
+            <span class="hidden lg:inline">Catalog Data</span>
+            <span id="catalogEditedBadge" class="hidden absolute -top-1 -right-1 lg:static w-2.5 h-2.5 lg:w-auto lg:h-auto lg:px-1.5 lg:py-0.5 rounded-full bg-gold lg:text-[10px] text-obsidian font-bold" title="Using your edited copy"><span class="hidden lg:inline">Edited</span></span>
+          </button>
           <button onclick="window.print()" title="Print / Save PDF Menu" aria-label="Print / Save PDF Menu" class="p-2 lg:px-3.5 lg:py-2 rounded-xl bg-gold hover:bg-gold-light text-obsidian text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-md shadow-gold/10 transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
             <span class="hidden lg:inline">Print / Save PDF Menu</span>
@@ -201,15 +206,15 @@
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <!-- Group 1: Spirits, Wines & Kombucha -->
+            <!-- Group 1: Spirits, Wines & Bases -->
             <div class="space-y-2">
-              <h4 class="text-[11px] uppercase tracking-wider text-gold font-bold">Spirits, Wines & Kombucha</h4>
+              <h4 class="text-[11px] uppercase tracking-wider text-gold font-bold">Spirits, Wines & Bases</h4>
               <div id="multiFilterSpirits" class="flex flex-wrap gap-1.5"></div>
             </div>
 
             <!-- Group 2: Syrups -->
             <div class="space-y-2">
-              <h4 class="text-[11px] uppercase tracking-wider text-gold font-bold">Syrups (12)</h4>
+              <h4 class="text-[11px] uppercase tracking-wider text-gold font-bold">Syrups</h4>
               <div id="multiFilterSyrups" class="flex flex-wrap gap-1.5"></div>
             </div>
 
@@ -270,7 +275,10 @@
       <!-- Active Filter Banner & Reset -->
       <div class="flex items-center justify-between text-xs text-gray-400 px-1">
         <p>Showing <span id="visibleCount" class="text-gold font-bold">48</span> curated recipes tailored to your bar catalog</p>
-        <button onclick="resetAllFilters()" id="resetFiltersBtn" class="hidden text-gold hover:underline font-medium no-print">Reset All Filters</button>
+        <div class="flex items-center gap-3 no-print">
+          <button onclick="resetAllFilters()" id="resetFiltersBtn" class="hidden text-gold hover:underline font-medium">Reset All Filters</button>
+          <button onclick="openRecipeEditor('add')" class="px-3 py-1.5 rounded-lg bg-gold/15 hover:bg-gold text-gold hover:text-obsidian border border-gold/30 font-semibold transition">+ Add Recipe</button>
+        </div>
       </div>
 
       <!-- Recipe Grid -->
@@ -284,56 +292,15 @@
       <div class="glass-card rounded-2xl p-6 border-l-4 border-l-gold flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 class="font-serif text-2xl sm:text-3xl font-bold text-white">Your Master Bar Inventory & Live Stock Manager</h2>
-          <p class="text-sm text-gray-300 mt-1">Toggle any bottle between <strong class="text-emerald-400">In Stock</strong>, <strong class="text-amber-300">Low Stock</strong>, or <strong class="text-red-400">Out of Stock</strong>. Changes save automatically and update the Drink Menu & Restock List.</p>
+          <p class="text-sm text-gray-300 mt-1">Toggle any bottle between <strong class="text-emerald-400">In Stock</strong>, <strong class="text-amber-300">Low Stock</strong>, or <strong class="text-red-400">Out of Stock</strong>. Changes save automatically and update the Drink Menu & Restock List. Use <strong class="text-gold">+ Add</strong> and <strong class="text-gold">Edit</strong> to change what's in your bar.</p>
         </div>
         <button onclick="resetAllStockStatuses()" class="shrink-0 px-4 py-2 rounded-xl bg-white/5 hover:bg-emerald-500/20 border border-white/15 hover:border-emerald-500/40 text-xs font-semibold text-gray-200 hover:text-emerald-300 transition">
           Reset All to In Stock
         </button>
       </div>
 
-      <!-- Syrups Section -->
-      <div class="space-y-4">
-        <div class="flex items-center justify-between">
-          <h3 class="font-serif text-xl sm:text-2xl font-bold text-gold">1. Artisanal & Flavored Syrups (12 Items)</h3>
-          <span class="text-xs text-gray-400">Click status pills to update stock</span>
-        </div>
-        <div id="inventorySyrupsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-      </div>
-
-      <!-- Spirits, Liqueurs & Wines Section -->
-      <div class="space-y-4">
-        <div class="flex items-center justify-between">
-          <h3 class="font-serif text-xl sm:text-2xl font-bold text-gold">2. Spirits, Liqueurs & Wines (10 Items)</h3>
-          <span class="text-xs text-gray-400">Click status pills to update stock</span>
-        </div>
-        <div id="inventorySpiritsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-      </div>
-
-      <!-- Fermented & On-Demand Section -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="glass-card rounded-2xl p-6 space-y-4">
-          <div class="flex items-center justify-between">
-            <h3 class="font-serif text-xl font-bold text-gold">3. Fermented / Zero-Proof Base</h3>
-            <span id="kombuchaStatusBadge" class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">In Stock</span>
-          </div>
-          <div id="kombuchaInventoryCard" class="p-4 rounded-xl bg-obsidian/70 border border-white/10 space-y-3">
-            <!-- Populated dynamically with stock controls -->
-          </div>
-        </div>
-
-        <div class="glass-card rounded-2xl p-6 space-y-4">
-          <div class="flex items-center justify-between">
-            <h3 class="font-serif text-xl font-bold text-gold">4. On-Demand Staples & Mixers</h3>
-            <button onclick="openShoppingModal()" class="text-xs text-gold hover:underline font-medium">Open Order Checklist →</button>
-          </div>
-          <p class="text-xs text-gray-300 leading-relaxed">Club soda, tonic water, fresh citrus, juices, and dairy are treated as on-demand items. Open the checklist to track your grocery runs.</p>
-          <div class="pt-2">
-            <button onclick="openShoppingModal()" class="w-full py-3 rounded-xl bg-gold hover:bg-gold-light text-obsidian text-xs font-semibold shadow-md transition flex items-center justify-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-              <span>View On-Demand Shopping & Restock List</span>
-            </button>
-          </div>
-        </div>
+      <div id="inventorySections" class="space-y-8">
+        <!-- Populated dynamically from the catalog -->
       </div>
     </section>
 
@@ -377,7 +344,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2">
         <input type="text" id="stockDrawerSearch" oninput="renderStockDrawer()" placeholder="Quick search bottle or syrup..." class="px-3.5 py-2 rounded-xl bg-obsidian border border-white/10 focus:border-gold focus:outline-none text-xs text-white w-full sm:w-64" />
         <button onclick="resetAllStockStatuses()" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-emerald-500/20 border border-white/10 text-xs font-semibold text-gray-200 hover:text-emerald-300 transition">
-          Reset All 23 Items to In Stock
+          Reset All to In Stock
         </button>
       </div>
 
@@ -404,7 +371,7 @@
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
-      <p class="text-xs text-gray-300 leading-relaxed">Check off items as you order or unpack them. All 12 syrups, 10 spirits/wines, and kombucha are already marked as <strong class="text-emerald-400">Stocked</strong> in your bar.</p>
+      <p class="text-xs text-gray-300 leading-relaxed">Check off on-demand mixers as you order or unpack them. Bottles and syrups marked Low or Out in the Stock Manager appear here automatically.</p>
       <!-- Automatic Bar Restock Alerts -->
       <div id="restockAlertSection" class="space-y-3"></div>
       <div id="shoppingChecklist" class="space-y-2 max-h-80 overflow-y-auto pr-2 scrollbar-thin">
@@ -417,52 +384,48 @@
     </div>
   </div>
 
+  <!-- ==================== RECIPE EDITOR MODAL ==================== -->
+  <div id="recipeEditorModal" class="fixed inset-0 z-[60] hidden items-start sm:items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto no-print" onclick="closeRecipeEditor()">
+    <div id="recipeEditorBody" class="glass-card bg-charcoal border border-gold/40 rounded-3xl max-w-3xl w-full shadow-2xl my-auto" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Recipe editor">
+      <!-- Populated dynamically via JS -->
+    </div>
+  </div>
+
+  <!-- ==================== INVENTORY ITEM EDITOR MODAL ==================== -->
+  <div id="itemEditorModal" class="fixed inset-0 z-[60] hidden items-start sm:items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto no-print" onclick="closeItemEditor()">
+    <div id="itemEditorBody" class="glass-card bg-charcoal border border-gold/40 rounded-3xl max-w-xl w-full shadow-2xl my-auto" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Inventory item editor">
+      <!-- Populated dynamically via JS -->
+    </div>
+  </div>
+
+  <!-- ==================== CATALOG DATA MODAL ==================== -->
+  <div id="dataModal" class="fixed inset-0 z-50 hidden items-start sm:items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto no-print" onclick="closeDataModal()">
+    <div class="glass-card bg-charcoal border border-gold/40 rounded-3xl max-w-2xl w-full p-5 sm:p-8 shadow-2xl space-y-5 my-auto" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Catalog data">
+      <div class="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
+        <div>
+          <span class="text-xs uppercase tracking-widest text-gold font-semibold">Recipes &amp; Inventory</span>
+          <h3 class="font-serif text-2xl font-bold text-white mt-0.5">Catalog Data</h3>
+        </div>
+        <button onclick="closeDataModal()" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white" aria-label="Close">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="dataModalBody" class="space-y-4"></div>
+    </div>
+  </div>
+
+  <input type="file" id="importFileInput" accept=".json,.js,application/json,text/javascript" class="hidden" onchange="handleImportFile(this)" />
+  <div id="toast" class="hidden" role="status" aria-live="polite"></div>
+
+  <!-- Catalog data (inventory + recipes). Must load before the app script. -->
+  <script src="data/catalog.js"></script>
   <script>
     // =========================================================================
-    // 1. MASTER DATA: INVENTORY, GLASSWARE & 57 DETAILED RECIPES
+    // 1. REFERENCE DATA & CONSTANTS
+    //    Inventory items and recipes live in data/catalog.js (window.BAR_CATALOG).
+    //    The glassware guide is presentation content tied to the SVG renderer,
+    //    so it stays here.
     // =========================================================================
-
-    const SYRUPS_DATA = [
-      { name: "Watermelon Syrup", profile: "Fruity / Light", notes: "Crisp, summer melon sweetness; pairs cleanly with lime, mint, vodka, tequila, and soda." },
-      { name: "Passion Fruit Syrup", profile: "Fruity / Tart", notes: "Vibrant tropical tang and floral aroma; shines with dark rum, tequila, white wine, and kombucha." },
-      { name: "Mint Mojito Syrup", profile: "Herbal / Cooling", notes: "Spearmint & cane sugar balance; effortless mojito and cooler base without muddling fresh leaves." },
-      { name: "Green Apple Syrup", profile: "Fruity / Crisp-Tart", notes: "Bright orchard acidity; pairs wonderfully with whisky, grappa, white wine, and ginger ale." },
-      { name: "Vanilla Syrup", profile: "Rich / Aromatic", notes: "Warm Madagascar-style sweetness; softens dark rum, whisky, coffee gin, and berry builds." },
-      { name: "Cacao Blue Syrup", profile: "Citrus / Bittersweet", notes: "Blue Curaçao style orange peel liqueur alternative; delivers vivid azure color and citrus depth." },
-      { name: "Triple Sec Cacao Syrup", profile: "Citrus / Sweet Orange", notes: "Classic sweet orange zest profile; essential for margaritas, sangrias, and crisp spritzes." },
-      { name: "Cheesecake Syrup", profile: "Rich / Dessert", notes: "Velvety cream-cheese and graham sweetness; transforms vodka, Baileys, and berries into dessert serves." },
-      { name: "Grenadine", profile: "Fruity / Tart-Sweet", notes: "Deep ruby pomegranate-berry richness; adds gradient sunset visuals and tart balance." },
-      { name: "Hazelnut Syrup", profile: "Nutty / Roasted", notes: "Toasted praline warmth; natural partner for coffee gin, whisky, dark rum, and Baileys." },
-      { name: "Coconut Syrup", profile: "Tropical / Creamy", notes: "Lush tropical body; bridges pineapple, passion fruit, dark rum, and blue citrus builds." },
-      { name: "Strawberry Syrup", profile: "Fruity / Jammy", notes: "Ripe red berry sweetness; pairs with cheesecake syrup, Jägermeister, white wine, and mint." }
-    ];
-
-    const SPIRITS_DATA = [
-      { name: "Whisky", category: "Base Spirit", profile: "Oaky, warm, caramel-spice", notes: "Anchors orchard fruit (green apple), nutty hazelnut, and vanilla highballs or stirred serves." },
-      { name: "Vodka", category: "Base Spirit", profile: "Clean, crisp, neutral", notes: "Lets delicate fruit syrups (watermelon, strawberry, cheesecake) take center stage." },
-      { name: "Tequila", category: "Base Spirit", profile: "Agave, earthy, bright", notes: "Natural affinity for passion fruit, watermelon, lime, and Triple Sec Cacao." },
-      { name: "Dark Rum", category: "Base Spirit", profile: "Molasses, rich, caramelized", notes: "The backbone of tropical tiki serves (coconut, passion fruit) and spiced vanilla builds." },
-      { name: "Coffee Gin", category: "Flavored Spirit", profile: "Juniper, botanical, roasted coffee", notes: "A showstopper spirit; pairs remarkably with hazelnut, tonic water, vanilla, and orange peel." },
-      { name: "Grappa", category: "Base Spirit", profile: "Aromatic, grape-pomace, dry", notes: "Italian grape spirit that shines with green apple, citrus, and dry tonic or kombucha." },
-      { name: "Jägermeister", category: "Herbal Liqueur", profile: "56 herbs, anise, bitter orange", notes: "Surprisingly versatile with red berries (strawberry, grenadine), citrus, and ginger beer." },
-      { name: "Baileys", category: "Cream Liqueur", profile: "Irish whiskey, cream, cocoa", notes: "Instant dessert texture; pairs seamlessly with cheesecake, hazelnut, and coffee gin." },
-      { name: "Red Wine", category: "Wine", profile: "Tannic, dark fruit, structured", notes: "Ideal for sangrias and berry-citrus spritzes lengthened with soda." },
-      { name: "White Wine", category: "Wine", profile: "Crisp, acidic, floral", notes: "Light, refreshing base for passion fruit, green apple, and strawberry spritzers." }
-    ];
-
-    const ON_DEMAND_ITEMS = [
-      { id: "soda", name: "Club Soda / Sparkling Water", category: "Carbonated Staple" },
-      { id: "tonic", name: "Tonic Water", category: "Carbonated Staple" },
-      { id: "ginger", name: "Ginger Ale / Ginger Beer", category: "Carbonated Staple" },
-      { id: "cola", name: "Cola", category: "Carbonated Staple" },
-      { id: "lime", name: "Fresh Lime Juice", category: "Fresh Citrus" },
-      { id: "lemon", name: "Fresh Lemon Juice", category: "Fresh Citrus" },
-      { id: "orange", name: "Orange Juice", category: "Fruit Juice" },
-      { id: "pineapple", name: "Pineapple Juice", category: "Fruit Juice" },
-      { id: "cranberry", name: "Cranberry Juice", category: "Fruit Juice" },
-      { id: "dairy", name: "Milk or Heavy Cream", category: "Dairy / Texture" },
-      { id: "espresso", name: "Espresso or Cold Brew", category: "Coffee" }
-    ];
 
     const GLASSWARE_GUIDE = [
       {
@@ -529,1534 +492,381 @@
         color1: "#fde047", color2: "#f59e0b", garnish: "berry-rim"
       }
     ];
+    const CATALOG_SCHEMA = 1;
+    const DRINK_TYPES = ["Cocktail", "Mocktail", "Wine & Low-ABV"];
+    const VIBES = ["Refreshing & Crisp", "Tropical & Fruity", "Rich & Dessert", "Herbal & Bold"];
+    const GLASSES = ["Highball", "Rocks", "Coupe", "Martini", "Copa", "Hurricane", "Flute"];
+    const GLASS_LABELS = { Copa: "Copa (Balloon)", Flute: "Champagne Flute" };
+    const GARNISHES = ["none", "citrus-wheel", "mint-lime", "orange-twist", "berry-rim", "umbrella-straw"];
+    const GARNISH_LABELS = {
+      "none": "None", "citrus-wheel": "Citrus wheel", "mint-lime": "Mint & lime",
+      "orange-twist": "Orange twist", "berry-rim": "Berry rim", "umbrella-straw": "Umbrella & straw"
+    };
+    const ITEM_KINDS = {
+      syrup:  { label: "Syrups", singular: "Syrup", tracked: true },
+      spirit: { label: "Spirits, Liqueurs & Wines", singular: "Spirit / Liqueur / Wine", tracked: true },
+      base:   { label: "Fermented & Zero-Proof Bases", singular: "Fermented / Zero-Proof Base", tracked: true },
+      mixer:  { label: "On-Demand Mixers & Juices", singular: "On-Demand Mixer / Juice", tracked: false }
+    };
+    const KIND_ORDER = ["syrup", "spirit", "base", "mixer"];
+    const ID_RE = /^[a-z0-9][a-z0-9-]{0,62}$/;
+    const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
-    const RECIPES = [
-      // --- REFRESHING & CRISP ---
-      {
-        id: "watermelon-mint-cooler",
-        name: "Emerald Watermelon Cooler",
-        type: "Mocktail",
-        vibe: "Refreshing & Crisp",
-        glass: "Highball",
-        method: "Build & Stir",
-        ice: "Cubed Ice (Full Column)",
-        colors: ["#fb7185", "#e11d48"],
-        garnishType: "mint-lime",
-        readyNow: false,
-        tags: ["Watermelon Syrup", "Mint Mojito Syrup", "Kombucha"],
-        ingredients: [
-          { name: "Watermelon Syrup", amount: "20 ml", stocked: true },
-          { name: "Mint Mojito Syrup", amount: "15 ml", stocked: true },
-          { name: "Fresh Lime Juice", amount: "15 ml", stocked: false },
-          { name: "Kombucha (Original or Ginger)", amount: "120 ml", stocked: true },
-          { name: "Club Soda", amount: "Top (45 ml)", stocked: false }
-        ],
-        steps: [
-          "Fill a chilled Highball glass all the way to the top with clear ice cubes.",
-          "Pour in the Watermelon Syrup, Mint Mojito Syrup, and Fresh Lime Juice.",
-          "Top gently with chilled Kombucha and a splash of Club Soda to preserve effervescence.",
-          "Lift once from bottom to top with a barspoon so the pink melon and mint flavors integrate cleanly."
-        ],
-        servingNotes: "Slap a fresh mint sprig between your palms to release aromatic oils and tuck it beside the straw alongside a thin lime wheel. (Cocktail option: add 45 ml Vodka or Tequila)."
-      },
-      {
-        id: "spiked-watermelon-paloma",
-        name: "Sonoma Watermelon Paloma",
-        type: "Cocktail",
-        vibe: "Refreshing & Crisp",
-        glass: "Highball",
-        method: "Shake & Top",
-        ice: "Cubed Ice",
-        colors: ["#f43f5e", "#fda4af"],
-        garnishType: "citrus-wheel",
-        readyNow: false,
-        tags: ["Tequila", "Watermelon Syrup", "Triple Sec Cacao Syrup"],
-        ingredients: [
-          { name: "Tequila", amount: "45 ml", stocked: true },
-          { name: "Watermelon Syrup", amount: "20 ml", stocked: true },
-          { name: "Triple Sec Cacao Syrup", amount: "10 ml", stocked: true },
-          { name: "Fresh Lime Juice", amount: "20 ml", stocked: false },
-          { name: "Club Soda", amount: "90 ml", stocked: false }
-        ],
-        steps: [
-          "Optional: Run a lime wedge around half the rim of a Highball glass and dip in flaky sea salt.",
-          "Add Tequila, Watermelon Syrup, Triple Sec Cacao Syrup, and Fresh Lime Juice to a shaker with ice.",
-          "Shake briskly for 10 seconds until frosty.",
-          "Strain over fresh cubed ice in the Highball glass and top with chilled Club Soda."
-        ],
-        servingNotes: "Garnish with a fresh lime wheel perched on the rim. The Triple Sec Cacao adds a subtle bittersweet orange zest that mimics ruby grapefruit."
-      },
-      {
-        id: "coffee-gin-hazelnut-tonic",
-        name: "Roasted Hazelnut Coffee G&T",
-        type: "Cocktail",
-        vibe: "Refreshing & Crisp",
-        glass: "Copa",
-        method: "Build over Ice",
-        ice: "Large Cubed Ice",
-        colors: ["#92400e", "#d97706"],
-        garnishType: "orange-twist",
-        readyNow: true,
-        tags: ["Coffee Gin", "Hazelnut Syrup"],
-        ingredients: [
-          { name: "Coffee Gin", amount: "50 ml", stocked: true },
-          { name: "Hazelnut Syrup", amount: "12 ml", stocked: true },
-          { name: "Tonic Water", amount: "140 ml", stocked: false }
-        ],
-        steps: [
-          "Pack a large Copa balloon wine glass generously with solid ice cubes.",
-          "Pour Coffee Gin and Hazelnut Syrup directly over the ice.",
-          "Slowly pour chilled Tonic Water down the side of the glass (or down a barspoon) to keep bubbles lively.",
-          "Stir gently twice to marry the roasted hazelnut with the quinine and juniper."
-        ],
-        servingNotes: "Express an orange peel over the bowl of the glass and drop it in. The citrus oil bridges the roasted coffee bean and herbal gin botanicals."
-      },
-      {
-        id: "orchard-whisky-highball",
-        name: "Crisp Orchard Whisky Highball",
-        type: "Cocktail",
-        vibe: "Refreshing & Crisp",
-        glass: "Highball",
-        method: "Build & Lift",
-        ice: "Cubed Ice",
-        colors: ["#eab308", "#a3e635"],
-        garnishType: "citrus-wheel",
-        readyNow: true,
-        tags: ["Whisky", "Green Apple Syrup"],
-        ingredients: [
-          { name: "Whisky", amount: "45 ml", stocked: true },
-          { name: "Green Apple Syrup", amount: "20 ml", stocked: true },
-          { name: "Ginger Ale / Ginger Beer", amount: "130 ml", stocked: false }
-        ],
-        steps: [
-          "Chill a tall Highball glass and fill completely with ice cubes.",
-          "Add Whisky and Green Apple Syrup.",
-          "Top with chilled Ginger Ale (for lighter sweetness) or Ginger Beer (for spicy bite).",
-          "Give a single gentle stir from bottom to top."
-        ],
-        servingNotes: "Serve with a crisp lemon wheel or thin fan of fresh green apple slices. Tart orchard apple cuts straight through the warm oak of the whisky."
-      },
-      {
-        id: "grappa-botanical-fizz",
-        name: "Venetian Orchard Spritz",
-        type: "Cocktail",
-        vibe: "Refreshing & Crisp",
-        glass: "Copa",
-        method: "Build",
-        ice: "Cubed Ice",
-        colors: ["#bef264", "#65a30d"],
-        garnishType: "citrus-wheel",
-        readyNow: true,
-        tags: ["Grappa", "Green Apple Syrup", "Triple Sec Cacao Syrup"],
-        ingredients: [
-          { name: "Grappa", amount: "40 ml", stocked: true },
-          { name: "Green Apple Syrup", amount: "15 ml", stocked: true },
-          { name: "Triple Sec Cacao Syrup", amount: "10 ml", stocked: true },
-          { name: "Tonic Water", amount: "120 ml", stocked: false }
-        ],
-        steps: [
-          "Fill a stemmed Copa or large white wine glass with ice.",
-          "Pour in Grappa, Green Apple Syrup, and Triple Sec Cacao Syrup.",
-          "Top with crisp Tonic Water and stir gently."
-        ],
-        servingNotes: "Garnish with a lemon wheel. Grappa's grape-pomace aromatics pair naturally with crisp green apple and bittersweet tonic."
-      },
-      {
-        id: "white-wine-mojito-spritz",
-        name: "Garden Mint White Wine Spritz",
-        type: "Wine & Low-ABV",
-        vibe: "Refreshing & Crisp",
-        glass: "Copa",
-        method: "Build",
-        ice: "Cubed Ice",
-        colors: ["#fde047", "#86efac"],
-        garnishType: "mint-lime",
-        readyNow: true,
-        tags: ["White Wine", "Mint Mojito Syrup", "Green Apple Syrup"],
-        ingredients: [
-          { name: "White Wine (Chilled)", amount: "120 ml", stocked: true },
-          { name: "Mint Mojito Syrup", amount: "15 ml", stocked: true },
-          { name: "Green Apple Syrup", amount: "10 ml", stocked: true },
-          { name: "Club Soda", amount: "60 ml", stocked: false }
-        ],
-        steps: [
-          "Fill a large wine glass with ice cubes.",
-          "Add Mint Mojito Syrup and Green Apple Syrup first, then pour chilled White Wine.",
-          "Top with Club Soda and lift gently with a spoon."
-        ],
-        servingNotes: "Garnish with a fresh mint sprig and lime wheel. A crisp, low-ABV patio refresher."
-      },
-      {
-        id: "kombucha-apple-zen",
-        name: "Probiotic Orchard Fizz",
-        type: "Mocktail",
-        vibe: "Refreshing & Crisp",
-        glass: "Highball",
-        method: "Build",
-        ice: "Cubed Ice",
-        colors: ["#a3e635", "#eab308"],
-        garnishType: "mint-lime",
-        readyNow: true,
-        tags: ["Kombucha", "Green Apple Syrup", "Mint Mojito Syrup"],
-        ingredients: [
-          { name: "Kombucha (Chilled)", amount: "150 ml", stocked: true },
-          { name: "Green Apple Syrup", amount: "15 ml", stocked: true },
-          { name: "Mint Mojito Syrup", amount: "10 ml", stocked: true },
-          { name: "Club Soda", amount: "30 ml", stocked: false }
-        ],
-        steps: [
-          "Fill a Highball glass with ice.",
-          "Pour Green Apple Syrup and Mint Mojito Syrup over the ice.",
-          "Top slowly with chilled Kombucha and a splash of Club Soda."
-        ],
-        servingNotes: "Zero-proof and ready right out of your stocked bar—tangy fermented tea meets crisp apple and cooling spearmint."
-      },
-      {
-        id: "vodka-watermelon-mint-mule",
-        name: "Summer Melon Mint Mule",
-        type: "Cocktail",
-        vibe: "Refreshing & Crisp",
-        glass: "Highball",
-        method: "Build & Stir",
-        ice: "Cubed Ice",
-        colors: ["#fb7185", "#fda4af"],
-        garnishType: "mint-lime",
-        readyNow: false,
-        tags: ["Vodka", "Watermelon Syrup", "Mint Mojito Syrup"],
-        ingredients: [
-          { name: "Vodka", amount: "45 ml", stocked: true },
-          { name: "Watermelon Syrup", amount: "18 ml", stocked: true },
-          { name: "Mint Mojito Syrup", amount: "10 ml", stocked: true },
-          { name: "Fresh Lime Juice", amount: "15 ml", stocked: false },
-          { name: "Ginger Ale / Ginger Beer", amount: "100 ml", stocked: false }
-        ],
-        steps: [
-          "Fill a Highball glass with cubed ice.",
-          "Pour Vodka, Watermelon Syrup, Mint Mojito Syrup, and Fresh Lime Juice over the ice.",
-          "Top with spicy Ginger Beer and stir gently."
-        ],
-        servingNotes: "Garnish with a lime wheel and slapped mint sprig. Juicy watermelon cools down the fiery ginger kick."
-      },
-      {
-        id: "whisky-mint-julep-smash",
-        name: "Kentucky Green Apple Smash",
-        type: "Cocktail",
-        vibe: "Refreshing & Crisp",
-        glass: "Rocks",
-        method: "Shake & Strain",
-        ice: "Crushed Ice",
-        colors: ["#eab308", "#84cc16"],
-        garnishType: "mint-lime",
-        readyNow: false,
-        tags: ["Whisky", "Mint Mojito Syrup", "Green Apple Syrup"],
-        ingredients: [
-          { name: "Whisky", amount: "50 ml", stocked: true },
-          { name: "Mint Mojito Syrup", amount: "12 ml", stocked: true },
-          { name: "Green Apple Syrup", amount: "10 ml", stocked: true },
-          { name: "Fresh Lemon Juice", amount: "15 ml", stocked: false }
-        ],
-        steps: [
-          "Add Whisky, Mint Mojito Syrup, Green Apple Syrup, and Fresh Lemon Juice to a shaker with ice.",
-          "Shake briskly for 10 seconds.",
-          "Strain into a Rocks glass packed with crushed ice."
-        ],
-        servingNotes: "Crown with a generous bouquet of fresh mint. Crisp orchard acidity modernizes the classic Mint Julep."
-      },
-      {
-        id: "grappa-watermelon-spritz",
-        name: "Amalfi Melon & Grape Spritz",
-        type: "Cocktail",
-        vibe: "Refreshing & Crisp",
-        glass: "Copa",
-        method: "Build",
-        ice: "Cubed Ice",
-        colors: ["#f43f5e", "#fde047"],
-        garnishType: "mint-lime",
-        readyNow: true,
-        tags: ["Grappa", "Watermelon Syrup", "Mint Mojito Syrup"],
-        ingredients: [
-          { name: "Grappa", amount: "40 ml", stocked: true },
-          { name: "Watermelon Syrup", amount: "18 ml", stocked: true },
-          { name: "Mint Mojito Syrup", amount: "8 ml", stocked: true },
-          { name: "Club Soda", amount: "120 ml", stocked: false }
-        ],
-        steps: [
-          "Pack a large Copa wine glass with cubed ice.",
-          "Pour Grappa, Watermelon Syrup, and Mint Mojito Syrup over the ice.",
-          "Top with chilled Club Soda and stir once."
-        ],
-        servingNotes: "Ready right now using only basic Club Soda—floral grape distillates elevate fresh watermelon and mint."
-      },
-      {
-        id: "tequila-citrus-kombucha-rancher",
-        name: "Oaxacan Kombucha Ranch Water",
-        type: "Cocktail",
-        vibe: "Refreshing & Crisp",
-        glass: "Highball",
-        method: "Build",
-        ice: "Cubed Ice",
-        colors: ["#fde047", "#ca8a04"],
-        garnishType: "citrus-wheel",
-        readyNow: false,
-        tags: ["Tequila", "Kombucha", "Triple Sec Cacao Syrup"],
-        ingredients: [
-          { name: "Tequila", amount: "45 ml", stocked: true },
-          { name: "Triple Sec Cacao Syrup", amount: "10 ml", stocked: true },
-          { name: "Fresh Lime Juice", amount: "15 ml", stocked: false },
-          { name: "Kombucha (Citrus or Ginger)", amount: "120 ml", stocked: true }
-        ],
-        steps: [
-          "Fill a Highball glass with ice.",
-          "Add Tequila, Triple Sec Cacao Syrup, and Fresh Lime Juice.",
-          "Top with chilled Kombucha and lift gently."
-        ],
-        servingNotes: "A probiotic, tangy upgrade to classic Ranch Water with bright orange peel complexity."
-      },
-      {
-        id: "zero-proof-ginger-apple-mule",
-        name: "Zero-Proof Ginger Orchard Mule",
-        type: "Mocktail",
-        vibe: "Refreshing & Crisp",
-        glass: "Highball",
-        method: "Build",
-        ice: "Cubed Ice",
-        colors: ["#bef264", "#d97706"],
-        garnishType: "mint-lime",
-        readyNow: false,
-        tags: ["Kombucha", "Green Apple Syrup"],
-        ingredients: [
-          { name: "Kombucha (Ginger or Original)", amount: "100 ml", stocked: true },
-          { name: "Green Apple Syrup", amount: "20 ml", stocked: true },
-          { name: "Fresh Lime Juice", amount: "15 ml", stocked: false },
-          { name: "Ginger Ale / Ginger Beer", amount: "75 ml", stocked: false }
-        ],
-        steps: [
-          "Fill a Highball glass with cubed ice.",
-          "Add Green Apple Syrup and Fresh Lime Juice.",
-          "Top with equal parts chilled Kombucha and Ginger Beer."
-        ],
-        servingNotes: "Double-fermented bite from Kombucha and Ginger Beer balanced by crisp green apple."
-      },
-
-      // --- TROPICAL & FRUITY ---
-      {
-        id: "electric-blue-lagoon",
-        name: "Electric Azure Lagoon",
-        type: "Cocktail",
-        vibe: "Tropical & Fruity",
-        glass: "Hurricane",
-        method: "Shake & Strain",
-        ice: "Crushed / Pebble Ice",
-        colors: ["#06b6d4", "#1d4ed8"],
-        garnishType: "umbrella-straw",
-        readyNow: false,
-        tags: ["Vodka", "Cacao Blue Syrup", "Coconut Syrup"],
-        ingredients: [
-          { name: "Vodka", amount: "45 ml", stocked: true },
-          { name: "Cacao Blue Syrup", amount: "20 ml", stocked: true },
-          { name: "Coconut Syrup", amount: "15 ml", stocked: true },
-          { name: "Pineapple Juice", amount: "75 ml", stocked: false },
-          { name: "Fresh Lemon Juice", amount: "15 ml", stocked: false }
-        ],
-        steps: [
-          "Add Vodka, Cacao Blue Syrup, Coconut Syrup, Pineapple Juice, and Fresh Lemon Juice to a shaker with ice.",
-          "Shake vigorously for 12 seconds to create a frothy pineapple foam.",
-          "Strain into a Hurricane glass packed with crushed ice."
-        ],
-        servingNotes: "Garnish with a pineapple wedge or orange wheel and a cocktail umbrella. Vivid ocean-blue color with creamy coconut-citrus balance."
-      },
-      {
-        id: "zero-proof-blue-surf",
-        name: "Pacific Reef Zero-Proof",
-        type: "Mocktail",
-        vibe: "Tropical & Fruity",
-        glass: "Hurricane",
-        method: "Build & Layer",
-        ice: "Crushed Ice",
-        colors: ["#22d3ee", "#0369a1"],
-        garnishType: "umbrella-straw",
-        readyNow: false,
-        tags: ["Cacao Blue Syrup", "Coconut Syrup", "Kombucha"],
-        ingredients: [
-          { name: "Cacao Blue Syrup", amount: "20 ml", stocked: true },
-          { name: "Coconut Syrup", amount: "15 ml", stocked: true },
-          { name: "Pineapple Juice", amount: "60 ml", stocked: false },
-          { name: "Fresh Lime Juice", amount: "15 ml", stocked: false },
-          { name: "Kombucha", amount: "60 ml", stocked: true }
-        ],
-        steps: [
-          "Pack a Hurricane glass with crushed ice.",
-          "Stir Coconut Syrup, Pineapple Juice, and Fresh Lime Juice together and pour over the ice.",
-          "Top with Kombucha, then slowly drizzle Cacao Blue Syrup over the top for a deep turquoise gradient."
-        ],
-        servingNotes: "Serve with a straw so the drinker can swirl the blue orange-peel syrup into the creamy pineapple-coconut base."
-      },
-      {
-        id: "dark-rum-passion-tiki",
-        name: "Blackbeard's Passion Punch",
-        type: "Cocktail",
-        vibe: "Tropical & Fruity",
-        glass: "Hurricane",
-        method: "Shake & Strain",
-        ice: "Crushed Ice",
-        colors: ["#f59e0b", "#7c2d12"],
-        garnishType: "umbrella-straw",
-        readyNow: false,
-        tags: ["Dark Rum", "Passion Fruit Syrup", "Coconut Syrup", "Grenadine"],
-        ingredients: [
-          { name: "Dark Rum", amount: "50 ml", stocked: true },
-          { name: "Passion Fruit Syrup", amount: "20 ml", stocked: true },
-          { name: "Coconut Syrup", amount: "15 ml", stocked: true },
-          { name: "Fresh Lime Juice", amount: "20 ml", stocked: false },
-          { name: "Orange Juice", amount: "45 ml", stocked: false },
-          { name: "Grenadine", amount: "5 ml (Float)", stocked: true }
-        ],
-        steps: [
-          "Combine Dark Rum, Passion Fruit Syrup, Coconut Syrup, Fresh Lime Juice, and Orange Juice in a shaker with ice.",
-          "Shake hard for 12 seconds.",
-          "Strain into a Hurricane glass filled with crushed ice.",
-          "Drizzle 5 ml Grenadine down the inside edge for a ruby-amber sunset base."
-        ],
-        servingNotes: "Rich molasses notes from the Dark Rum anchor the bright tartness of passion fruit and creamy coconut."
-      },
-      {
-        id: "passion-fruit-tequila-sunrise",
-        name: "Acapulco Passion Sunrise",
-        type: "Cocktail",
-        vibe: "Tropical & Fruity",
-        glass: "Highball",
-        method: "Build & Layer",
-        ice: "Cubed Ice",
-        colors: ["#fbbf24", "#e11d48"],
-        garnishType: "citrus-wheel",
-        readyNow: false,
-        tags: ["Tequila", "Passion Fruit Syrup", "Grenadine"],
-        ingredients: [
-          { name: "Tequila", amount: "45 ml", stocked: true },
-          { name: "Passion Fruit Syrup", amount: "15 ml", stocked: true },
-          { name: "Orange Juice", amount: "100 ml", stocked: false },
-          { name: "Grenadine", amount: "15 ml", stocked: true }
-        ],
-        steps: [
-          "Fill a Highball glass with cubed ice.",
-          "Stir Tequila, Passion Fruit Syrup, and Orange Juice together in the glass.",
-          "Slowly pour Grenadine down the inner wall of the glass—it will sink to the bottom and create a fiery sunrise gradient."
-        ],
-        servingNotes: "Do not stir after adding Grenadine; serve with a straw and an orange wheel."
-      },
-      {
-        id: "crimson-red-sangria",
-        name: "Andalusian Sunset Red Sangria",
-        type: "Wine & Low-ABV",
-        vibe: "Tropical & Fruity",
-        glass: "Copa",
-        method: "Build & Stir",
-        ice: "Cubed Ice",
-        colors: ["#9f1239", "#4c0519"],
-        garnishType: "citrus-wheel",
-        readyNow: false,
-        tags: ["Red Wine", "Triple Sec Cacao Syrup", "Strawberry Syrup", "Grenadine"],
-        ingredients: [
-          { name: "Red Wine", amount: "120 ml", stocked: true },
-          { name: "Triple Sec Cacao Syrup", amount: "15 ml", stocked: true },
-          { name: "Strawberry Syrup", amount: "10 ml", stocked: true },
-          { name: "Grenadine", amount: "5 ml", stocked: true },
-          { name: "Orange Juice", amount: "45 ml", stocked: false },
-          { name: "Club Soda", amount: "45 ml", stocked: false }
-        ],
-        steps: [
-          "Fill a large Copa wine glass with cubed ice.",
-          "Pour in Red Wine, Triple Sec Cacao Syrup, Strawberry Syrup, Grenadine, and Orange Juice.",
-          "Stir gently to blend, then top with chilled Club Soda."
-        ],
-        servingNotes: "Garnish with an orange half-wheel and fresh strawberry slice if available. Rich, fruity, and effortless."
-      },
-      {
-        id: "white-wine-passion-sangria",
-        name: "Riviera Passion White Sangria",
-        type: "Wine & Low-ABV",
-        vibe: "Tropical & Fruity",
-        glass: "Copa",
-        method: "Build & Stir",
-        ice: "Cubed Ice",
-        colors: ["#fde047", "#f97316"],
-        garnishType: "citrus-wheel",
-        readyNow: false,
-        tags: ["White Wine", "Passion Fruit Syrup", "Triple Sec Cacao Syrup"],
-        ingredients: [
-          { name: "White Wine (Chilled)", amount: "120 ml", stocked: true },
-          { name: "Passion Fruit Syrup", amount: "15 ml", stocked: true },
-          { name: "Triple Sec Cacao Syrup", amount: "10 ml", stocked: true },
-          { name: "Pineapple Juice", amount: "30 ml", stocked: false },
-          { name: "Club Soda", amount: "50 ml", stocked: false }
-        ],
-        steps: [
-          "Fill a Copa balloon glass with ice.",
-          "Combine chilled White Wine, Passion Fruit Syrup, Triple Sec Cacao Syrup, and Pineapple Juice.",
-          "Top with Club Soda and stir once gently."
-        ],
-        servingNotes: "Bright, aromatic, and sparkling—ideal for warm afternoons."
-      },
-      {
-        id: "passion-kombucha-sparkler",
-        name: "Tropical Kombucha Bellini",
-        type: "Mocktail",
-        vibe: "Tropical & Fruity",
-        glass: "Flute",
-        method: "Build & Top",
-        ice: "Chilled Flute (No Ice)",
-        colors: ["#fb923c", "#facc15"],
-        garnishType: "berry-rim",
-        readyNow: true,
-        tags: ["Kombucha", "Passion Fruit Syrup", "Strawberry Syrup"],
-        ingredients: [
-          { name: "Passion Fruit Syrup", amount: "15 ml", stocked: true },
-          { name: "Strawberry Syrup", amount: "10 ml", stocked: true },
-          { name: "Kombucha (Well Chilled)", amount: "140 ml", stocked: true }
-        ],
-        steps: [
-          "Chill a Champagne Flute in the freezer beforehand.",
-          "Add Passion Fruit Syrup and Strawberry Syrup to the bottom of the chilled glass.",
-          "Slowly top with cold Kombucha, tilting the glass at 45° so it foams gently without overflowing."
-        ],
-        servingNotes: "100% stocked ingredients—no extra mixers needed. Looks and drinks like a sparkling brunch Bellini."
-      },
-      {
-        id: "blue-hawaiian-dark-rum",
-        name: "Midnight Blue Hawaiian",
-        type: "Cocktail",
-        vibe: "Tropical & Fruity",
-        glass: "Hurricane",
-        method: "Shake & Strain",
-        ice: "Crushed Ice",
-        colors: ["#0284c7", "#0f766e"],
-        garnishType: "umbrella-straw",
-        readyNow: false,
-        tags: ["Dark Rum", "Cacao Blue Syrup", "Coconut Syrup"],
-        ingredients: [
-          { name: "Dark Rum", amount: "45 ml", stocked: true },
-          { name: "Cacao Blue Syrup", amount: "20 ml", stocked: true },
-          { name: "Coconut Syrup", amount: "20 ml", stocked: true },
-          { name: "Pineapple Juice", amount: "90 ml", stocked: false }
-        ],
-        steps: [
-          "Shake Dark Rum, Cacao Blue Syrup, Coconut Syrup, and Pineapple Juice with ice for 12 seconds.",
-          "Strain into a Hurricane glass packed with crushed ice."
-        ],
-        servingNotes: "The deep caramel of Dark Rum turns the azure blue syrup into a stunning sea-foam emerald hue."
-      },
-      {
-        id: "strawberry-coconut-daiquiri-rocks",
-        name: "Ruby Coconut Rum Daiquiri",
-        type: "Cocktail",
-        vibe: "Tropical & Fruity",
-        glass: "Coupe",
-        method: "Hard Shake & Double Strain",
-        ice: "Served Up (Chilled Coupe)",
-        colors: ["#fb7185", "#f43f5e"],
-        garnishType: "berry-rim",
-        readyNow: false,
-        tags: ["Dark Rum", "Strawberry Syrup", "Coconut Syrup"],
-        ingredients: [
-          { name: "Dark Rum", amount: "50 ml", stocked: true },
-          { name: "Strawberry Syrup", amount: "15 ml", stocked: true },
-          { name: "Coconut Syrup", amount: "12 ml", stocked: true },
-          { name: "Fresh Lime Juice", amount: "22 ml", stocked: false }
-        ],
-        steps: [
-          "Combine Dark Rum, Strawberry Syrup, Coconut Syrup, and Fresh Lime Juice in a shaker with ice.",
-          "Shake hard for 12 seconds until frosty.",
-          "Double-strain into a chilled Coupe glass."
-        ],
-        servingNotes: "A silky, tart-sweet strawberry-coconut daiquiri elevated by aged dark rum."
-      },
-      {
-        id: "tequila-blue-margarita",
-        name: "Baja Blue Curacao Margarita",
-        type: "Cocktail",
-        vibe: "Tropical & Fruity",
-        glass: "Rocks",
-        method: "Shake & Strain",
-        ice: "Cubed Ice",
-        colors: ["#38bdf8", "#0284c7"],
-        garnishType: "citrus-wheel",
-        readyNow: false,
-        tags: ["Tequila", "Cacao Blue Syrup", "Triple Sec Cacao Syrup"],
-        ingredients: [
-          { name: "Tequila", amount: "45 ml", stocked: true },
-          { name: "Cacao Blue Syrup", amount: "15 ml", stocked: true },
-          { name: "Triple Sec Cacao Syrup", amount: "10 ml", stocked: true },
-          { name: "Fresh Lime Juice", amount: "22 ml", stocked: false }
-        ],
-        steps: [
-          "Rim a Rocks glass with salt if desired and fill with cubed ice.",
-          "Shake Tequila, Cacao Blue Syrup, Triple Sec Cacao Syrup, and Fresh Lime Juice with ice.",
-          "Strain over the fresh ice in the Rocks glass."
-        ],
-        servingNotes: "Vibrant electric blue margarita with double-layered bitter and sweet orange peel aromatics."
-      },
-      {
-        id: "white-wine-strawberry-flute",
-        name: "Sparkling Rosé-Style Strawberry Flute",
-        type: "Wine & Low-ABV",
-        vibe: "Tropical & Fruity",
-        glass: "Flute",
-        method: "Build & Top",
-        ice: "Chilled Flute (No Ice)",
-        colors: ["#fda4af", "#f43f5e"],
-        garnishType: "berry-rim",
-        readyNow: true,
-        tags: ["White Wine", "Strawberry Syrup", "Grenadine"],
-        ingredients: [
-          { name: "Strawberry Syrup", amount: "12 ml", stocked: true },
-          { name: "Grenadine", amount: "5 ml", stocked: true },
-          { name: "White Wine (Well Chilled)", amount: "110 ml", stocked: true },
-          { name: "Club Soda (Chilled)", amount: "40 ml", stocked: false }
-        ],
-        steps: [
-          "Pour Strawberry Syrup and Grenadine into a chilled Champagne Flute.",
-          "Add cold White Wine, then top with crisp Club Soda for sparkling effervescence."
-        ],
-        servingNotes: "Turns crisp white wine into a celebratory sparkling berry spritz in seconds."
-      },
-      {
-        id: "watermelon-passion-kombucha-punch",
-        name: "Sunset Melon & Passion Cooler",
-        type: "Mocktail",
-        vibe: "Tropical & Fruity",
-        glass: "Hurricane",
-        method: "Build & Layer",
-        ice: "Crushed Ice",
-        colors: ["#fb923c", "#e11d48"],
-        garnishType: "umbrella-straw",
-        readyNow: true,
-        tags: ["Kombucha", "Watermelon Syrup", "Passion Fruit Syrup", "Grenadine"],
-        ingredients: [
-          { name: "Watermelon Syrup", amount: "15 ml", stocked: true },
-          { name: "Passion Fruit Syrup", amount: "15 ml", stocked: true },
-          { name: "Kombucha (Berry or Citrus)", amount: "140 ml", stocked: true },
-          { name: "Grenadine", amount: "8 ml (Sink)", stocked: true }
-        ],
-        steps: [
-          "Fill a Hurricane glass with crushed ice.",
-          "Stir Watermelon Syrup, Passion Fruit Syrup, and Kombucha gently in the glass.",
-          "Drizzle Grenadine down the side to create a ruby gradient at the bottom."
-        ],
-        servingNotes: "100% stocked zero-proof tropical showstopper—no extra juices required."
-      },
-      {
-        id: "vodka-cranberry-passion-cosmopolitan",
-        name: "Passion Fruit Cosmopolitan",
-        type: "Cocktail",
-        vibe: "Tropical & Fruity",
-        glass: "Martini",
-        method: "Hard Shake & Double Strain",
-        ice: "Served Up (Chilled Martini Glass)",
-        colors: ["#f43f5e", "#fb923c"],
-        garnishType: "orange-twist",
-        readyNow: false,
-        tags: ["Vodka", "Passion Fruit Syrup", "Triple Sec Cacao Syrup"],
-        ingredients: [
-          { name: "Vodka", amount: "45 ml", stocked: true },
-          { name: "Triple Sec Cacao Syrup", amount: "15 ml", stocked: true },
-          { name: "Passion Fruit Syrup", amount: "10 ml", stocked: true },
-          { name: "Cranberry Juice", amount: "35 ml", stocked: false },
-          { name: "Fresh Lime Juice", amount: "12 ml", stocked: false }
-        ],
-        steps: [
-          "Shake Vodka, Triple Sec Cacao Syrup, Passion Fruit Syrup, Cranberry Juice, and Fresh Lime Juice with ice.",
-          "Double-strain into a frozen V-shaped Martini glass."
-        ],
-        servingNotes: "Express an orange twist over the glass. Exotic passion fruit gives the classic Cosmo a vibrant tropical lift."
-      },
-      {
-        id: "whisky-grenadine-pineapple-sour",
-        name: "Crimson Crown Whisky Sour",
-        type: "Cocktail",
-        vibe: "Tropical & Fruity",
-        glass: "Rocks",
-        method: "Hard Shake & Strain",
-        ice: "Cubed Ice",
-        colors: ["#e11d48", "#d97706"],
-        garnishType: "citrus-wheel",
-        readyNow: false,
-        tags: ["Whisky", "Grenadine", "Vanilla Syrup"],
-        ingredients: [
-          { name: "Whisky", amount: "50 ml", stocked: true },
-          { name: "Grenadine", amount: "15 ml", stocked: true },
-          { name: "Vanilla Syrup", amount: "5 ml", stocked: true },
-          { name: "Pineapple Juice", amount: "30 ml", stocked: false },
-          { name: "Fresh Lemon Juice", amount: "18 ml", stocked: false }
-        ],
-        steps: [
-          "Shake Whisky, Grenadine, Vanilla Syrup, Pineapple Juice, and Fresh Lemon Juice hard with ice for 12 seconds.",
-          "Strain over fresh cubed ice in a Rocks glass."
-        ],
-        servingNotes: "Produces a gorgeous ruby-pink foam cap with rich bourbon-vanilla warmth underneath."
-      },
-
-      // --- RICH & DESSERT ---
-      {
-        id: "strawberry-cheesecake-martini",
-        name: "Velvet Strawberry Cheesecake Martini",
-        type: "Cocktail",
-        vibe: "Rich & Dessert",
-        glass: "Martini",
-        method: "Hard Shake & Double Strain",
-        ice: "Served Up (Chilled Martini Glass)",
-        colors: ["#f9a8d4", "#db2777"],
-        garnishType: "berry-rim",
-        readyNow: true,
-        tags: ["Vodka", "Baileys", "Cheesecake Syrup", "Strawberry Syrup"],
-        ingredients: [
-          { name: "Vodka", amount: "35 ml", stocked: true },
-          { name: "Baileys", amount: "35 ml", stocked: true },
-          { name: "Cheesecake Syrup", amount: "15 ml", stocked: true },
-          { name: "Strawberry Syrup", amount: "10 ml", stocked: true }
-        ],
-        steps: [
-          "Optional: Swirl a thin ribbon of Strawberry Syrup inside the bowl of a chilled Martini glass.",
-          "Add Vodka, Baileys, Cheesecake Syrup, and Strawberry Syrup into a shaker filled with ice.",
-          "Shake vigorously for 15 seconds until thick, frosty, and aerated.",
-          "Double-strain into the chilled Martini glass."
-        ],
-        servingNotes: "100% stocked in your bar! Creamy, indulgent, and balanced by the crisp bite of vodka."
-      },
-      {
-        id: "zero-proof-strawberry-cheesecake",
-        name: "No-Bake Strawberry Cheesecake Shake",
-        type: "Mocktail",
-        vibe: "Rich & Dessert",
-        glass: "Coupe",
-        method: "Hard Shake & Strain",
-        ice: "Served Up (Chilled Coupe)",
-        colors: ["#fbcfe8", "#f472b6"],
-        garnishType: "berry-rim",
-        readyNow: false,
-        tags: ["Cheesecake Syrup", "Strawberry Syrup", "Vanilla Syrup"],
-        ingredients: [
-          { name: "Cheesecake Syrup", amount: "20 ml", stocked: true },
-          { name: "Strawberry Syrup", amount: "15 ml", stocked: true },
-          { name: "Vanilla Syrup", amount: "5 ml", stocked: true },
-          { name: "Milk or Heavy Cream (Chilled)", amount: "90 ml", stocked: false }
-        ],
-        steps: [
-          "Combine Cheesecake Syrup, Strawberry Syrup, Vanilla Syrup, and cold Milk/Cream in a shaker with ice.",
-          "Shake hard for 15 seconds until velvety and frothy.",
-          "Strain into a chilled Coupe or Rocks glass."
-        ],
-        servingNotes: "Drizzle a drop of Strawberry Syrup on top of the foam and swirl with a toothpick."
-      },
-      {
-        id: "hazelnut-espresso-gin-martini",
-        name: "Roasted Hazelnut Espresso Gin Martini",
-        type: "Cocktail",
-        vibe: "Rich & Dessert",
-        glass: "Martini",
-        method: "Hard Shake & Double Strain",
-        ice: "Served Up (Chilled Martini Glass)",
-        colors: ["#451a03", "#92400e"],
-        garnishType: "none",
-        readyNow: false,
-        tags: ["Coffee Gin", "Hazelnut Syrup", "Baileys"],
-        ingredients: [
-          { name: "Coffee Gin", amount: "45 ml", stocked: true },
-          { name: "Hazelnut Syrup", amount: "15 ml", stocked: true },
-          { name: "Baileys", amount: "15 ml", stocked: true },
-          { name: "Espresso or Cold Brew (Chilled)", amount: "30 ml", stocked: false }
-        ],
-        steps: [
-          "Add Coffee Gin, Hazelnut Syrup, Baileys, and chilled Espresso/Cold Brew into a shaker packed with ice.",
-          "Shake aggressively for 15 seconds to build a rich, silky crema.",
-          "Double-strain immediately into a frozen Martini glass."
-        ],
-        servingNotes: "A gourmet twist on the Espresso Martini—botanical juniper and roasted hazelnut add immense depth."
-      },
-      {
-        id: "vanilla-hazelnut-rum-old-fashioned",
-        name: "Smoked Vanilla & Praline Rum Fashioned",
-        type: "Cocktail",
-        vibe: "Rich & Dessert",
-        glass: "Rocks",
-        method: "Stir & Strain",
-        ice: "1 Large King Cube",
-        colors: ["#92400e", "#451a03"],
-        garnishType: "orange-twist",
-        readyNow: true,
-        tags: ["Dark Rum", "Vanilla Syrup", "Hazelnut Syrup"],
-        ingredients: [
-          { name: "Dark Rum", amount: "60 ml", stocked: true },
-          { name: "Vanilla Syrup", amount: "7.5 ml", stocked: true },
-          { name: "Hazelnut Syrup", amount: "7.5 ml", stocked: true }
-        ],
-        steps: [
-          "Add Dark Rum, Vanilla Syrup, and Hazelnut Syrup to a mixing glass filled with ice.",
-          "Stir smoothly for 25–30 seconds until properly chilled and diluted.",
-          "Strain over a single large ice cube in a Rocks glass."
-        ],
-        servingNotes: "100% stocked! Express an orange peel over the surface to cut through the rich vanilla-praline molasses notes."
-      },
-      {
-        id: "baileys-hazelnut-coffee-gin-rocks",
-        name: "Bicerin Nocturne",
-        type: "Cocktail",
-        vibe: "Rich & Dessert",
-        glass: "Rocks",
-        method: "Build & Stir",
-        ice: "Large Cubed Ice",
-        colors: ["#78350f", "#d6d3d1"],
-        garnishType: "none",
-        readyNow: true,
-        tags: ["Coffee Gin", "Baileys", "Hazelnut Syrup", "Vanilla Syrup"],
-        ingredients: [
-          { name: "Coffee Gin", amount: "35 ml", stocked: true },
-          { name: "Baileys", amount: "45 ml", stocked: true },
-          { name: "Hazelnut Syrup", amount: "10 ml", stocked: true },
-          { name: "Vanilla Syrup", amount: "5 ml", stocked: true }
-        ],
-        steps: [
-          "Place a large ice sphere or heavy cubes into a Rocks glass.",
-          "Pour Coffee Gin, Hazelnut Syrup, and Vanilla Syrup over the ice and stir briefly.",
-          "Slowly pour Baileys over the top so it cascades into the dark coffee spirit."
-        ],
-        servingNotes: "Inspired by Turin's famous layered coffee-chocolate-cream drink—100% ready from your stocked shelves."
-      },
-      {
-        id: "whisky-vanilla-cola-float",
-        name: "Bourbon Vanilla Cream Highball",
-        type: "Cocktail",
-        vibe: "Rich & Dessert",
-        glass: "Highball",
-        method: "Build",
-        ice: "Cubed Ice",
-        colors: ["#3f1d0b", "#78350f"],
-        garnishType: "none",
-        readyNow: false,
-        tags: ["Whisky", "Vanilla Syrup", "Cheesecake Syrup"],
-        ingredients: [
-          { name: "Whisky", amount: "45 ml", stocked: true },
-          { name: "Vanilla Syrup", amount: "12 ml", stocked: true },
-          { name: "Cheesecake Syrup", amount: "8 ml", stocked: true },
-          { name: "Cola (Chilled)", amount: "130 ml", stocked: false }
-        ],
-        steps: [
-          "Fill a Highball glass with ice cubes.",
-          "Pour Whisky, Vanilla Syrup, and Cheesecake Syrup over the ice.",
-          "Top with chilled Cola and stir gently."
-        ],
-        servingNotes: "Tastes like an elevated adult cream-soda float with warm oak and vanilla bean notes."
-      },
-      {
-        id: "coconut-baileys-colada-rocks",
-        name: "Toasted Coconut Cream",
-        type: "Cocktail",
-        vibe: "Rich & Dessert",
-        glass: "Rocks",
-        method: "Shake & Strain",
-        ice: "Crushed / Cubed Ice",
-        colors: ["#fef3c7", "#d97706"],
-        garnishType: "umbrella-straw",
-        readyNow: true,
-        tags: ["Dark Rum", "Baileys", "Coconut Syrup", "Vanilla Syrup"],
-        ingredients: [
-          { name: "Dark Rum", amount: "35 ml", stocked: true },
-          { name: "Baileys", amount: "35 ml", stocked: true },
-          { name: "Coconut Syrup", amount: "15 ml", stocked: true },
-          { name: "Vanilla Syrup", amount: "5 ml", stocked: true }
-        ],
-        steps: [
-          "Add Dark Rum, Baileys, Coconut Syrup, and Vanilla Syrup to a shaker with ice.",
-          "Shake briskly for 12 seconds.",
-          "Strain over fresh ice in a Rocks glass."
-        ],
-        servingNotes: "100% stocked! Lush coconut macaroon meets Irish cream and dark molasses rum."
-      },
-      {
-        id: "hazelnut-whisky-godfather",
-        name: "Toasted Praline Whisky Sipper",
-        type: "Cocktail",
-        vibe: "Rich & Dessert",
-        glass: "Rocks",
-        method: "Stir & Strain",
-        ice: "1 Large King Cube",
-        colors: ["#b45309", "#78350f"],
-        garnishType: "orange-twist",
-        readyNow: true,
-        tags: ["Whisky", "Hazelnut Syrup", "Triple Sec Cacao Syrup"],
-        ingredients: [
-          { name: "Whisky", amount: "55 ml", stocked: true },
-          { name: "Hazelnut Syrup", amount: "12 ml", stocked: true },
-          { name: "Triple Sec Cacao Syrup", amount: "5 ml", stocked: true }
-        ],
-        steps: [
-          "Stir Whisky, Hazelnut Syrup, and Triple Sec Cacao Syrup over ice in a mixing glass for 25 seconds.",
-          "Strain into a Rocks glass over one large ice cube."
-        ],
-        servingNotes: "100% stocked! A rich, nutty riff on the classic Godfather cocktail with a whisper of sweet orange peel."
-      },
-      {
-        id: "baileys-cheesecake-coffee-flip",
-        name: "Tiramisu Cheesecake Martini",
-        type: "Cocktail",
-        vibe: "Rich & Dessert",
-        glass: "Coupe",
-        method: "Hard Shake & Double Strain",
-        ice: "Served Up (Chilled Coupe)",
-        colors: ["#d6d3d1", "#78350f"],
-        garnishType: "none",
-        readyNow: true,
-        tags: ["Coffee Gin", "Baileys", "Cheesecake Syrup", "Vanilla Syrup"],
-        ingredients: [
-          { name: "Coffee Gin", amount: "35 ml", stocked: true },
-          { name: "Baileys", amount: "35 ml", stocked: true },
-          { name: "Cheesecake Syrup", amount: "15 ml", stocked: true },
-          { name: "Vanilla Syrup", amount: "5 ml", stocked: true }
-        ],
-        steps: [
-          "Combine Coffee Gin, Baileys, Cheesecake Syrup, and Vanilla Syrup in a shaker packed with ice.",
-          "Shake hard for 15 seconds until velvety and frothy.",
-          "Double-strain into a chilled Coupe glass."
-        ],
-        servingNotes: "100% stocked! Liquid tiramisu—mascarpone cheesecake richness layered over roasted coffee botanicals."
-      },
-      {
-        id: "grappa-hazelnut-affogato-rocks",
-        name: "Piedmont Hazelnut & Grappa Cream",
-        type: "Cocktail",
-        vibe: "Rich & Dessert",
-        glass: "Rocks",
-        method: "Shake & Strain",
-        ice: "Large Cubed Ice",
-        colors: ["#e7e5e4", "#78350f"],
-        garnishType: "none",
-        readyNow: true,
-        tags: ["Grappa", "Baileys", "Hazelnut Syrup"],
-        ingredients: [
-          { name: "Grappa", amount: "30 ml", stocked: true },
-          { name: "Baileys", amount: "45 ml", stocked: true },
-          { name: "Hazelnut Syrup", amount: "12 ml", stocked: true }
-        ],
-        steps: [
-          "Shake Grappa, Baileys, and Hazelnut Syrup with ice for 12 seconds.",
-          "Strain over a large ice cube in a Rocks glass."
-        ],
-        servingNotes: "100% stocked! Classic northern Italian digestif pairing of aromatic grape grappa and toasted Piedmont hazelnuts."
-      },
-      {
-        id: "iced-vanilla-hazelnut-cold-brew-mocktail",
-        name: "Velvet Hazelnut Cold Brew Tonic",
-        type: "Mocktail",
-        vibe: "Rich & Dessert",
-        glass: "Highball",
-        method: "Build & Layer",
-        ice: "Cubed Ice",
-        colors: ["#451a03", "#d97706"],
-        garnishType: "orange-twist",
-        readyNow: false,
-        tags: ["Hazelnut Syrup", "Vanilla Syrup"],
-        ingredients: [
-          { name: "Hazelnut Syrup", amount: "15 ml", stocked: true },
-          { name: "Vanilla Syrup", amount: "10 ml", stocked: true },
-          { name: "Tonic Water (Chilled)", amount: "100 ml", stocked: false },
-          { name: "Espresso or Cold Brew (Chilled)", amount: "60 ml", stocked: false }
-        ],
-        steps: [
-          "Fill a Highball glass with ice cubes.",
-          "Pour Hazelnut Syrup, Vanilla Syrup, and chilled Tonic Water into the glass and stir gently.",
-          "Slowly float the cold Espresso/Cold Brew over the top for a dramatic two-tone layer."
-        ],
-        servingNotes: "Express an orange peel over the top. Sophisticated, zero-proof coffee-house mocktail."
-      },
-      {
-        id: "tequila-coconut-vanilla-horchata",
-        name: "Agave Coconut Cream",
-        type: "Cocktail",
-        vibe: "Rich & Dessert",
-        glass: "Rocks",
-        method: "Hard Shake & Strain",
-        ice: "Cubed Ice",
-        colors: ["#fef3c7", "#d6d3d1"],
-        garnishType: "none",
-        readyNow: false,
-        tags: ["Tequila", "Coconut Syrup", "Vanilla Syrup"],
-        ingredients: [
-          { name: "Tequila", amount: "45 ml", stocked: true },
-          { name: "Coconut Syrup", amount: "15 ml", stocked: true },
-          { name: "Vanilla Syrup", amount: "10 ml", stocked: true },
-          { name: "Milk or Heavy Cream (Chilled)", amount: "60 ml", stocked: false }
-        ],
-        steps: [
-          "Shake Tequila, Coconut Syrup, Vanilla Syrup, and cold Milk/Cream hard with ice for 12 seconds.",
-          "Strain over fresh cubed ice in a Rocks glass."
-        ],
-        servingNotes: "Earthy agave tequila pairs surprisingly well with creamy coconut and warm Madagascar vanilla."
-      },
-
-      // --- HERBAL & BOLD ---
-      {
-        id: "jager-berry-fizz",
-        name: "Black Forest Jäger Fizz",
-        type: "Cocktail",
-        vibe: "Herbal & Bold",
-        glass: "Highball",
-        method: "Shake & Top",
-        ice: "Cubed Ice",
-        colors: ["#881337", "#be123c"],
-        garnishType: "citrus-wheel",
-        readyNow: false,
-        tags: ["Jägermeister", "Strawberry Syrup", "Grenadine"],
-        ingredients: [
-          { name: "Jägermeister", amount: "45 ml", stocked: true },
-          { name: "Strawberry Syrup", amount: "15 ml", stocked: true },
-          { name: "Grenadine", amount: "10 ml", stocked: true },
-          { name: "Fresh Lemon Juice", amount: "20 ml", stocked: false },
-          { name: "Club Soda", amount: "90 ml", stocked: false }
-        ],
-        steps: [
-          "Shake Jägermeister, Strawberry Syrup, Grenadine, and Fresh Lemon Juice with ice for 10 seconds.",
-          "Strain into a Highball glass filled with ice.",
-          "Top with chilled Club Soda and stir lightly."
-        ],
-        servingNotes: "Garnish with a lemon wheel. The 56 botanicals and anise notes in Jägermeister pair surprisingly well with tart berry and bright lemon."
-      },
-      {
-        id: "jager-ginger-apple-mule",
-        name: "Bavarian Orchard Mule",
-        type: "Cocktail",
-        vibe: "Herbal & Bold",
-        glass: "Rocks",
-        method: "Build & Stir",
-        ice: "Cubed Ice",
-        colors: ["#713f12", "#a16207"],
-        garnishType: "mint-lime",
-        readyNow: false,
-        tags: ["Jägermeister", "Green Apple Syrup"],
-        ingredients: [
-          { name: "Jägermeister", amount: "45 ml", stocked: true },
-          { name: "Green Apple Syrup", amount: "15 ml", stocked: true },
-          { name: "Fresh Lime Juice", amount: "15 ml", stocked: false },
-          { name: "Ginger Ale / Ginger Beer", amount: "100 ml", stocked: false }
-        ],
-        steps: [
-          "Fill a Rocks glass with ice.",
-          "Pour Jägermeister, Green Apple Syrup, and Fresh Lime Juice over the ice.",
-          "Top with spicy Ginger Beer and give a gentle stir."
-        ],
-        servingNotes: "Garnish with a lime wheel and mint sprig. Spiced herbal roots meet crisp green apple and fiery ginger."
-      },
-      {
-        id: "coffee-gin-negroni-twist",
-        name: "Midnight Cacao Coffee Boulevardier",
-        type: "Cocktail",
-        vibe: "Herbal & Bold",
-        glass: "Rocks",
-        method: "Stir & Strain",
-        ice: "1 Large King Cube",
-        colors: ["#7f1d1d", "#450a0a"],
-        garnishType: "orange-twist",
-        readyNow: true,
-        tags: ["Coffee Gin", "Red Wine", "Triple Sec Cacao Syrup", "Hazelnut Syrup"],
-        ingredients: [
-          { name: "Coffee Gin", amount: "40 ml", stocked: true },
-          { name: "Red Wine (Full-Bodied)", amount: "35 ml", stocked: true },
-          { name: "Triple Sec Cacao Syrup", amount: "10 ml", stocked: true },
-          { name: "Hazelnut Syrup", amount: "5 ml", stocked: true }
-        ],
-        steps: [
-          "Combine Coffee Gin, Red Wine, Triple Sec Cacao Syrup, and Hazelnut Syrup in a mixing glass with ice.",
-          "Stir for 25 seconds until glossy and deeply chilled.",
-          "Strain over a large ice cube in a Rocks glass."
-        ],
-        servingNotes: "100% stocked! Express an orange peel over the drink—red wine tannins, roasted coffee gin, and sweet orange create a low-sugar aperitif profile."
-      },
-      {
-        id: "grappa-citrus-sour",
-        name: "Alpine Grappa Citrus Sour",
-        type: "Cocktail",
-        vibe: "Herbal & Bold",
-        glass: "Rocks",
-        method: "Hard Shake & Strain",
-        ice: "Cubed Ice",
-        colors: ["#fef08a", "#eab308"],
-        garnishType: "orange-twist",
-        readyNow: false,
-        tags: ["Grappa", "Triple Sec Cacao Syrup", "Vanilla Syrup"],
-        ingredients: [
-          { name: "Grappa", amount: "50 ml", stocked: true },
-          { name: "Triple Sec Cacao Syrup", amount: "15 ml", stocked: true },
-          { name: "Vanilla Syrup", amount: "5 ml", stocked: true },
-          { name: "Fresh Lemon Juice", amount: "22 ml", stocked: false }
-        ],
-        steps: [
-          "Add Grappa, Triple Sec Cacao Syrup, Vanilla Syrup, and Fresh Lemon Juice to a shaker with ice.",
-          "Shake hard for 12 seconds to aerate.",
-          "Strain over fresh ice in a Rocks glass."
-        ],
-        servingNotes: "Garnish with a lemon or orange twist. Softens Grappa's fiery grape character into a bright, aromatic sour."
-      },
-      {
-        id: "kombucha-jager-zero-proof-tonic",
-        name: "Spiced Botanical Kombucha Sangria",
-        type: "Mocktail",
-        vibe: "Herbal & Bold",
-        glass: "Copa",
-        method: "Build & Stir",
-        ice: "Cubed Ice",
-        colors: ["#991b1b", "#7f1d1d"],
-        garnishType: "orange-twist",
-        readyNow: false,
-        tags: ["Kombucha", "Grenadine", "Triple Sec Cacao Syrup", "Mint Mojito Syrup"],
-        ingredients: [
-          { name: "Kombucha (Berry or Original)", amount: "130 ml", stocked: true },
-          { name: "Grenadine", amount: "15 ml", stocked: true },
-          { name: "Triple Sec Cacao Syrup", amount: "10 ml", stocked: true },
-          { name: "Mint Mojito Syrup", amount: "5 ml", stocked: true },
-          { name: "Cranberry Juice", amount: "40 ml", stocked: false }
-        ],
-        steps: [
-          "Fill a large Copa wine glass with ice.",
-          "Add Grenadine, Triple Sec Cacao Syrup, Mint Mojito Syrup, and Cranberry Juice.",
-          "Top with chilled Kombucha and lift gently with a barspoon."
-        ],
-        servingNotes: "Complex, tannic, and ruby-red—gives zero-proof guests the structure and depth of a fine red wine spritz."
-      },
-      {
-        id: "jager-coffee-gin-black-tonic",
-        name: "Dark Forest Espresso Tonic",
-        type: "Cocktail",
-        vibe: "Herbal & Bold",
-        glass: "Highball",
-        method: "Build & Stir",
-        ice: "Cubed Ice",
-        colors: ["#271408", "#713f12"],
-        garnishType: "orange-twist",
-        readyNow: true,
-        tags: ["Jägermeister", "Coffee Gin", "Vanilla Syrup"],
-        ingredients: [
-          { name: "Coffee Gin", amount: "30 ml", stocked: true },
-          { name: "Jägermeister", amount: "20 ml", stocked: true },
-          { name: "Vanilla Syrup", amount: "10 ml", stocked: true },
-          { name: "Tonic Water (Chilled)", amount: "130 ml", stocked: false }
-        ],
-        steps: [
-          "Fill a tall Highball glass with clear ice cubes.",
-          "Pour Coffee Gin, Jägermeister, and Vanilla Syrup over the ice.",
-          "Top with chilled Tonic Water and stir gently."
-        ],
-        servingNotes: "100% stocked! Express an orange peel over the glass. Bittersweet herbs, roasted coffee, and crisp quinine create a bold digestif highball."
-      },
-      {
-        id: "jager-blue-lagoon-abyss",
-        name: "Deep Sea Botanicals",
-        type: "Cocktail",
-        vibe: "Herbal & Bold",
-        glass: "Rocks",
-        method: "Build & Layer",
-        ice: "Cubed Ice",
-        colors: ["#0369a1", "#1e1b4b"],
-        garnishType: "orange-twist",
-        readyNow: false,
-        tags: ["Jägermeister", "Cacao Blue Syrup"],
-        ingredients: [
-          { name: "Jägermeister", amount: "40 ml", stocked: true },
-          { name: "Cacao Blue Syrup", amount: "20 ml", stocked: true },
-          { name: "Fresh Lime Juice", amount: "15 ml", stocked: false },
-          { name: "Ginger Ale / Ginger Beer", amount: "90 ml", stocked: false }
-        ],
-        steps: [
-          "Fill a Rocks glass with cubed ice.",
-          "Pour Cacao Blue Syrup, Fresh Lime Juice, and Ginger Ale into the glass and stir.",
-          "Slowly float Jägermeister over the back of a spoon so the dark herbal liqueur settles over the deep blue base."
-        ],
-        servingNotes: "Dramatic midnight-blue and amber layered presentation with bright citrus-spice flavor."
-      },
-      {
-        id: "red-wine-spiced-jager-spritz",
-        name: "Blackberry & Herb Red Wine Cooler",
-        type: "Wine & Low-ABV",
-        vibe: "Herbal & Bold",
-        glass: "Copa",
-        method: "Build & Stir",
-        ice: "Cubed Ice",
-        colors: ["#4c0519", "#881337"],
-        garnishType: "citrus-wheel",
-        readyNow: true,
-        tags: ["Red Wine", "Jägermeister", "Grenadine"],
-        ingredients: [
-          { name: "Red Wine", amount: "100 ml", stocked: true },
-          { name: "Jägermeister", amount: "20 ml", stocked: true },
-          { name: "Grenadine", amount: "12 ml", stocked: true },
-          { name: "Club Soda", amount: "60 ml", stocked: false }
-        ],
-        steps: [
-          "Fill a Copa balloon glass with ice.",
-          "Pour Red Wine, Jägermeister, and Grenadine over the ice and stir.",
-          "Top with Club Soda and garnish with an orange wheel."
-        ],
-        servingNotes: "100% stocked! Jägermeister acts like instant mulled-wine spices and botanical bitters for your red wine."
-      },
-      {
-        id: "dark-rum-whisky-vieux-carre-twist",
-        name: "Harbor Master's Reserve",
-        type: "Cocktail",
-        vibe: "Herbal & Bold",
-        glass: "Rocks",
-        method: "Stir & Strain",
-        ice: "1 Large King Cube",
-        colors: ["#78350f", "#451a03"],
-        garnishType: "orange-twist",
-        readyNow: true,
-        tags: ["Whisky", "Dark Rum", "Triple Sec Cacao Syrup", "Vanilla Syrup"],
-        ingredients: [
-          { name: "Whisky", amount: "30 ml", stocked: true },
-          { name: "Dark Rum", amount: "30 ml", stocked: true },
-          { name: "Triple Sec Cacao Syrup", amount: "8 ml", stocked: true },
-          { name: "Vanilla Syrup", amount: "5 ml", stocked: true }
-        ],
-        steps: [
-          "Combine Whisky, Dark Rum, Triple Sec Cacao Syrup, and Vanilla Syrup in a mixing glass with ice.",
-          "Stir for 30 seconds until silky and well chilled.",
-          "Strain over a large king cube in a Rocks glass."
-        ],
-        servingNotes: "100% stocked! A split-base slow sipper uniting oak-aged whisky with rich molasses dark rum."
-      },
-      {
-        id: "grappa-red-wine-spritz",
-        name: "Tuscan Vineyard Spritz",
-        type: "Wine & Low-ABV",
-        vibe: "Herbal & Bold",
-        glass: "Copa",
-        method: "Build & Stir",
-        ice: "Cubed Ice",
-        colors: ["#881337", "#9f1239"],
-        garnishType: "orange-twist",
-        readyNow: true,
-        tags: ["Red Wine", "Grappa", "Triple Sec Cacao Syrup"],
-        ingredients: [
-          { name: "Red Wine", amount: "90 ml", stocked: true },
-          { name: "Grappa", amount: "25 ml", stocked: true },
-          { name: "Triple Sec Cacao Syrup", amount: "12 ml", stocked: true },
-          { name: "Tonic Water", amount: "60 ml", stocked: false }
-        ],
-        steps: [
-          "Pack a Copa wine glass with cubed ice.",
-          "Pour Red Wine, Grappa, and Triple Sec Cacao Syrup over the ice.",
-          "Top with Tonic Water and stir gently."
-        ],
-        servingNotes: "100% stocked! Grape-on-grape synergy fortified with Grappa and lifted by bittersweet orange and tonic."
-      },
-      {
-        id: "kombucha-cacao-blue-botanical-fizz",
-        name: "Sapphire Tea & Citrus Spritz",
-        type: "Mocktail",
-        vibe: "Herbal & Bold",
-        glass: "Copa",
-        method: "Build & Stir",
-        ice: "Cubed Ice",
-        colors: ["#0284c7", "#0f766e"],
-        garnishType: "orange-twist",
-        readyNow: true,
-        tags: ["Kombucha", "Cacao Blue Syrup", "Mint Mojito Syrup"],
-        ingredients: [
-          { name: "Kombucha (Original or Citrus)", amount: "150 ml", stocked: true },
-          { name: "Cacao Blue Syrup", amount: "15 ml", stocked: true },
-          { name: "Mint Mojito Syrup", amount: "8 ml", stocked: true },
-          { name: "Tonic Water", amount: "30 ml", stocked: false }
-        ],
-        steps: [
-          "Fill a large Copa wine glass with ice.",
-          "Pour Cacao Blue Syrup and Mint Mojito Syrup over the ice.",
-          "Top with chilled Kombucha and a splash of Tonic Water."
-        ],
-        servingNotes: "100% stocked zero-proof aperitif—earthy fermented tea turns blue curaçao into an emerald-sapphire botanical spritz."
-      },
-      {
-        id: "coffee-gin-passion-sour",
-        name: "Roast & Tropics Sour",
-        type: "Cocktail",
-        vibe: "Herbal & Bold",
-        glass: "Coupe",
-        method: "Hard Shake & Double Strain",
-        ice: "Served Up (Chilled Coupe)",
-        colors: ["#92400e", "#f59e0b"],
-        garnishType: "citrus-wheel",
-        readyNow: false,
-        tags: ["Coffee Gin", "Passion Fruit Syrup", "Vanilla Syrup"],
-        ingredients: [
-          { name: "Coffee Gin", amount: "45 ml", stocked: true },
-          { name: "Passion Fruit Syrup", amount: "18 ml", stocked: true },
-          { name: "Vanilla Syrup", amount: "5 ml", stocked: true },
-          { name: "Fresh Lime Juice", amount: "20 ml", stocked: false }
-        ],
-        steps: [
-          "Shake Coffee Gin, Passion Fruit Syrup, Vanilla Syrup, and Fresh Lime Juice hard with ice for 12 seconds.",
-          "Double-strain into a chilled Coupe glass."
-        ],
-        servingNotes: "A bartenders' secret pairing: bright acidic passion fruit unlocks the fruity notes inside roasted coffee beans."
-      },
-      {
-        id: "vodka-cheesecake-passion-martini",
-        name: "Tropical Passion Cheesecake Martini",
-        type: "Cocktail",
-        vibe: "Rich & Dessert",
-        glass: "Martini",
-        method: "Hard Shake & Double Strain",
-        ice: "Served Up (Chilled Martini Glass)",
-        colors: ["#fde047", "#f59e0b"],
-        garnishType: "citrus-wheel",
-        readyNow: true,
-        tags: ["Vodka", "Baileys", "Cheesecake Syrup", "Passion Fruit Syrup"],
-        ingredients: [
-          { name: "Vodka", amount: "35 ml", stocked: true },
-          { name: "Baileys", amount: "30 ml", stocked: true },
-          { name: "Cheesecake Syrup", amount: "15 ml", stocked: true },
-          { name: "Passion Fruit Syrup", amount: "12 ml", stocked: true }
-        ],
-        steps: [
-          "Combine Vodka, Baileys, Cheesecake Syrup, and Passion Fruit Syrup in a shaker with ice.",
-          "Shake hard for 15 seconds until thick and frothy.",
-          "Double-strain into a chilled Martini glass."
-        ],
-        servingNotes: "100% stocked! Tangy passion fruit curd layered over creamy New York cheesecake."
-      },
-      {
-        id: "whisky-orange-vanilla-sour",
-        name: "Golden Valencia Whisky Sour",
-        type: "Cocktail",
-        vibe: "Tropical & Fruity",
-        glass: "Rocks",
-        method: "Hard Shake & Strain",
-        ice: "Cubed Ice",
-        colors: ["#f59e0b", "#b45309"],
-        garnishType: "orange-twist",
-        readyNow: false,
-        tags: ["Whisky", "Triple Sec Cacao Syrup", "Vanilla Syrup"],
-        ingredients: [
-          { name: "Whisky", amount: "50 ml", stocked: true },
-          { name: "Orange Juice", amount: "60 ml", stocked: false },
-          { name: "Triple Sec Cacao Syrup", amount: "12 ml", stocked: true },
-          { name: "Vanilla Syrup", amount: "8 ml", stocked: true },
-          { name: "Fresh Lemon Juice", amount: "10 ml", stocked: false }
-        ],
-        steps: [
-          "Add Whisky, Orange Juice, Triple Sec Cacao Syrup, Vanilla Syrup, and Fresh Lemon Juice to a shaker with ice.",
-          "Shake hard for 12 seconds until frothy and chilled.",
-          "Strain over fresh cubed ice in a Rocks glass."
-        ],
-        servingNotes: "Garnish with a fresh orange wheel or expressed orange peel. Rich vanilla and warm whisky melt into bright fresh orange."
-      },
-      {
-        id: "tequila-passion-orange-margarita",
-        name: "Jalisco Blood-Orange & Passion Margarita",
-        type: "Cocktail",
-        vibe: "Tropical & Fruity",
-        glass: "Rocks",
-        method: "Shake & Strain",
-        ice: "Cubed Ice",
-        colors: ["#fb923c", "#ea580c"],
-        garnishType: "citrus-wheel",
-        readyNow: false,
-        tags: ["Tequila", "Passion Fruit Syrup", "Triple Sec Cacao Syrup"],
-        ingredients: [
-          { name: "Tequila", amount: "45 ml", stocked: true },
-          { name: "Orange Juice", amount: "60 ml", stocked: false },
-          { name: "Passion Fruit Syrup", amount: "15 ml", stocked: true },
-          { name: "Triple Sec Cacao Syrup", amount: "10 ml", stocked: true },
-          { name: "Fresh Lime Juice", amount: "12 ml", stocked: false }
-        ],
-        steps: [
-          "Shake Tequila, Orange Juice, Passion Fruit Syrup, Triple Sec Cacao Syrup, and Fresh Lime Juice with ice.",
-          "Strain into a Rocks glass over fresh cubed ice."
-        ],
-        servingNotes: "A bright, sunset-orange margarita bursting with tropical passion fruit—zero grenadine needed."
-      },
-      {
-        id: "dark-rum-coconut-painkiller",
-        name: "Carib Sunset Orange Painkiller",
-        type: "Cocktail",
-        vibe: "Tropical & Fruity",
-        glass: "Hurricane",
-        method: "Shake & Strain",
-        ice: "Crushed Ice",
-        colors: ["#facc15", "#d97706"],
-        garnishType: "umbrella-straw",
-        readyNow: false,
-        tags: ["Dark Rum", "Coconut Syrup", "Triple Sec Cacao Syrup"],
-        ingredients: [
-          { name: "Dark Rum", amount: "50 ml", stocked: true },
-          { name: "Orange Juice", amount: "75 ml", stocked: false },
-          { name: "Coconut Syrup", amount: "20 ml", stocked: true },
-          { name: "Triple Sec Cacao Syrup", amount: "10 ml", stocked: true }
-        ],
-        steps: [
-          "Combine Dark Rum, Orange Juice, Coconut Syrup, and Triple Sec Cacao Syrup in a shaker with ice.",
-          "Shake briskly for 12 seconds until creamy and aerated.",
-          "Strain into a Hurricane glass packed with crushed ice."
-        ],
-        servingNotes: "Inspired by the classic Painkiller—velvety coconut cream and sweet orange juice anchored by bold Dark Rum."
-      },
-      {
-        id: "vodka-strawberry-orange-screwdriver",
-        name: "Crimson Seville Screwdriver",
-        type: "Cocktail",
-        vibe: "Refreshing & Crisp",
-        glass: "Highball",
-        method: "Build & Stir",
-        ice: "Cubed Ice",
-        colors: ["#fb7185", "#fb923c"],
-        garnishType: "citrus-wheel",
-        readyNow: false,
-        tags: ["Vodka", "Strawberry Syrup", "Triple Sec Cacao Syrup"],
-        ingredients: [
-          { name: "Vodka", amount: "45 ml", stocked: true },
-          { name: "Orange Juice", amount: "110 ml", stocked: false },
-          { name: "Strawberry Syrup", amount: "15 ml", stocked: true },
-          { name: "Triple Sec Cacao Syrup", amount: "8 ml", stocked: true }
-        ],
-        steps: [
-          "Fill a tall Highball glass with cubed ice.",
-          "Pour Vodka, Strawberry Syrup, Triple Sec Cacao Syrup, and chilled Orange Juice over the ice.",
-          "Stir gently from bottom to top until rosy-orange."
-        ],
-        servingNotes: "Garnish with an orange wheel. Fresh berry sweetness and orange liqueur notes elevate the classic Screwdriver."
-      },
-      {
-        id: "coffee-gin-orange-spritz",
-        name: "Espresso Valencia Tonic",
-        type: "Cocktail",
-        vibe: "Herbal & Bold",
-        glass: "Copa",
-        method: "Build & Stir",
-        ice: "Cubed Ice",
-        colors: ["#9a3412", "#f97316"],
-        garnishType: "orange-twist",
-        readyNow: false,
-        tags: ["Coffee Gin", "Triple Sec Cacao Syrup", "Vanilla Syrup"],
-        ingredients: [
-          { name: "Coffee Gin", amount: "45 ml", stocked: true },
-          { name: "Orange Juice", amount: "50 ml", stocked: false },
-          { name: "Triple Sec Cacao Syrup", amount: "10 ml", stocked: true },
-          { name: "Vanilla Syrup", amount: "5 ml", stocked: true },
-          { name: "Tonic Water", amount: "80 ml", stocked: false }
-        ],
-        steps: [
-          "Fill a large Copa balloon wine glass with ice cubes.",
-          "Add Coffee Gin, Orange Juice, Triple Sec Cacao Syrup, and Vanilla Syrup and stir gently.",
-          "Top with chilled Tonic Water."
-        ],
-        servingNotes: "Roasted coffee and fresh orange juice is a cafe favorite—tonic water turns it into a crisp, bittersweet aperitif."
-      },
-      {
-        id: "jager-orange-ginger-highball",
-        name: "Black Forest Orange Highball",
-        type: "Cocktail",
-        vibe: "Herbal & Bold",
-        glass: "Highball",
-        method: "Build & Stir",
-        ice: "Cubed Ice",
-        colors: ["#7c2d12", "#ea580c"],
-        garnishType: "orange-twist",
-        readyNow: false,
-        tags: ["Jägermeister", "Triple Sec Cacao Syrup"],
-        ingredients: [
-          { name: "Jägermeister", amount: "45 ml", stocked: true },
-          { name: "Orange Juice", amount: "80 ml", stocked: false },
-          { name: "Triple Sec Cacao Syrup", amount: "10 ml", stocked: true },
-          { name: "Ginger Ale / Ginger Beer", amount: "60 ml", stocked: false }
-        ],
-        steps: [
-          "Fill a Highball glass with cubed ice.",
-          "Pour Jägermeister, Orange Juice, and Triple Sec Cacao Syrup over the ice.",
-          "Top with Ginger Ale or Ginger Beer and stir gently."
-        ],
-        servingNotes: "Jägermeister already features bitter orange peel in its botanical blend—fresh orange juice and ginger bring it to life."
-      }
-    ];
-
-    // =========================================================================
-    // 2. STATE MANAGEMENT & PERSISTENT STOCK STATUSES
-    // =========================================================================
-    const STORAGE_KEY_STOCK = "private_reserve_stock_v1";
-    const ALL_CATALOG_ITEMS = [
-      ...SYRUPS_DATA.map(s => ({ name: s.name, category: "Syrup" })),
-      ...SPIRITS_DATA.map(sp => ({ name: sp.name, category: sp.category })),
-      { name: "Kombucha", category: "Fermented Base" }
-    ];
-
-    const STORAGE_KEY_SHOPPING = "private_reserve_shopping_v1";
-    let currentTypeFilter = "ALL";
-    let currentVibeFilter = "ALL";
-    let selectedIngredients = new Set();
-    let multiMatchMode = "ANY"; // "ANY" (OR) | "ALL" (AND)
-
-    const FILTER_GROUPS = {
-      spirits: [
-        "Whisky", "Vodka", "Tequila", "Dark Rum", "Coffee Gin",
-        "Grappa", "Jägermeister", "Baileys", "Red Wine", "White Wine", "Kombucha"
-      ],
-      syrups: [
-        "Watermelon Syrup", "Passion Fruit Syrup", "Mint Mojito Syrup",
-        "Green Apple Syrup", "Vanilla Syrup", "Cacao Blue Syrup",
-        "Triple Sec Cacao Syrup", "Cheesecake Syrup", "Grenadine",
-        "Hazelnut Syrup", "Coconut Syrup", "Strawberry Syrup"
-      ],
-      juices: [
-        "Orange Juice", "Pineapple Juice", "Cranberry Juice",
-        "Fresh Lime Juice", "Fresh Lemon Juice",
-        "Club Soda", "Tonic Water", "Ginger Ale / Ginger Beer",
-        "Cola", "Milk or Heavy Cream", "Espresso or Cold Brew"
-      ]
+    const STORAGE_KEYS = {
+      catalog: "private_reserve_catalog_v1",   // { basedOn, savedAt, catalog } — edited copy
+      stock: "private_reserve_stock_v2",       // { itemId: "low" | "out" }
+      legacyStock: "private_reserve_stock_v1", // { itemName: "low" | "out" } — migrated once
+      shopping: "private_reserve_shopping_v1"  // [mixerId, ...] ticked on the restock checklist
     };
 
-    let checkedShoppingItems = loadShoppingChecklist();
-    let stockStatuses = loadStockStatuses(); // Map of itemName -> "in" | "low" | "out"
-
-    function loadShoppingChecklist() {
+    // =========================================================================
+    // 2. SMALL UTILITIES
+    // =========================================================================
+    function esc(value) {
+      return String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+    function str(v) { return typeof v === "string" ? v.trim() : ""; }
+    function slugify(text) {
+      return String(text).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 56) || "item";
+    }
+    function uniqueId(base, existingIds) {
+      let id = base, n = 2;
+      while (existingIds.has(id)) id = `${base}-${n++}`;
+      return id;
+    }
+    function readJSON(key) {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY_SHOPPING);
-        if (raw) return new Set(JSON.parse(raw));
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
       } catch (e) {
-        console.warn("Could not read shopping checklist from localStorage", e);
+        console.warn(`Could not read ${key} from localStorage`, e);
+        return null;
       }
-      return new Set();
+    }
+    function writeJSON(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+      } catch (e) {
+        console.warn(`Could not save ${key} to localStorage`, e);
+        showToast("Couldn't save to this browser's storage. Export a backup to keep your changes.", "error");
+        return false;
+      }
+    }
+    function removeKey(key) {
+      try { localStorage.removeItem(key); } catch (e) { /* storage unavailable */ }
+    }
+    function downloadFile(filename, text, mime) {
+      const blob = new Blob([text], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    function todayStamp() { return new Date().toISOString().slice(0, 10); }
+
+    let toastTimer = null;
+    function showToast(message, kind = "ok") {
+      const el = document.getElementById("toast");
+      if (!el) return;
+      const tone = kind === "error" ? "border-red-500/50 text-red-200"
+                 : kind === "warn" ? "border-amber-500/50 text-amber-200"
+                 : "border-gold/50 text-gray-100";
+      el.className = `fixed bottom-4 left-1/2 -translate-x-1/2 z-[80] max-w-[calc(100vw-2rem)] px-4 py-2.5 rounded-xl bg-charcoal border shadow-2xl text-sm no-print ${tone}`;
+      el.textContent = message;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.add("hidden"), 4500);
     }
 
-    function saveShoppingChecklist() {
-      try {
-        localStorage.setItem(STORAGE_KEY_SHOPPING, JSON.stringify(Array.from(checkedShoppingItems)));
-      } catch (e) {
-        console.warn("Could not save shopping checklist to localStorage", e);
+    function showModal(id) {
+      const m = document.getElementById(id);
+      m.classList.remove("hidden");
+      m.classList.add("flex");
+    }
+    function hideModal(id) {
+      const m = document.getElementById(id);
+      m.classList.add("hidden");
+      m.classList.remove("flex");
+    }
+    function isModalOpen(id) {
+      return !document.getElementById(id).classList.contains("hidden");
+    }
+
+    // =========================================================================
+    // 3. CATALOG: VALIDATION, LOADING & PERSISTENCE
+    //    The shipped catalog comes from data/catalog.js. Any in-app edit saves a
+    //    full edited copy to localStorage, which then takes precedence. If the
+    //    edited copy ever matches the shipped one again it is dropped.
+    // =========================================================================
+    function normalizeItem(it) {
+      const out = { id: it.id, name: str(it.name), kind: it.kind, category: str(it.category), profile: str(it.profile), notes: str(it.notes) };
+      if (it.kind === "mixer" && it.staple === true) out.staple = true;
+      return out;
+    }
+    function normalizeIngredient(ing) {
+      if (ing.item) {
+        const out = { item: ing.item };
+        const note = str(ing.note);
+        if (note) out.note = note;
+        out.amount = str(ing.amount);
+        return out;
       }
+      return { name: str(ing.name), amount: str(ing.amount) };
+    }
+    function normalizeRecipe(r) {
+      return {
+        id: r.id, name: str(r.name), type: r.type, vibe: r.vibe, glass: r.glass,
+        method: str(r.method), ice: str(r.ice),
+        colors: [r.colors[0].toLowerCase(), r.colors[1].toLowerCase()],
+        garnishType: r.garnishType,
+        ingredients: r.ingredients.map(normalizeIngredient),
+        steps: r.steps.map(str).filter(Boolean),
+        servingNotes: str(r.servingNotes)
+      };
+    }
+
+    // Validates untrusted catalog data (shipped file, saved copy or an import).
+    // Returns { catalog, errors }: catalog is normalized, or null when invalid.
+    function validateCatalog(raw) {
+      const errors = [];
+      const err = msg => { if (errors.length < 50) errors.push(msg); };
+      if (!raw || typeof raw !== "object") return { catalog: null, errors: ["Not a catalog object."] };
+      if (raw.schema !== CATALOG_SCHEMA) err(`Unsupported schema version "${raw.schema}" (expected ${CATALOG_SCHEMA}).`);
+      if (!Array.isArray(raw.items)) err('Missing "items" list.');
+      if (!Array.isArray(raw.recipes)) err('Missing "recipes" list.');
+      if (errors.length) return { catalog: null, errors };
+
+      const itemIds = new Set(), itemNames = new Set();
+      raw.items.forEach((it, i) => {
+        const where = `Item ${i + 1}${it && typeof it.name === "string" ? ` "${it.name}"` : ""}`;
+        if (!it || typeof it !== "object") return err(`${where}: not an object.`);
+        if (typeof it.id !== "string" || !ID_RE.test(it.id)) err(`${where}: id must be lowercase letters, digits and dashes.`);
+        else if (itemIds.has(it.id)) err(`${where}: duplicate id "${it.id}".`);
+        else itemIds.add(it.id);
+        if (!str(it.name)) err(`${where}: name is required.`);
+        else if (itemNames.has(str(it.name).toLowerCase())) err(`${where}: another item already has this name.`);
+        else itemNames.add(str(it.name).toLowerCase());
+        if (!Object.prototype.hasOwnProperty.call(ITEM_KINDS, it.kind)) err(`${where}: kind must be one of ${KIND_ORDER.join(", ")}.`);
+        ["category", "profile", "notes"].forEach(f => { if (it[f] != null && typeof it[f] !== "string") err(`${where}: ${f} must be text.`); });
+        if (it.staple != null && typeof it.staple !== "boolean") err(`${where}: staple must be true or false.`);
+      });
+
+      const recipeIds = new Set();
+      raw.recipes.forEach((r, i) => {
+        const where = `Recipe ${i + 1}${r && typeof r.name === "string" ? ` "${r.name}"` : ""}`;
+        if (!r || typeof r !== "object") return err(`${where}: not an object.`);
+        if (typeof r.id !== "string" || !ID_RE.test(r.id)) err(`${where}: id must be lowercase letters, digits and dashes.`);
+        else if (recipeIds.has(r.id)) err(`${where}: duplicate id "${r.id}".`);
+        else recipeIds.add(r.id);
+        if (!str(r.name)) err(`${where}: name is required.`);
+        if (!DRINK_TYPES.includes(r.type)) err(`${where}: type must be one of ${DRINK_TYPES.join(", ")}.`);
+        if (!VIBES.includes(r.vibe)) err(`${where}: vibe must be one of ${VIBES.join(", ")}.`);
+        if (!GLASSES.includes(r.glass)) err(`${where}: glass must be one of ${GLASSES.join(", ")}.`);
+        if (!GARNISHES.includes(r.garnishType)) err(`${where}: garnishType must be one of ${GARNISHES.join(", ")}.`);
+        if (!Array.isArray(r.colors) || r.colors.length !== 2 || !r.colors.every(c => typeof c === "string" && HEX_RE.test(c))) {
+          err(`${where}: colors must be two #rrggbb values.`);
+        }
+        ["method", "ice", "servingNotes"].forEach(f => { if (r[f] != null && typeof r[f] !== "string") err(`${where}: ${f} must be text.`); });
+        if (!Array.isArray(r.ingredients) || r.ingredients.length === 0) {
+          err(`${where}: needs at least one ingredient.`);
+        } else {
+          r.ingredients.forEach((ing, j) => {
+            const w = `${where}, ingredient ${j + 1}`;
+            if (!ing || typeof ing !== "object") return err(`${w}: not an object.`);
+            if (ing.item != null) {
+              if (typeof ing.item !== "string" || !itemIds.has(ing.item)) err(`${w}: unknown inventory item "${ing.item}".`);
+              if (ing.note != null && typeof ing.note !== "string") err(`${w}: note must be text.`);
+            } else if (!str(ing.name)) {
+              err(`${w}: needs an inventory item or a name.`);
+            }
+            if (!str(ing.amount)) err(`${w}: amount is required.`);
+          });
+        }
+        if (!Array.isArray(r.steps) || !r.steps.every(s => typeof s === "string")) err(`${where}: steps must be a list of text.`);
+        else if (!r.steps.some(s => str(s))) err(`${where}: needs at least one step.`);
+      });
+
+      if (errors.length) return { catalog: null, errors };
+      return {
+        catalog: {
+          schema: CATALOG_SCHEMA,
+          updated: str(raw.updated),
+          items: raw.items.map(normalizeItem),
+          recipes: raw.recipes.map(normalizeRecipe)
+        },
+        errors
+      };
+    }
+
+    const EMPTY_CATALOG = { schema: CATALOG_SCHEMA, updated: "", items: [], recipes: [] };
+    let shippedCatalog = null;   // validated data/catalog.js, or null if missing/invalid
+    let shippedErrors = [];
+    let catalog = EMPTY_CATALOG; // what the app renders: shipped, or the edited copy
+    let usingLocalCopy = false;
+    let localBasedOn = "";       // shipped "updated" stamp the edited copy started from
+    let localLoadError = false;
+    let itemsById = new Map();
+
+    function contentKey(c) { return JSON.stringify({ items: c.items, recipes: c.recipes }); }
+
+    function setActiveCatalog(c, isLocal, basedOn) {
+      catalog = c;
+      usingLocalCopy = isLocal;
+      localBasedOn = basedOn;
+      itemsById = new Map(c.items.map(i => [i.id, i]));
+    }
+
+    function loadCatalog() {
+      if (window.BAR_CATALOG) {
+        const res = validateCatalog(window.BAR_CATALOG);
+        shippedCatalog = res.catalog;
+        shippedErrors = res.errors;
+      } else {
+        shippedErrors = ["data/catalog.js did not load (missing file or a syntax error)."];
+      }
+
+      const saved = readJSON(STORAGE_KEYS.catalog);
+      if (saved && saved.catalog) {
+        const res = validateCatalog(saved.catalog);
+        if (res.catalog) {
+          if (shippedCatalog && contentKey(res.catalog) === contentKey(shippedCatalog)) {
+            removeKey(STORAGE_KEYS.catalog); // edits were published as the new shipped catalog
+          } else {
+            setActiveCatalog(res.catalog, true, str(saved.basedOn));
+            return;
+          }
+        } else {
+          // Keep the unreadable copy in storage untouched; it is only replaced on the next save.
+          localLoadError = true;
+          console.warn("Saved catalog copy is invalid and was ignored:", res.errors);
+        }
+      }
+      setActiveCatalog(shippedCatalog || EMPTY_CATALOG, false, "");
+    }
+
+    // Single entry point for every catalog change (editors, import, reset).
+    function commitCatalog(next, message, { rebase = false } = {}) {
+      const res = validateCatalog(next);
+      if (!res.catalog) {
+        console.warn("Catalog change rejected:", res.errors);
+        showToast(res.errors[0], "error");
+        return false;
+      }
+      const c = res.catalog;
+      if (shippedCatalog && contentKey(c) === contentKey(shippedCatalog)) {
+        removeKey(STORAGE_KEYS.catalog);
+        setActiveCatalog(shippedCatalog, false, "");
+      } else {
+        const basedOn = (rebase || !usingLocalCopy) ? (shippedCatalog?.updated || "") : localBasedOn;
+        writeJSON(STORAGE_KEYS.catalog, { basedOn, savedAt: new Date().toISOString(), catalog: c });
+        setActiveCatalog(c, true, basedOn);
+      }
+      localLoadError = false;
+      pruneOrphanState();
+      refreshAllViews();
+      if (message) showToast(message);
+      return true;
+    }
+
+    function shippedChangedSinceEdit() {
+      return usingLocalCopy && !!shippedCatalog && localBasedOn !== shippedCatalog.updated;
+    }
+
+    // =========================================================================
+    // 4. CATALOG QUERIES
+    // =========================================================================
+    const isTracked = it => !!(it && ITEM_KINDS[it.kind] && ITEM_KINDS[it.kind].tracked);
+    const itemsOfKind = kind => catalog.items.filter(i => i.kind === kind);
+    const trackedItems = () => catalog.items.filter(isTracked);
+    const recipeById = id => catalog.recipes.find(r => r.id === id);
+
+    function ingredientLabel(ing) {
+      const it = ing.item ? itemsById.get(ing.item) : null;
+      if (!it) return ing.name || "Unknown ingredient";
+      return ing.note ? `${it.name} (${ing.note})` : it.name;
+    }
+    // Bar-Ready = needs nothing but stock-tracked bottles and "always on hand" mixers.
+    function isBarReady(r) {
+      return r.ingredients.every(ing => {
+        const it = ing.item && itemsById.get(ing.item);
+        return !!it && (isTracked(it) || it.staple === true);
+      });
+    }
+    function recipesUsingItem(id) {
+      return catalog.recipes.filter(r => r.ingredients.some(i => i.item === id));
+    }
+
+    // =========================================================================
+    // 5. STOCK STATUSES & RESTOCK CHECKLIST (per browser)
+    // =========================================================================
+    let stockStatuses = {};             // itemId -> "low" | "out" (absent = in stock)
+    let checkedShoppingItems = new Set();
+    let currentTypeFilter = "ALL";
+    let currentVibeFilter = "ALL";
+    let selectedIngredients = new Set(); // item ids
+    let multiMatchMode = "ANY";          // "ANY" (OR) | "ALL" (AND)
+
+    function sanitizeStock(obj) {
+      const out = {};
+      if (!obj || typeof obj !== "object") return out;
+      Object.entries(obj).forEach(([id, st]) => {
+        if (isTracked(itemsById.get(id)) && (st === "low" || st === "out")) out[id] = st;
+      });
+      return out;
     }
 
     function loadStockStatuses() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY_STOCK);
-        if (raw) return JSON.parse(raw);
-      } catch (e) {
-        console.warn("Could not read stock status from localStorage", e);
+      const current = readJSON(STORAGE_KEYS.stock);
+      if (current && typeof current === "object") return sanitizeStock(current);
+      // One-time migration from v1, which keyed statuses by item name.
+      const legacy = readJSON(STORAGE_KEYS.legacyStock);
+      if (legacy && typeof legacy === "object") {
+        const idByName = new Map(catalog.items.map(i => [i.name.toLowerCase(), i.id]));
+        const migrated = {};
+        Object.entries(legacy).forEach(([name, st]) => {
+          const id = idByName.get(String(name).toLowerCase());
+          if (id) migrated[id] = st;
+        });
+        const clean = sanitizeStock(migrated);
+        writeJSON(STORAGE_KEYS.stock, clean);
+        return clean;
       }
       return {};
     }
+    function saveStockStatuses() { writeJSON(STORAGE_KEYS.stock, stockStatuses); }
 
-    function saveStockStatuses() {
-      try {
-        localStorage.setItem(STORAGE_KEY_STOCK, JSON.stringify(stockStatuses));
-      } catch (e) {
-        console.warn("Could not save stock status to localStorage", e);
+    function loadShoppingChecklist() {
+      const arr = readJSON(STORAGE_KEYS.shopping);
+      return new Set(Array.isArray(arr) ? arr.filter(id => itemsById.get(id)?.kind === "mixer") : []);
+    }
+    function saveShoppingChecklist() { writeJSON(STORAGE_KEYS.shopping, [...checkedShoppingItems]); }
+
+    // Drop state that points at items which no longer exist or are no longer tracked.
+    function pruneOrphanState() {
+      const cleanStock = sanitizeStock(stockStatuses);
+      if (JSON.stringify(cleanStock) !== JSON.stringify(stockStatuses)) {
+        stockStatuses = cleanStock;
+        saveStockStatuses();
       }
+      const cleanShopping = new Set([...checkedShoppingItems].filter(id => itemsById.get(id)?.kind === "mixer"));
+      if (cleanShopping.size !== checkedShoppingItems.size) {
+        checkedShoppingItems = cleanShopping;
+        saveShoppingChecklist();
+      }
+      selectedIngredients = new Set([...selectedIngredients].filter(id => itemsById.has(id)));
     }
 
-    function getItemStockStatus(name) {
-      return stockStatuses[name] || "in";
-    }
+    function getItemStockStatus(id) { return stockStatuses[id] || "in"; }
 
-    function setItemStockStatus(name, status) {
-      if (status === "in") {
-        delete stockStatuses[name];
-      } else {
-        stockStatuses[name] = status;
-      }
+    function setItemStockStatus(id, status) {
+      if (!isTracked(itemsById.get(id))) return;
+      if (status === "in") delete stockStatuses[id];
+      else stockStatuses[id] = status;
       saveStockStatuses();
       refreshAllViews();
     }
@@ -2067,69 +877,60 @@
       refreshAllViews();
     }
 
-    function matchCatalogItemForIngredient(ingName) {
-      const lower = ingName.toLowerCase();
-      for (const item of ALL_CATALOG_ITEMS) {
-        if (lower.includes(item.name.toLowerCase())) {
-          return item.name;
-        }
-      }
-      return null;
-    }
-
     function getRecipeStockAnalysis(recipe) {
-      const lowItems = [];
-      const outItems = [];
+      const lowItems = [], outItems = [];
       recipe.ingredients.forEach(ing => {
-        if (!ing.stocked) return; // on-demand items aren't tracked as out of bar stock
-        const catalogKey = matchCatalogItemForIngredient(ing.name);
-        if (catalogKey) {
-          const st = getItemStockStatus(catalogKey);
-          if (st === "low" && !lowItems.includes(catalogKey)) lowItems.push(catalogKey);
-          if (st === "out" && !outItems.includes(catalogKey)) outItems.push(catalogKey);
-        }
+        const it = ing.item && itemsById.get(ing.item);
+        if (!isTracked(it)) return; // on-demand mixers aren't stock-tracked
+        const st = getItemStockStatus(it.id);
+        if (st === "low" && !lowItems.includes(it.name)) lowItems.push(it.name);
+        if (st === "out" && !outItems.includes(it.name)) outItems.push(it.name);
       });
       return { lowItems, outItems };
     }
 
+    // =========================================================================
+    // 6. RENDERING
+    // =========================================================================
     function refreshAllViews() {
+      updateCounts();
       updateStockBadges();
+      renderMultiFilterControls();
       renderRecipes();
-      renderInventoryMatrices();
+      renderInventory();
       renderStockDrawer();
       renderShoppingChecklist();
+      if (isModalOpen("dataModal")) renderDataModal();
+    }
+
+    function updateCounts() {
+      document.getElementById("totalRecipeCount").textContent = catalog.recipes.length;
+      document.getElementById("inventoryTabCount").textContent = trackedItems().length;
+      const badge = document.getElementById("catalogEditedBadge");
+      badge.classList.toggle("hidden", !usingLocalCopy);
+      badge.classList.toggle("bg-amber-400", shippedChangedSinceEdit());
+      badge.title = shippedChangedSinceEdit() ? "Edited copy — the shipped catalog has changed since" : "Using your edited copy";
     }
 
     function updateStockBadges() {
-      const lowCount = Object.values(stockStatuses).filter(s => s === "low").length;
-      const outCount = Object.values(stockStatuses).filter(s => s === "out").length;
+      const statuses = Object.values(stockStatuses);
+      const lowCount = statuses.filter(s => s === "low").length;
+      const outCount = statuses.filter(s => s === "out").length;
       const alertTotal = lowCount + outCount;
 
       const alertBadge = document.getElementById("stockAlertBadge");
-      if (alertBadge) {
-        alertBadge.textContent = alertTotal;
-        alertBadge.classList.toggle("hidden", alertTotal === 0);
-      }
+      alertBadge.textContent = alertTotal;
+      alertBadge.classList.toggle("hidden", alertTotal === 0);
+      document.getElementById("lowStockPillCount").textContent = lowCount;
 
-      const lowPill = document.getElementById("lowStockPillCount");
-      if (lowPill) {
-        lowPill.textContent = lowCount;
-      }
+      document.getElementById("stockSummaryStrip").innerHTML = `
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> ${trackedItems().length - alertTotal} In Stock</span>
+        <span class="flex items-center gap-1 ${lowCount > 0 ? 'text-amber-300 font-semibold' : ''}"><span class="w-2 h-2 rounded-full bg-amber-400"></span> ${lowCount} Low</span>
+        <span class="flex items-center gap-1 ${outCount > 0 ? 'text-red-400 font-semibold' : ''}"><span class="w-2 h-2 rounded-full bg-red-400"></span> ${outCount} Out</span>
+      `;
 
-      const summaryStrip = document.getElementById("stockSummaryStrip");
-      if (summaryStrip) {
-        summaryStrip.innerHTML = `
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> ${ALL_CATALOG_ITEMS.length - alertTotal} In Stock</span>
-          <span class="flex items-center gap-1 ${lowCount > 0 ? 'text-amber-300 font-semibold' : ''}"><span class="w-2 h-2 rounded-full bg-amber-400"></span> ${lowCount} Low</span>
-          <span class="flex items-center gap-1 ${outCount > 0 ? 'text-red-400 font-semibold' : ''}"><span class="w-2 h-2 rounded-full bg-red-400"></span> ${outCount} Out</span>
-        `;
-      }
-
-      const remainingMixers = ON_DEMAND_ITEMS.length - checkedShoppingItems.size;
-      const shopBadge = document.getElementById("shoppingBadge");
-      if (shopBadge) {
-        shopBadge.textContent = remainingMixers + alertTotal;
-      }
+      const remainingMixers = itemsOfKind("mixer").filter(m => !checkedShoppingItems.has(m.id)).length;
+      document.getElementById("shoppingBadge").textContent = remainingMixers + alertTotal;
     }
 
     // =========================================================================
@@ -2290,10 +1091,6 @@
         </svg>`;
     }
 
-    // =========================================================================
-    // 4. RENDERING FUNCTIONS
-    // =========================================================================
-
     function renderRecipes() {
       const grid = document.getElementById("recipeGrid");
       const searchVal = document.getElementById("searchInput").value.toLowerCase().trim();
@@ -2301,44 +1098,38 @@
       const hideOutOfStock = document.getElementById("hideOutOfStockToggle").checked;
       const useUpLowStock = document.getElementById("useUpLowStockToggle").checked;
 
-      const filtered = RECIPES.filter(r => {
+      if (!catalog.recipes.length && shippedErrors.length && !usingLocalCopy) {
+        grid.innerHTML = `
+          <div class="col-span-full glass-card rounded-2xl p-10 text-center space-y-3 border-red-500/40">
+            <p class="font-serif text-2xl text-white">The catalog couldn't be loaded</p>
+            <p class="text-sm text-gray-300">${esc(shippedErrors[0])}</p>
+            <button onclick="openDataModal()" class="mt-2 px-4 py-2 rounded-xl bg-gold text-obsidian text-sm font-semibold">Open Catalog Data</button>
+          </div>`;
+        document.getElementById("visibleCount").textContent = 0;
+        return;
+      }
+
+      const filtered = catalog.recipes.filter(r => {
         const { lowItems, outItems } = getRecipeStockAnalysis(r);
-
-        // Hide Out-of-Stock Drinks toggle
         if (hideOutOfStock && outItems.length > 0) return false;
-
-        // Use Up Low-Stock Items toggle
         if (useUpLowStock && lowItems.length === 0) return false;
-
-        // Type filter
         if (currentTypeFilter !== "ALL" && r.type !== currentTypeFilter) return false;
-        // Vibe filter
         if (currentVibeFilter !== "ALL" && r.vibe !== currentVibeFilter) return false;
-        // Readiness filter
-        if (readinessFilter === "READY_NOW" && !r.readyNow) return false;
-        if (readinessFilter === "NEEDS_JUICE" && r.readyNow) return false;
+        const ready = isBarReady(r);
+        if (readinessFilter === "READY_NOW" && !ready) return false;
+        if (readinessFilter === "NEEDS_JUICE" && ready) return false;
 
-        // Multi-Select Ingredient filter (Alcohol / Syrups / Juices)
         if (selectedIngredients.size > 0) {
-          const selectedArr = Array.from(selectedIngredients);
-          const recipeMatchesToken = (token) => {
-            const lowerToken = token.toLowerCase();
-            return r.tags.some(t => t.toLowerCase().includes(lowerToken)) ||
-                   r.ingredients.some(i => i.name.toLowerCase().includes(lowerToken));
-          };
-
-          const isMatch = multiMatchMode === "ALL"
-            ? selectedArr.every(recipeMatchesToken)
-            : selectedArr.some(recipeMatchesToken);
-
+          const uses = id => r.ingredients.some(i => i.item === id);
+          const selected = [...selectedIngredients];
+          const isMatch = multiMatchMode === "ALL" ? selected.every(uses) : selected.some(uses);
           if (!isMatch) return false;
         }
 
-        // Search query
         if (searchVal) {
           const haystack = [
-            r.name, r.type, r.vibe, r.glass, r.servingNotes,
-            ...r.ingredients.map(i => i.name)
+            r.name, r.type, r.vibe, r.glass, r.method, r.servingNotes,
+            ...r.ingredients.map(ingredientLabel)
           ].join(" ").toLowerCase();
           if (!haystack.includes(searchVal)) return false;
         }
@@ -2352,9 +1143,11 @@
       if (filtered.length === 0) {
         grid.innerHTML = `
           <div class="col-span-full glass-card rounded-2xl p-12 text-center space-y-3">
-            <p class="font-serif text-2xl text-white">No matching drinks found</p>
-            <p class="text-sm text-gray-400">Try clearing one of your active filters or updating your stock statuses.</p>
-            <button onclick="resetAllFilters()" class="mt-2 px-4 py-2 rounded-xl bg-gold text-obsidian text-sm font-semibold">Reset All Filters</button>
+            <p class="font-serif text-2xl text-white">${catalog.recipes.length ? "No matching drinks found" : "No recipes yet"}</p>
+            <p class="text-sm text-gray-400">${catalog.recipes.length ? "Try clearing one of your active filters or updating your stock statuses." : "Add your first recipe to get started."}</p>
+            ${catalog.recipes.length
+              ? `<button onclick="resetAllFilters()" class="mt-2 px-4 py-2 rounded-xl bg-gold text-obsidian text-sm font-semibold">Reset All Filters</button>`
+              : `<button onclick="openRecipeEditor('add')" class="mt-2 px-4 py-2 rounded-xl bg-gold text-obsidian text-sm font-semibold no-print">+ Add Recipe</button>`}
           </div>`;
         return;
       }
@@ -2370,7 +1163,7 @@
             ? "bg-purple-500/15 text-purple-300 border-purple-500/30"
             : "bg-gold/15 text-gold border-gold/30";
 
-        const readyBadge = r.readyNow
+        const readyBadge = isBarReady(r)
           ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Bar-Ready</span>`
           : `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">+ On-Demand Juice/Citrus</span>`;
 
@@ -2379,275 +1172,149 @@
           stockWarningBanner = `
             <div class="mb-3 px-2.5 py-1.5 rounded-lg bg-red-500/15 border border-red-500/40 text-red-300 text-[11px] font-medium flex items-center gap-1.5">
               <span>Out of Stock:</span>
-              <strong class="truncate">${outItems.join(", ")}</strong>
+              <strong class="truncate">${esc(outItems.join(", "))}</strong>
             </div>`;
         } else if (isLow) {
           stockWarningBanner = `
             <div class="mb-3 px-2.5 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-300 text-[11px] font-medium flex items-center gap-1.5">
               <span>Low Stock:</span>
-              <strong class="truncate">${lowItems.join(", ")}</strong>
+              <strong class="truncate">${esc(lowItems.join(", "))}</strong>
             </div>`;
         }
 
         const ingPreview = r.ingredients.map(i => {
-          const catalogKey = i.stocked ? matchCatalogItemForIngredient(i.name) : null;
-          const st = catalogKey ? getItemStockStatus(catalogKey) : null;
-          const dotColor = !i.stocked
-            ? "bg-sky-400"
-            : st === "out"
-              ? "bg-red-500"
-              : st === "low"
-                ? "bg-amber-400"
-                : "bg-emerald-400";
+          const it = i.item ? itemsById.get(i.item) : null;
+          const st = isTracked(it) ? getItemStockStatus(it.id) : null;
+          const dotColor = !st ? "bg-sky-400" : st === "out" ? "bg-red-500" : st === "low" ? "bg-amber-400" : "bg-emerald-400";
           const textStyle = st === "out" ? "line-through text-red-300/80" : st === "low" ? "text-amber-200" : "text-gray-200";
-
           return `
-            <li class="flex items-center justify-between text-xs py-1 border-b border-white/5 last:border-0">
-              <span class="${textStyle} flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full ${dotColor}"></span>
-                ${i.name}
+            <li class="flex items-center justify-between gap-3 text-xs py-1 border-b border-white/5 last:border-0">
+              <span class="${textStyle} flex items-center gap-1.5 min-w-0">
+                <span class="w-1.5 h-1.5 rounded-full shrink-0 ${dotColor}"></span>
+                <span class="truncate">${esc(ingredientLabel(i))}</span>
               </span>
-              <span class="font-mono text-[11px] text-gray-400">${i.amount}</span>
-            </li>
-          `;
+              <span class="font-mono text-[11px] text-gray-400 shrink-0">${esc(i.amount)}</span>
+            </li>`;
         }).join("");
 
         return `
           <article onclick="openRecipeModal('${r.id}')" class="glass-card rounded-2xl p-5 flex flex-col justify-between cursor-pointer group ${isOut ? 'opacity-55 border-red-500/30 grayscale-[35%]' : isLow ? 'border-amber-500/35' : ''}">
             <div>
-              <!-- Top Badges -->
               <div class="flex flex-wrap items-center justify-between gap-1.5 mb-2.5">
-                <span class="text-[11px] px-2.5 py-0.5 rounded-full border font-semibold ${typeBadgeColor}">${r.type}</span>
+                <span class="text-[11px] px-2.5 py-0.5 rounded-full border font-semibold ${typeBadgeColor}">${esc(r.type)}</span>
                 ${readyBadge}
               </div>
-
               ${stockWarningBanner}
-
-              <!-- Title + Glassware Illustration Header -->
               <div class="flex items-center justify-between gap-3 bg-obsidian/60 rounded-xl p-3 border border-white/5 mb-4">
-                <div class="space-y-1">
-                  <p class="text-[11px] uppercase tracking-wider text-gold font-medium">${r.vibe}</p>
-                  <h3 class="font-serif text-xl font-bold text-white group-hover:text-gold transition leading-snug">${r.name}</h3>
-                  <div class="flex items-center gap-2 pt-1 text-[11px] text-gray-400">
-                    <span class="px-2 py-0.5 rounded bg-white/5 text-gray-200 font-medium">${r.glass} Glass</span>
-                    <span>• ${r.method}</span>
+                <div class="space-y-1 min-w-0">
+                  <p class="text-[11px] uppercase tracking-wider text-gold font-medium">${esc(r.vibe)}</p>
+                  <h3 class="font-serif text-xl font-bold text-white group-hover:text-gold transition leading-snug">${esc(r.name)}</h3>
+                  <div class="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-gray-400">
+                    <span class="px-2 py-0.5 rounded bg-white/5 text-gray-200 font-medium">${esc(r.glass)} Glass</span>
+                    ${r.method ? `<span>• ${esc(r.method)}</span>` : ""}
                   </div>
                 </div>
                 ${renderGlassSVG(r.glass, r.colors, r.garnishType, r.id)}
               </div>
-
-              <!-- Ingredients List -->
-              <ul class="space-y-0.5 mb-4">
-                ${ingPreview}
-              </ul>
+              <ul class="space-y-0.5 mb-4">${ingPreview}</ul>
             </div>
-
-            <!-- Footer Action -->
             <div class="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
-              <span class="text-gray-400 truncate max-w-[70%]">Ice: <strong class="text-gray-300 font-medium">${r.ice}</strong></span>
+              <span class="text-gray-400 truncate max-w-[70%]">Ice: <strong class="text-gray-300 font-medium">${esc(r.ice || "—")}</strong></span>
               <span class="text-gold font-semibold group-hover:translate-x-0.5 transition flex items-center gap-1">
                 <span>Full Spec</span>
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
               </span>
             </div>
-          </article>
-        `;
+          </article>`;
       }).join("");
     }
 
-    function renderMultiFilterControls() {
-      const renderGroup = (containerId, items) => {
-        const el = document.getElementById(containerId);
-        if (!el) return;
-        el.innerHTML = items.map(item => {
-          const active = selectedIngredients.has(item);
-          const safeItem = item.replace(/'/g, "\\'");
-          const shortLabel = item.replace(" Syrup", "");
-          return `
-            <button type="button" onclick="toggleSelectedIngredient('${safeItem}')"
-              class="px-2.5 py-1 rounded-lg text-xs font-medium border transition flex items-center gap-1.5 ${
-                active
-                  ? "bg-gold text-obsidian border-gold font-semibold shadow-sm"
-                  : "bg-charcoal/90 text-gray-300 border-white/10 hover:border-gold/40 hover:text-white"
-              }">
-              <span>${shortLabel}</span>
-              ${active ? '<span class="text-[10px] font-bold">✓</span>' : ""}
-            </button>
-          `;
-        }).join("");
-      };
-
-      renderGroup("multiFilterSpirits", FILTER_GROUPS.spirits);
-      renderGroup("multiFilterSyrups", FILTER_GROUPS.syrups);
-      renderGroup("multiFilterJuices", FILTER_GROUPS.juices);
-
-      // Update button badge & label
-      const count = selectedIngredients.size;
-      const badge = document.getElementById("selectedIngCountBadge");
-      const label = document.getElementById("multiFilterBtnLabel");
-      if (badge && label) {
-        badge.textContent = count;
-        badge.classList.toggle("hidden", count === 0);
-        label.textContent = count === 0
-          ? "Filter Alcohol, Syrups & Juices"
-          : `${count} Ingredient${count > 1 ? "s" : ""} Selected (${multiMatchMode === "ALL" ? "Match All" : "Match Any"})`;
-      }
-
-      // Render active removable chips strip
-      const chipsWrap = document.getElementById("activeIngredientChips");
-      if (chipsWrap) {
-        if (count === 0) {
-          chipsWrap.classList.add("hidden");
-          chipsWrap.classList.remove("flex");
-          chipsWrap.innerHTML = "";
-        } else {
-          chipsWrap.classList.remove("hidden");
-          chipsWrap.classList.add("flex");
-          const chipsHtml = Array.from(selectedIngredients).map(item => {
-            const safeItem = item.replace(/'/g, "\\'");
-            return `
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gold/20 border border-gold/40 text-gold text-xs font-medium">
-                <span>${item}</span>
-                <button type="button" onclick="toggleSelectedIngredient('${safeItem}')" class="hover:text-white font-bold leading-none" aria-label="Remove filter">&times;</button>
-              </span>
-            `;
-          }).join("");
-          chipsWrap.innerHTML = `
-            <span class="text-[11px] text-gray-400 mr-1">Selected (${multiMatchMode === "ALL" ? "AND" : "OR"}):</span>
-            ${chipsHtml}
-            <button type="button" onclick="clearSelectedIngredients()" class="text-[11px] text-gray-400 hover:text-white underline ml-1">Clear</button>
-          `;
-        }
-      }
-    }
-
-
-    function renderStockToggleButtons(itemName) {
-      const current = getItemStockStatus(itemName);
-      const safeName = itemName.replace(/'/g, "\\'");
+    function renderStockToggleButtons(id) {
+      const current = getItemStockStatus(id);
+      const btn = (value, label, on) => `
+        <button type="button" onclick="setItemStockStatus('${id}', '${value}')" class="py-1 px-2 rounded-lg transition ${current === value ? on : 'text-gray-400 hover:text-white'}">${label}</button>`;
       return `
         <div class="grid grid-cols-3 gap-1 p-1 rounded-xl bg-obsidian border border-white/10 text-[11px] font-semibold">
-          <button type="button" onclick="setItemStockStatus('${safeName}', 'in')" class="py-1 px-2 rounded-lg transition ${current === 'in' ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40' : 'text-gray-400 hover:text-white'}">
-            In Stock
-          </button>
-          <button type="button" onclick="setItemStockStatus('${safeName}', 'low')" class="py-1 px-2 rounded-lg transition ${current === 'low' ? 'bg-amber-500/25 text-amber-300 border border-amber-500/40' : 'text-gray-400 hover:text-white'}">
-            Low Stock
-          </button>
-          <button type="button" onclick="setItemStockStatus('${safeName}', 'out')" class="py-1 px-2 rounded-lg transition ${current === 'out' ? 'bg-red-500/25 text-red-300 border border-red-500/40' : 'text-gray-400 hover:text-white'}">
-            Out
-          </button>
-        </div>
-      `;
+          ${btn("in", "In Stock", "bg-emerald-500/25 text-emerald-300 border border-emerald-500/40")}
+          ${btn("low", "Low Stock", "bg-amber-500/25 text-amber-300 border border-amber-500/40")}
+          ${btn("out", "Out", "bg-red-500/25 text-red-300 border border-red-500/40")}
+        </div>`;
     }
 
-    function renderInventoryMatrices() {
-      const syrupsGrid = document.getElementById("inventorySyrupsGrid");
-      if (syrupsGrid) {
-        syrupsGrid.innerHTML = SYRUPS_DATA.map(s => {
-          const st = getItemStockStatus(s.name);
-          const cardTint = st === "out" ? "border-red-500/40 opacity-75" : st === "low" ? "border-amber-500/40" : "";
-          return `
-            <div class="glass-card rounded-2xl p-4 flex flex-col justify-between gap-3 ${cardTint}">
-              <div>
-                <div class="flex items-center justify-between gap-2">
-                  <h4 class="font-semibold text-base ${st === 'out' ? 'line-through text-red-300' : 'text-white'}">${s.name}</h4>
-                  <span class="text-[11px] px-2 py-0.5 rounded-md bg-gold/15 text-gold font-medium">${s.profile}</span>
-                </div>
-                <p class="text-xs text-gray-300 mt-2 leading-relaxed">${s.notes}</p>
-              </div>
-              <div class="space-y-2 pt-1">
-                ${renderStockToggleButtons(s.name)}
-                <button onclick="jumpToIngredient('${s.name}')" class="w-full py-2 rounded-xl bg-white/5 hover:bg-gold hover:text-obsidian text-gold text-xs font-semibold transition">
-                  Filter Recipes with ${s.name} →
-                </button>
-              </div>
+    function renderInventoryCard(it) {
+      const tracked = isTracked(it);
+      const st = tracked ? getItemStockStatus(it.id) : "in";
+      const uses = recipesUsingItem(it.id).length;
+      const tint = st === "out" ? "border-red-500/40 opacity-75" : st === "low" ? "border-amber-500/40" : "";
+      return `
+        <div class="glass-card rounded-2xl p-4 flex flex-col justify-between gap-3 ${tint}">
+          <div>
+            <div class="flex items-start justify-between gap-2">
+              <h4 class="font-semibold text-base ${st === 'out' ? 'line-through text-red-300' : 'text-white'}">${esc(it.name)}</h4>
+              <span class="shrink-0 text-[11px] px-2 py-0.5 rounded-md bg-white/10 text-gray-200 font-medium">${esc(it.category || ITEM_KINDS[it.kind].singular)}</span>
             </div>
-          `;
-        }).join("");
-      }
-
-      const spiritsGrid = document.getElementById("inventorySpiritsGrid");
-      if (spiritsGrid) {
-        spiritsGrid.innerHTML = SPIRITS_DATA.map(sp => {
-          const st = getItemStockStatus(sp.name);
-          const cardTint = st === "out" ? "border-red-500/40 opacity-75" : st === "low" ? "border-amber-500/40" : "";
-          return `
-            <div class="glass-card rounded-2xl p-4 flex flex-col justify-between gap-3 ${cardTint}">
-              <div>
-                <div class="flex items-center justify-between gap-2">
-                  <h4 class="font-semibold text-base ${st === 'out' ? 'line-through text-red-300' : 'text-white'}">${sp.name}</h4>
-                  <span class="text-[11px] px-2 py-0.5 rounded-md bg-white/10 text-gray-200 font-medium">${sp.category}</span>
-                </div>
-                <p class="text-[11px] text-gold mt-0.5">${sp.profile}</p>
-                <p class="text-xs text-gray-300 mt-2 leading-relaxed">${sp.notes}</p>
-              </div>
-              <div class="space-y-2 pt-1">
-                ${renderStockToggleButtons(sp.name)}
-                <button onclick="jumpToIngredient('${sp.name}')" class="w-full py-2 rounded-xl bg-white/5 hover:bg-gold hover:text-obsidian text-gold text-xs font-semibold transition">
-                  Filter Recipes with ${sp.name} →
-                </button>
-              </div>
-            </div>
-          `;
-        }).join("");
-      }
-
-      // Kombucha card in Inventory tab
-      const kSt = getItemStockStatus("Kombucha");
-      const kBadge = document.getElementById("kombuchaStatusBadge");
-      if (kBadge) {
-        if (kSt === "out") {
-          kBadge.className = "text-xs px-2.5 py-1 rounded-full bg-red-500/15 text-red-300 border border-red-500/30";
-          kBadge.textContent = "Out of Stock";
-        } else if (kSt === "low") {
-          kBadge.className = "text-xs px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30";
-          kBadge.textContent = "Low Stock";
-        } else {
-          kBadge.className = "text-xs px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30";
-          kBadge.textContent = "In Stock";
-        }
-      }
-      const kCard = document.getElementById("kombuchaInventoryCard");
-      if (kCard) {
-        kCard.innerHTML = `
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <h4 class="font-semibold text-base ${kSt === 'out' ? 'line-through text-red-300' : 'text-white'}">Kombucha (Ginger, Berry, Citrus, Original)</h4>
-              <p class="text-xs text-gold mt-0.5">Tangy • Effervescent • Tea-Forward • Naturally Acidic</p>
-              <p class="text-xs text-gray-300 mt-2 leading-relaxed">Provides natural carbonation, probiotic tang, and tannic depth—acting as an ideal zero-proof spirit substitute or low-ABV spritz lengthener.</p>
-            </div>
-            <button onclick="jumpToIngredient('Kombucha')" class="shrink-0 px-3 py-1.5 rounded-lg bg-gold/20 hover:bg-gold text-gold hover:text-obsidian text-xs font-semibold transition">View Drinks</button>
+            ${it.profile ? `<p class="text-[11px] text-gold mt-0.5">${esc(it.profile)}</p>` : ""}
+            ${it.notes ? `<p class="text-xs text-gray-300 mt-2 leading-relaxed">${esc(it.notes)}</p>` : ""}
+            ${it.staple ? `<p class="text-[11px] text-emerald-300 mt-2">Always on hand: doesn't stop a drink being Bar-Ready</p>` : ""}
           </div>
-          ${renderStockToggleButtons("Kombucha")}
-        `;
-      }
+          <div class="space-y-2 pt-1 no-print">
+            ${tracked ? renderStockToggleButtons(it.id) : ""}
+            <div class="flex gap-2">
+              <button onclick="jumpToIngredient('${it.id}')" ${uses ? "" : "disabled"} class="flex-1 py-2 rounded-xl bg-white/5 enabled:hover:bg-gold enabled:hover:text-obsidian text-gold text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed">
+                ${uses ? `View ${uses} drink${uses > 1 ? "s" : ""} →` : "Not used in any drink"}
+              </button>
+              <button onclick="openItemEditor('edit', '${it.id}')" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-gray-200 text-xs font-semibold transition">Edit</button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function renderInventory() {
+      const el = document.getElementById("inventorySections");
+      el.innerHTML = KIND_ORDER.map((kind, idx) => {
+        const list = itemsOfKind(kind);
+        const meta = ITEM_KINDS[kind];
+        const cards = list.map(renderInventoryCard).join("");
+        return `
+          <div class="space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="font-serif text-xl sm:text-2xl font-bold text-gold">${idx + 1}. ${meta.label} (${list.length})</h3>
+              <div class="flex items-center gap-3 no-print">
+                ${kind === "mixer"
+                  ? `<button onclick="openShoppingModal()" class="text-xs text-gold hover:underline font-medium">Open Order Checklist →</button>`
+                  : `<span class="hidden sm:inline text-xs text-gray-400">Click status pills to update stock</span>`}
+                <button onclick="openItemEditor('add', null, '${kind}')" class="px-3 py-1.5 rounded-lg bg-gold/15 hover:bg-gold text-gold hover:text-obsidian border border-gold/30 text-xs font-semibold transition">+ Add</button>
+              </div>
+            </div>
+            ${kind === "mixer" ? `<p class="text-xs text-gray-400 -mt-2">Not stock-tracked: these go on the Order &amp; Restock checklist. Mixers marked “always on hand” don't stop a drink counting as Bar-Ready.</p>` : ""}
+            ${cards
+              ? `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">${cards}</div>`
+              : `<p class="text-xs text-gray-400">Nothing here yet.</p>`}
+          </div>`;
+      }).join("");
     }
 
     function renderStockDrawer() {
       const container = document.getElementById("stockDrawerList");
-      if (!container) return;
       const query = (document.getElementById("stockDrawerSearch")?.value || "").toLowerCase().trim();
-      const items = ALL_CATALOG_ITEMS.filter(item =>
+      const items = trackedItems().filter(item =>
         !query || item.name.toLowerCase().includes(query) || item.category.toLowerCase().includes(query)
       );
-
       container.innerHTML = items.map(item => {
-        const st = getItemStockStatus(item.name);
+        const st = getItemStockStatus(item.id);
         return `
           <div class="p-3 rounded-xl bg-obsidian/80 border ${st === 'out' ? 'border-red-500/40' : st === 'low' ? 'border-amber-500/40' : 'border-white/10'} space-y-2">
             <div class="flex items-center justify-between gap-2">
-              <span class="text-xs font-semibold ${st === 'out' ? 'line-through text-red-300' : 'text-white'}">${item.name}</span>
-              <span class="text-[10px] px-2 py-0.5 rounded bg-white/5 text-gray-400">${item.category}</span>
+              <span class="text-xs font-semibold ${st === 'out' ? 'line-through text-red-300' : 'text-white'}">${esc(item.name)}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-white/5 text-gray-400">${esc(item.category || ITEM_KINDS[item.kind].singular)}</span>
             </div>
-            ${renderStockToggleButtons(item.name)}
-          </div>
-        `;
-      }).join("");
+            ${renderStockToggleButtons(item.id)}
+          </div>`;
+      }).join("") || `<p class="text-xs text-gray-400 col-span-full">No matching items.</p>`;
     }
 
     function renderGlasswareGuide() {
       const grid = document.getElementById("glasswareGuideGrid");
-      if (!grid) return;
       grid.innerHTML = GLASSWARE_GUIDE.map((g, idx) => `
         <div class="glass-card rounded-2xl p-6 flex flex-col justify-between gap-4">
           <div class="flex items-center justify-between gap-4 bg-obsidian/70 p-4 rounded-xl border border-white/5">
@@ -2667,109 +1334,103 @@
     }
 
     function renderShoppingChecklist() {
-      // 1. Automatic Restock Alert Section
       const restockSection = document.getElementById("restockAlertSection");
-      if (restockSection) {
-        const flagged = ALL_CATALOG_ITEMS.filter(item => getItemStockStatus(item.name) !== "in");
-        if (flagged.length === 0) {
-          restockSection.innerHTML = `
-            <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between text-xs text-emerald-300">
-              <span>All 23 bar syrups, spirits, wines, and kombucha are marked <strong>In Stock</strong>.</span>
-              <button onclick="closeShoppingModal(); openStockDrawer();" class="underline font-semibold hover:text-white">Edit Stock</button>
+      const flagged = trackedItems().filter(item => getItemStockStatus(item.id) !== "in");
+      if (flagged.length === 0) {
+        restockSection.innerHTML = `
+          <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between gap-3 text-xs text-emerald-300">
+            <span>All ${trackedItems().length} tracked bar items are marked <strong>In Stock</strong>.</span>
+            <button onclick="closeShoppingModal(); openStockDrawer();" class="underline font-semibold hover:text-white shrink-0">Edit Stock</button>
+          </div>`;
+      } else {
+        restockSection.innerHTML = `
+          <div class="p-4 rounded-2xl bg-red-500/10 border border-amber-500/35 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs uppercase tracking-wider text-amber-300 font-bold">Automatic Bar Restock Alerts (${flagged.length})</h4>
+              <button onclick="closeShoppingModal(); openStockDrawer();" class="text-[11px] text-gold hover:underline">Manage Stock</button>
             </div>
-          `;
-        } else {
-          restockSection.innerHTML = `
-            <div class="p-4 rounded-2xl bg-red-500/10 border border-amber-500/35 space-y-2.5">
-              <div class="flex items-center justify-between">
-                <h4 class="text-xs uppercase tracking-wider text-amber-300 font-bold">Automatic Bar Restock Alerts (${flagged.length})</h4>
-                <button onclick="closeShoppingModal(); openStockDrawer();" class="text-[11px] text-gold hover:underline">Manage Stock</button>
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                ${flagged.map(item => {
-                  const st = getItemStockStatus(item.name);
-                  const safeName = item.name.replace(/'/g, "\\'");
-                  return `
-                    <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-obsidian/90 border ${st === 'out' ? 'border-red-500/40' : 'border-amber-500/40'} text-xs">
-                      <div>
-                        <span class="font-semibold text-white block">${item.name}</span>
-                        <span class="text-[10px] ${st === 'out' ? 'text-red-400' : 'text-amber-300'} font-bold uppercase">${st === 'out' ? 'Out of Stock' : 'Low Stock'}</span>
-                      </div>
-                      <button onclick="setItemStockStatus('${safeName}', 'in')" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-obsidian text-[11px] font-semibold transition">
-                        Restocked ✓
-                      </button>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              ${flagged.map(item => {
+                const st = getItemStockStatus(item.id);
+                return `
+                  <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-obsidian/90 border ${st === 'out' ? 'border-red-500/40' : 'border-amber-500/40'} text-xs">
+                    <div>
+                      <span class="font-semibold text-white block">${esc(item.name)}</span>
+                      <span class="text-[10px] ${st === 'out' ? 'text-red-400' : 'text-amber-300'} font-bold uppercase">${st === 'out' ? 'Out of Stock' : 'Low Stock'}</span>
                     </div>
-                  `;
-                }).join("")}
-              </div>
+                    <button onclick="setItemStockStatus('${item.id}', 'in')" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-obsidian text-[11px] font-semibold transition shrink-0">Restocked ✓</button>
+                  </div>`;
+              }).join("")}
             </div>
-          `;
-        }
+          </div>`;
       }
 
-      // 2. On-Demand Mixers & Juices
-      const container = document.getElementById("shoppingChecklist");
-      container.innerHTML = ON_DEMAND_ITEMS.map(item => {
+      const mixers = itemsOfKind("mixer");
+      document.getElementById("shoppingChecklist").innerHTML = mixers.map(item => {
         const isChecked = checkedShoppingItems.has(item.id);
         return `
-          <label class="flex items-center justify-between p-3 rounded-xl bg-obsidian/70 border border-white/10 hover:border-gold/40 cursor-pointer transition">
+          <label class="flex items-center justify-between gap-3 p-3 rounded-xl bg-obsidian/70 border border-white/10 hover:border-gold/40 cursor-pointer transition">
             <div class="flex items-center gap-3">
               <input type="checkbox" ${isChecked ? "checked" : ""} onchange="toggleShoppingItem('${item.id}')" class="w-4 h-4 rounded accent-[#d4a359]" />
-              <span class="text-sm ${isChecked ? 'line-through text-gray-500' : 'text-gray-100 font-medium'}">${item.name}</span>
+              <span class="text-sm ${isChecked ? 'line-through text-gray-500' : 'text-gray-100 font-medium'}">${esc(item.name)}</span>
             </div>
-            <span class="text-[11px] px-2 py-0.5 rounded bg-white/5 text-gray-400">${item.category}</span>
-          </label>
-        `;
-      }).join("");
-      updateStockBadges();
+            <span class="text-[11px] px-2 py-0.5 rounded bg-white/5 text-gray-400 shrink-0">${esc(item.category || "Mixer")}</span>
+          </label>`;
+      }).join("") || `<p class="text-xs text-gray-400">No on-demand mixers in the inventory.</p>`;
     }
 
-    // =========================================================================
-    // 5. INTERACTION HANDLERS
-    // =========================================================================
+    // Ingredient filter chips (item ids). Spirits + bases share the first group.
+    function renderMultiFilterControls() {
+      const renderGroup = (containerId, items) => {
+        document.getElementById(containerId).innerHTML = items.map(item => {
+          const active = selectedIngredients.has(item.id);
+          return `
+            <button type="button" onclick="toggleSelectedIngredient('${item.id}')"
+              class="px-2.5 py-1 rounded-lg text-xs font-medium border transition flex items-center gap-1.5 ${
+                active
+                  ? "bg-gold text-obsidian border-gold font-semibold shadow-sm"
+                  : "bg-charcoal/90 text-gray-300 border-white/10 hover:border-gold/40 hover:text-white"
+              }">
+              <span>${esc(item.name.replace(/ Syrup$/, ""))}</span>
+              ${active ? '<span class="text-[10px] font-bold">✓</span>' : ""}
+            </button>`;
+        }).join("");
+      };
+      renderGroup("multiFilterSpirits", [...itemsOfKind("spirit"), ...itemsOfKind("base")]);
+      renderGroup("multiFilterSyrups", itemsOfKind("syrup"));
+      renderGroup("multiFilterJuices", itemsOfKind("mixer"));
 
-    function toggleMultiFilterPanel() {
-      const panel = document.getElementById("multiFilterPanel");
-      const chevron = document.getElementById("multiFilterChevron");
-      if (!panel) return;
-      const isHidden = panel.classList.contains("hidden");
-      panel.classList.toggle("hidden", !isHidden);
-      if (chevron) chevron.classList.toggle("rotate-180", isHidden);
-    }
+      const count = selectedIngredients.size;
+      const badge = document.getElementById("selectedIngCountBadge");
+      badge.textContent = count;
+      badge.classList.toggle("hidden", count === 0);
+      document.getElementById("multiFilterBtnLabel").textContent = count === 0
+        ? "Filter Alcohol, Syrups & Juices"
+        : `${count} Ingredient${count > 1 ? "s" : ""} Selected (${multiMatchMode === "ALL" ? "Match All" : "Match Any"})`;
 
-    function toggleSelectedIngredient(item) {
-      if (selectedIngredients.has(item)) {
-        selectedIngredients.delete(item);
+      const chipsWrap = document.getElementById("activeIngredientChips");
+      if (count === 0) {
+        chipsWrap.classList.add("hidden");
+        chipsWrap.classList.remove("flex");
+        chipsWrap.innerHTML = "";
       } else {
-        selectedIngredients.add(item);
+        chipsWrap.classList.remove("hidden");
+        chipsWrap.classList.add("flex");
+        const chipsHtml = [...selectedIngredients].map(id => `
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gold/20 border border-gold/40 text-gold text-xs font-medium">
+            <span>${esc(itemsById.get(id)?.name || id)}</span>
+            <button type="button" onclick="toggleSelectedIngredient('${id}')" class="hover:text-white font-bold leading-none" aria-label="Remove filter">&times;</button>
+          </span>`).join("");
+        chipsWrap.innerHTML = `
+          <span class="text-[11px] text-gray-400 mr-1">Selected (${multiMatchMode === "ALL" ? "AND" : "OR"}):</span>
+          ${chipsHtml}
+          <button type="button" onclick="clearSelectedIngredients()" class="text-[11px] text-gray-400 hover:text-white underline ml-1">Clear</button>`;
       }
-      renderMultiFilterControls();
-      applyFilters();
     }
 
-    function setMultiMatchMode(mode) {
-      multiMatchMode = mode;
-      const anyBtn = document.getElementById("matchModeAnyBtn");
-      const allBtn = document.getElementById("matchModeAllBtn");
-      if (anyBtn && allBtn) {
-        if (mode === "ANY") {
-          anyBtn.className = "px-3 py-1 rounded-lg font-semibold bg-gold text-obsidian transition";
-          allBtn.className = "px-3 py-1 rounded-lg font-medium text-gray-300 hover:text-white transition";
-        } else {
-          allBtn.className = "px-3 py-1 rounded-lg font-semibold bg-gold text-obsidian transition";
-          anyBtn.className = "px-3 py-1 rounded-lg font-medium text-gray-300 hover:text-white transition";
-        }
-      }
-      renderMultiFilterControls();
-      applyFilters();
-    }
-
-    function clearSelectedIngredients() {
-      selectedIngredients.clear();
-      renderMultiFilterControls();
-      applyFilters();
-    }
-
+    // =========================================================================
+    // 7. INTERACTION HANDLERS (tabs, filters, modals)
+    // =========================================================================
     function switchTab(tabName) {
       ["menu", "inventory", "glassware"].forEach(t => {
         document.getElementById(`view-${t}`).classList.toggle("hidden", t !== tabName);
@@ -2786,11 +1447,9 @@
     function setTypeFilter(type) {
       currentTypeFilter = type;
       document.querySelectorAll(".type-pill").forEach(btn => {
-        if (btn.dataset.type === type) {
-          btn.className = "type-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-gold text-obsidian transition";
-        } else {
-          btn.className = "type-pill px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 text-gray-300 hover:bg-white/10 transition";
-        }
+        btn.className = btn.dataset.type === type
+          ? "type-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-gold text-obsidian transition"
+          : "type-pill px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 text-gray-300 hover:bg-white/10 transition";
       });
       applyFilters();
     }
@@ -2798,18 +1457,44 @@
     function setVibeFilter(vibe) {
       currentVibeFilter = vibe;
       document.querySelectorAll(".vibe-pill").forEach(btn => {
-        if (btn.dataset.vibe === vibe) {
-          btn.className = "vibe-pill px-2.5 py-1 rounded-lg text-xs font-semibold bg-gold/20 text-gold border border-gold/40 transition";
-        } else {
-          btn.className = "vibe-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-white/5 text-gray-300 hover:bg-white/10 transition";
-        }
+        btn.className = btn.dataset.vibe === vibe
+          ? "vibe-pill px-2.5 py-1 rounded-lg text-xs font-semibold bg-gold/20 text-gold border border-gold/40 transition"
+          : "vibe-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-white/5 text-gray-300 hover:bg-white/10 transition";
       });
       applyFilters();
     }
 
-    function applyFilters() {
-      renderRecipes();
+    function toggleMultiFilterPanel() {
+      const panel = document.getElementById("multiFilterPanel");
+      const isHidden = panel.classList.contains("hidden");
+      panel.classList.toggle("hidden", !isHidden);
+      document.getElementById("multiFilterChevron").classList.toggle("rotate-180", isHidden);
     }
+
+    function toggleSelectedIngredient(id) {
+      if (selectedIngredients.has(id)) selectedIngredients.delete(id);
+      else if (itemsById.has(id)) selectedIngredients.add(id);
+      renderMultiFilterControls();
+      applyFilters();
+    }
+
+    function setMultiMatchMode(mode) {
+      multiMatchMode = mode;
+      const on = "px-3 py-1 rounded-lg font-semibold bg-gold text-obsidian transition";
+      const off = "px-3 py-1 rounded-lg font-medium text-gray-300 hover:text-white transition";
+      document.getElementById("matchModeAnyBtn").className = mode === "ANY" ? on : off;
+      document.getElementById("matchModeAllBtn").className = mode === "ALL" ? on : off;
+      renderMultiFilterControls();
+      applyFilters();
+    }
+
+    function clearSelectedIngredients() {
+      selectedIngredients.clear();
+      renderMultiFilterControls();
+      applyFilters();
+    }
+
+    function applyFilters() { renderRecipes(); }
 
     function resetAllFilters() {
       document.getElementById("searchInput").value = "";
@@ -2822,28 +1507,19 @@
       setVibeFilter("ALL");
     }
 
-    function jumpToIngredient(ingredientName) {
+    function jumpToIngredient(id) {
       switchTab("menu");
       selectedIngredients.clear();
-      const allFilterItems = [...FILTER_GROUPS.spirits, ...FILTER_GROUPS.syrups, ...FILTER_GROUPS.juices];
-      const matched = allFilterItems.find(i => i.toLowerCase() === ingredientName.toLowerCase());
-      if (matched) {
-        selectedIngredients.add(matched);
-        document.getElementById("searchInput").value = "";
-      } else {
-        document.getElementById("searchInput").value = ingredientName;
-      }
+      if (itemsById.has(id)) selectedIngredients.add(id);
+      document.getElementById("searchInput").value = "";
       renderMultiFilterControls();
       applyFilters();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function openRecipeModal(id) {
-      const r = RECIPES.find(item => item.id === id);
+      const r = recipeById(id);
       if (!r) return;
-
-      const modal = document.getElementById("recipeModal");
-      const content = document.getElementById("modalContent");
       const { lowItems, outItems } = getRecipeStockAnalysis(r);
 
       let modalAlert = "";
@@ -2851,74 +1527,55 @@
         modalAlert = `
           <div class="p-3.5 rounded-2xl ${outItems.length > 0 ? 'bg-red-500/15 border-red-500/40 text-red-200' : 'bg-amber-500/15 border-amber-500/40 text-amber-200'} border text-xs flex flex-wrap items-center justify-between gap-2">
             <div>
-              ${outItems.length > 0 ? `<p><strong>Out of Stock Alert:</strong> ${outItems.join(", ")}</p>` : ""}
-              ${lowItems.length > 0 ? `<p><strong>Low Stock Alert:</strong> ${lowItems.join(", ")}</p>` : ""}
+              ${outItems.length > 0 ? `<p><strong>Out of Stock Alert:</strong> ${esc(outItems.join(", "))}</p>` : ""}
+              ${lowItems.length > 0 ? `<p><strong>Low Stock Alert:</strong> ${esc(lowItems.join(", "))}</p>` : ""}
             </div>
-            <button onclick="closeRecipeModal(); openStockDrawer();" class="px-3 py-1 rounded-lg bg-obsidian/80 text-gold border border-gold/30 font-semibold hover:bg-gold hover:text-obsidian transition">
-              Update Stock
-            </button>
-          </div>
-        `;
+            <button onclick="closeRecipeModal(); openStockDrawer();" class="px-3 py-1 rounded-lg bg-obsidian/80 text-gold border border-gold/30 font-semibold hover:bg-gold hover:text-obsidian transition no-print">Update Stock</button>
+          </div>`;
       }
 
       const ingRows = r.ingredients.map(i => {
-        const catalogKey = i.stocked ? matchCatalogItemForIngredient(i.name) : null;
-        const st = catalogKey ? getItemStockStatus(catalogKey) : null;
-
+        const it = i.item ? itemsById.get(i.item) : null;
+        const st = isTracked(it) ? getItemStockStatus(it.id) : null;
         let badgeClass = "bg-sky-500/15 text-sky-300 border border-sky-500/30";
-        let badgeLabel = "On-Demand";
-        if (i.stocked) {
-          if (st === "out") {
-            badgeClass = "bg-red-500/20 text-red-300 border border-red-500/40";
-            badgeLabel = "Out of Stock";
-          } else if (st === "low") {
-            badgeClass = "bg-amber-500/20 text-amber-300 border border-amber-500/40";
-            badgeLabel = "Low Stock";
-          } else {
-            badgeClass = "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30";
-            badgeLabel = "In Stock";
-          }
-        }
-
+        let badgeLabel = it ? "On-Demand" : "Extra";
+        if (st === "out") { badgeClass = "bg-red-500/20 text-red-300 border border-red-500/40"; badgeLabel = "Out of Stock"; }
+        else if (st === "low") { badgeClass = "bg-amber-500/20 text-amber-300 border border-amber-500/40"; badgeLabel = "Low Stock"; }
+        else if (st === "in") { badgeClass = "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"; badgeLabel = "In Stock"; }
         return `
-          <div class="flex items-center justify-between py-2.5 px-3.5 rounded-xl bg-obsidian/80 border border-white/5">
-            <div class="flex items-center gap-2.5">
-              <span class="px-2 py-0.5 text-[10px] uppercase font-bold rounded ${badgeClass}">
-                ${badgeLabel}
-              </span>
-              <span class="text-sm font-medium ${st === 'out' ? 'line-through text-red-300' : 'text-white'}">${i.name}</span>
+          <div class="flex items-center justify-between gap-3 py-2.5 px-3.5 rounded-xl bg-obsidian/80 border border-white/5">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="px-2 py-0.5 text-[10px] uppercase font-bold rounded shrink-0 ${badgeClass}">${badgeLabel}</span>
+              <span class="text-sm font-medium ${st === 'out' ? 'line-through text-red-300' : 'text-white'}">${esc(ingredientLabel(i))}</span>
             </div>
-            <span class="font-mono text-sm text-gold font-semibold">${i.amount}</span>
-          </div>
-        `;
+            <span class="font-mono text-sm text-gold font-semibold shrink-0">${esc(i.amount)}</span>
+          </div>`;
       }).join("");
 
       const stepsList = r.steps.map((step, index) => `
         <li class="flex gap-3 text-sm text-gray-200 leading-relaxed">
           <span class="w-6 h-6 rounded-full bg-gold/20 text-gold font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">${index + 1}</span>
-          <span>${step}</span>
-        </li>
-      `).join("");
+          <span>${esc(step)}</span>
+        </li>`).join("");
 
-      content.innerHTML = `
+      document.getElementById("modalContent").innerHTML = `
         <div class="p-6 sm:p-8 space-y-6">
-          <!-- Header -->
           <div class="flex items-start justify-between gap-4 border-b border-white/10 pb-5">
             <div>
               <div class="flex flex-wrap items-center gap-2 mb-2">
-                <span class="text-xs px-2.5 py-0.5 rounded-full bg-gold/20 text-gold font-semibold">${r.type}</span>
-                <span class="text-xs px-2.5 py-0.5 rounded-full bg-white/10 text-gray-200">${r.vibe}</span>
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-gold/20 text-gold font-semibold">${esc(r.type)}</span>
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-white/10 text-gray-200">${esc(r.vibe)}</span>
+                ${isBarReady(r) ? `<span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300">Bar-Ready</span>` : ""}
               </div>
-              <h2 class="font-serif text-3xl sm:text-4xl font-bold text-white">${r.name}</h2>
+              <h2 class="font-serif text-3xl sm:text-4xl font-bold text-white">${esc(r.name)}</h2>
             </div>
-            <button onclick="closeRecipeModal()" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-gray-300 hover:text-white transition">
+            <button onclick="closeRecipeModal()" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-gray-300 hover:text-white transition" aria-label="Close">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
           </div>
 
           ${modalAlert}
 
-          <!-- Glassware & Specs Banner -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-obsidian/90 rounded-2xl p-4 border border-gold/20 items-center">
             <div class="flex items-center justify-center sm:border-r border-white/10 py-2">
               ${renderGlassSVG(r.glass, r.colors, r.garnishType, `modal-${r.id}`)}
@@ -2926,82 +1583,65 @@
             <div class="sm:col-span-2 grid grid-cols-2 gap-3 text-xs">
               <div class="p-2.5 rounded-xl bg-white/5">
                 <span class="text-gray-400 block">Recommended Glass</span>
-                <strong class="text-white text-sm mt-0.5 block">${r.glass} Glass</strong>
+                <strong class="text-white text-sm mt-0.5 block">${esc(GLASS_LABELS[r.glass] || r.glass)} Glass</strong>
               </div>
               <div class="p-2.5 rounded-xl bg-white/5">
                 <span class="text-gray-400 block">Technique</span>
-                <strong class="text-white text-sm mt-0.5 block">${r.method}</strong>
+                <strong class="text-white text-sm mt-0.5 block">${esc(r.method || "—")}</strong>
               </div>
               <div class="col-span-2 p-2.5 rounded-xl bg-white/5">
                 <span class="text-gray-400 block">Ice & Temperature Prep</span>
-                <strong class="text-gold text-sm mt-0.5 block">${r.ice}</strong>
+                <strong class="text-gold text-sm mt-0.5 block">${esc(r.ice || "—")}</strong>
               </div>
             </div>
           </div>
 
-          <!-- Two Column Body: Measurements & Method -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-3">
               <h4 class="text-xs uppercase tracking-widest text-gold font-bold">Exact Measurements</h4>
               <div class="space-y-2">${ingRows}</div>
             </div>
-
             <div class="space-y-3">
               <h4 class="text-xs uppercase tracking-widest text-gold font-bold">Step-by-Step Preparation</h4>
               <ol class="space-y-3">${stepsList}</ol>
             </div>
           </div>
 
-          <!-- Garnish & Serving Presentation -->
+          ${r.servingNotes ? `
           <div class="p-4 rounded-2xl bg-gold/10 border border-gold/30 space-y-1">
             <h4 class="text-xs uppercase tracking-widest text-gold font-bold">Garnish & Serving Presentation</h4>
-            <p class="text-sm text-gray-200 leading-relaxed">${r.servingNotes}</p>
+            <p class="text-sm text-gray-200 leading-relaxed">${esc(r.servingNotes)}</p>
+          </div>` : ""}
+
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-white/10 no-print">
+            <button onclick="deleteRecipe('${r.id}')" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-red-300 hover:bg-red-500/15 border border-red-500/30 transition">Delete</button>
+            <div class="flex gap-2">
+              <button onclick="openRecipeEditor('duplicate', '${r.id}')" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-gray-200 bg-white/5 hover:bg-white/15 border border-white/10 transition">Duplicate</button>
+              <button onclick="openRecipeEditor('edit', '${r.id}')" class="px-4 py-2 rounded-xl text-xs font-semibold bg-gold hover:bg-gold-light text-obsidian transition">Edit Recipe</button>
+            </div>
           </div>
-        </div>
-      `;
+        </div>`;
 
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
+      showModal("recipeModal");
     }
 
-    function closeRecipeModal(e) {
-      const modal = document.getElementById("recipeModal");
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
-    }
+    function closeRecipeModal() { hideModal("recipeModal"); }
 
     function openShoppingModal() {
       renderShoppingChecklist();
-      const modal = document.getElementById("shoppingModal");
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
+      showModal("shoppingModal");
     }
-
-    function closeShoppingModal() {
-      const modal = document.getElementById("shoppingModal");
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
-    }
+    function closeShoppingModal() { hideModal("shoppingModal"); }
 
     function openStockDrawer() {
       renderStockDrawer();
-      const modal = document.getElementById("stockDrawerModal");
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
+      showModal("stockDrawerModal");
     }
-
-    function closeStockDrawer() {
-      const modal = document.getElementById("stockDrawerModal");
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
-    }
+    function closeStockDrawer() { hideModal("stockDrawerModal"); }
 
     function toggleShoppingItem(id) {
-      if (checkedShoppingItems.has(id)) {
-        checkedShoppingItems.delete(id);
-      } else {
-        checkedShoppingItems.add(id);
-      }
+      if (checkedShoppingItems.has(id)) checkedShoppingItems.delete(id);
+      else checkedShoppingItems.add(id);
       saveShoppingChecklist();
       renderShoppingChecklist();
       updateStockBadges();
@@ -3014,23 +1654,580 @@
       updateStockBadges();
     }
 
-    // Close modals with Escape key
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        closeRecipeModal();
-        closeShoppingModal();
-        closeStockDrawer();
+    // =========================================================================
+    // 8. RECIPE EDITOR (add / edit / duplicate / delete)
+    // =========================================================================
+    const INPUT_CLS = "w-full px-3 py-2 rounded-xl bg-obsidian border border-white/10 focus:border-gold focus:outline-none text-sm text-white placeholder-gray-500";
+    const LABEL_CLS = "block text-[11px] uppercase tracking-wider text-gold font-semibold mb-1";
+    let recipeEditor = null; // { mode, id, draft }
+    let editorDirty = false;
+
+    function markEditorDirty() { editorDirty = true; }
+    function confirmDiscard() { return !editorDirty || confirm("Discard your unsaved changes?"); }
+
+    function optionsHtml(values, current, labels = {}) {
+      return values.map(v => `<option value="${esc(v)}" ${v === current ? "selected" : ""}>${esc(labels[v] || v)}</option>`).join("");
+    }
+    function datalistHtml(id, values) {
+      return `<datalist id="${id}">${[...new Set(values.filter(Boolean))].sort().map(v => `<option value="${esc(v)}"></option>`).join("")}</datalist>`;
+    }
+
+    function openRecipeEditor(mode, id) {
+      let draft;
+      if (mode === "add") {
+        draft = {
+          name: "", type: "Cocktail", vibe: VIBES[0], glass: "Highball", method: "", ice: "",
+          colors: ["#d4a359", "#92400e"], garnishType: "citrus-wheel",
+          ingredients: [], steps: [], servingNotes: ""
+        };
+      } else {
+        const src = recipeById(id);
+        if (!src) return;
+        draft = JSON.parse(JSON.stringify(src));
+        if (mode === "duplicate") draft.name = `${src.name} (Copy)`;
       }
+      // Editor rows: text is the note for inventory items, or the name for "other"
+      draft.rows = draft.ingredients.map(i => ({ item: i.item || "", text: i.item ? (i.note || "") : (i.name || ""), amount: i.amount || "" }));
+      if (!draft.rows.length) draft.rows.push({ item: "", text: "", amount: "" });
+      recipeEditor = { mode, id: mode === "edit" ? id : null, draft };
+      editorDirty = mode === "duplicate";
+      closeRecipeModal();
+      renderRecipeEditor();
+      showModal("recipeEditorModal");
+      document.getElementById("re_name").focus();
+    }
+
+    function ingredientOptions(selected) {
+      const groups = KIND_ORDER.map(kind => {
+        const list = itemsOfKind(kind);
+        if (!list.length) return "";
+        return `<optgroup label="${esc(ITEM_KINDS[kind].label)}">${list.map(it =>
+          `<option value="${it.id}" ${it.id === selected ? "selected" : ""}>${esc(it.name)}</option>`).join("")}</optgroup>`;
+      }).join("");
+      return `<option value="" ${!selected ? "selected" : ""}>Other (not in inventory)…</option>${groups}`;
+    }
+
+    function renderEditorIngredientRows() {
+      return recipeEditor.draft.rows.map((row, idx) => `
+        <div data-row class="grid grid-cols-[minmax(0,1fr)_6.5rem_auto] sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_7rem_auto] gap-2 items-center p-2 rounded-xl bg-obsidian/60 border border-white/5">
+          <select class="re-ing-item col-span-3 sm:col-span-1 ${INPUT_CLS}" onchange="onEditorItemChange(this)" aria-label="Ingredient ${idx + 1}">${ingredientOptions(row.item)}</select>
+          <input class="re-ing-text ${INPUT_CLS}" value="${esc(row.text)}" placeholder="${row.item ? "Note, e.g. Chilled" : "Ingredient name"}" aria-label="Ingredient ${idx + 1} ${row.item ? "note" : "name"}" />
+          <input class="re-ing-amount ${INPUT_CLS}" value="${esc(row.amount)}" placeholder="45 ml" aria-label="Ingredient ${idx + 1} amount" />
+          <button type="button" onclick="removeEditorIngredient(${idx})" class="w-8 h-8 rounded-lg text-gray-400 hover:text-red-300 hover:bg-red-500/15 text-lg leading-none" aria-label="Remove ingredient ${idx + 1}">&times;</button>
+        </div>`).join("");
+    }
+
+    function renderRecipeEditor() {
+      const d = recipeEditor.draft;
+      const title = { add: "Add a Recipe", edit: "Edit Recipe", duplicate: "Duplicate Recipe" }[recipeEditor.mode];
+      document.getElementById("recipeEditorBody").innerHTML = `
+        <div class="p-5 sm:p-8 space-y-5" oninput="markEditorDirty()" onchange="markEditorDirty()">
+          <div class="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
+            <div>
+              <span class="text-xs uppercase tracking-widest text-gold font-semibold">Recipe Builder</span>
+              <h3 class="font-serif text-2xl font-bold text-white mt-0.5">${title}</h3>
+            </div>
+            <button type="button" onclick="closeRecipeEditor()" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white" aria-label="Close">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-4 items-start">
+            <div class="space-y-3">
+              <div>
+                <label class="${LABEL_CLS}" for="re_name">Drink name</label>
+                <input id="re_name" class="${INPUT_CLS}" value="${esc(d.name)}" maxlength="80" placeholder="e.g. Smoky Hazelnut Old Fashioned" />
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="${LABEL_CLS}" for="re_type">Category</label>
+                  <select id="re_type" class="${INPUT_CLS}">${optionsHtml(DRINK_TYPES, d.type)}</select>
+                </div>
+                <div>
+                  <label class="${LABEL_CLS}" for="re_vibe">Flavour vibe</label>
+                  <select id="re_vibe" class="${INPUT_CLS}">${optionsHtml(VIBES, d.vibe)}</select>
+                </div>
+              </div>
+            </div>
+            <div id="re_preview" class="flex items-center justify-center bg-obsidian/70 rounded-2xl border border-white/10 p-2 sm:p-3" aria-hidden="true">
+              ${renderGlassSVG(d.glass, d.colors, d.garnishType, "editor-preview")}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div>
+              <label class="${LABEL_CLS}" for="re_glass">Glass</label>
+              <select id="re_glass" class="${INPUT_CLS}" onchange="updateEditorPreview()">${optionsHtml(GLASSES, d.glass, GLASS_LABELS)}</select>
+            </div>
+            <div>
+              <label class="${LABEL_CLS}" for="re_garnish">Garnish</label>
+              <select id="re_garnish" class="${INPUT_CLS}" onchange="updateEditorPreview()">${optionsHtml(GARNISHES, d.garnishType, GARNISH_LABELS)}</select>
+            </div>
+            <div>
+              <label class="${LABEL_CLS}" for="re_c1">Top colour</label>
+              <input id="re_c1" type="color" value="${esc(d.colors[0])}" oninput="updateEditorPreview()" class="w-full h-10 rounded-xl bg-obsidian border border-white/10 p-1 cursor-pointer" />
+            </div>
+            <div>
+              <label class="${LABEL_CLS}" for="re_c2">Bottom colour</label>
+              <input id="re_c2" type="color" value="${esc(d.colors[1])}" oninput="updateEditorPreview()" class="w-full h-10 rounded-xl bg-obsidian border border-white/10 p-1 cursor-pointer" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="${LABEL_CLS}" for="re_method">Technique</label>
+              <input id="re_method" class="${INPUT_CLS}" list="re_methods" value="${esc(d.method)}" placeholder="e.g. Shake & Strain" />
+              ${datalistHtml("re_methods", catalog.recipes.map(r => r.method))}
+            </div>
+            <div>
+              <label class="${LABEL_CLS}" for="re_ice">Ice</label>
+              <input id="re_ice" class="${INPUT_CLS}" list="re_ices" value="${esc(d.ice)}" placeholder="e.g. Large Cubed Ice" />
+              ${datalistHtml("re_ices", catalog.recipes.map(r => r.ice))}
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="${LABEL_CLS} mb-0">Ingredients</span>
+              <button type="button" onclick="addEditorIngredient()" class="text-xs text-gold hover:underline font-semibold">+ Add ingredient</button>
+            </div>
+            <div id="re_ingredients" class="space-y-2">${renderEditorIngredientRows()}</div>
+            <p class="text-[11px] text-gray-400">Pick from your inventory so stock tracking, filters and Bar-Ready work. Use “Other” for anything you don't track (e.g. egg white, bitters).</p>
+          </div>
+
+          <div>
+            <label class="${LABEL_CLS}" for="re_steps">Preparation steps <span class="normal-case tracking-normal text-gray-400 font-normal">(one per line)</span></label>
+            <textarea id="re_steps" rows="5" class="${INPUT_CLS}" placeholder="Fill a rocks glass with ice.&#10;Add the whisky and syrup.&#10;Stir for 20 seconds.">${esc(d.steps.join("\n"))}</textarea>
+          </div>
+
+          <div>
+            <label class="${LABEL_CLS}" for="re_notes">Garnish &amp; serving notes</label>
+            <textarea id="re_notes" rows="2" class="${INPUT_CLS}">${esc(d.servingNotes)}</textarea>
+          </div>
+
+          <div id="re_errors" class="hidden p-3 rounded-xl bg-red-500/10 border border-red-500/40 text-xs text-red-200"></div>
+
+          <div class="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
+            <button type="button" onclick="closeRecipeEditor()" class="px-4 py-2 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/5">Cancel</button>
+            <button type="button" onclick="saveRecipeEditor()" class="px-5 py-2 rounded-xl bg-gold hover:bg-gold-light text-obsidian font-semibold text-sm">Save Recipe</button>
+          </div>
+        </div>`;
+    }
+
+    function syncRecipeDraftFromForm() {
+      const d = recipeEditor.draft;
+      const v = id => document.getElementById(id).value;
+      d.name = v("re_name");
+      d.type = v("re_type");
+      d.vibe = v("re_vibe");
+      d.glass = v("re_glass");
+      d.garnishType = v("re_garnish");
+      d.colors = [v("re_c1"), v("re_c2")];
+      d.method = v("re_method");
+      d.ice = v("re_ice");
+      d.steps = v("re_steps").split("\n").map(s => s.trim()).filter(Boolean);
+      d.servingNotes = v("re_notes");
+      d.rows = [...document.querySelectorAll("#re_ingredients [data-row]")].map(row => ({
+        item: row.querySelector(".re-ing-item").value,
+        text: row.querySelector(".re-ing-text").value,
+        amount: row.querySelector(".re-ing-amount").value
+      }));
+    }
+
+    function updateEditorPreview() {
+      const v = id => document.getElementById(id).value;
+      document.getElementById("re_preview").innerHTML =
+        renderGlassSVG(v("re_glass"), [v("re_c1"), v("re_c2")], v("re_garnish"), "editor-preview");
+    }
+
+    function onEditorItemChange(select) {
+      const text = select.closest("[data-row]").querySelector(".re-ing-text");
+      text.placeholder = select.value ? "Note, e.g. Chilled" : "Ingredient name";
+    }
+
+    function addEditorIngredient() {
+      syncRecipeDraftFromForm();
+      recipeEditor.draft.rows.push({ item: "", text: "", amount: "" });
+      document.getElementById("re_ingredients").innerHTML = renderEditorIngredientRows();
+      markEditorDirty();
+      const selects = document.querySelectorAll("#re_ingredients .re-ing-item");
+      selects[selects.length - 1].focus();
+    }
+
+    function removeEditorIngredient(idx) {
+      syncRecipeDraftFromForm();
+      recipeEditor.draft.rows.splice(idx, 1);
+      if (!recipeEditor.draft.rows.length) recipeEditor.draft.rows.push({ item: "", text: "", amount: "" });
+      document.getElementById("re_ingredients").innerHTML = renderEditorIngredientRows();
+      markEditorDirty();
+    }
+
+    function showFormErrors(id, errors) {
+      const el = document.getElementById(id);
+      el.innerHTML = `<p class="font-semibold mb-1">Please fix the following:</p><ul class="list-disc pl-4 space-y-0.5">${errors.map(e => `<li>${esc(e)}</li>`).join("")}</ul>`;
+      el.classList.remove("hidden");
+      el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+
+    function saveRecipeEditor() {
+      syncRecipeDraftFromForm();
+      const d = recipeEditor.draft;
+      const errors = [];
+      if (!d.name.trim()) errors.push("Give the drink a name.");
+      const rows = d.rows.filter(r => r.item || r.text.trim() || r.amount.trim());
+      if (!rows.length) errors.push("Add at least one ingredient.");
+      rows.forEach((r, n) => {
+        if (!r.item && !r.text.trim()) errors.push(`Ingredient ${n + 1}: choose an inventory item or type a name.`);
+        if (!r.amount.trim()) errors.push(`Ingredient ${n + 1}: add an amount (e.g. 45 ml, Top, 2 dashes).`);
+      });
+      if (!d.steps.length) errors.push("Add at least one preparation step.");
+      if (errors.length) return showFormErrors("re_errors", errors);
+
+      const recipe = {
+        id: recipeEditor.id, name: d.name, type: d.type, vibe: d.vibe, glass: d.glass,
+        method: d.method, ice: d.ice, colors: d.colors, garnishType: d.garnishType,
+        ingredients: rows.map(r => r.item ? { item: r.item, note: r.text, amount: r.amount } : { name: r.text, amount: r.amount }),
+        steps: d.steps, servingNotes: d.servingNotes
+      };
+      const recipes = catalog.recipes.slice();
+      if (recipeEditor.mode === "edit") {
+        recipes[recipes.findIndex(r => r.id === recipe.id)] = recipe;
+      } else {
+        recipe.id = uniqueId(slugify(recipe.name), new Set(recipes.map(r => r.id)));
+        recipes.push(recipe);
+      }
+      if (commitCatalog({ ...catalog, recipes }, `Saved “${recipe.name.trim()}”.`)) {
+        editorDirty = false;
+        hideModal("recipeEditorModal");
+        openRecipeModal(recipe.id);
+      }
+    }
+
+    function closeRecipeEditor() {
+      if (!confirmDiscard()) return;
+      editorDirty = false;
+      hideModal("recipeEditorModal");
+    }
+
+    function deleteRecipe(id) {
+      const r = recipeById(id);
+      if (!r) return;
+      if (!confirm(`Delete “${r.name}”?\n\nIt's removed from this browser's catalog. To get it back later, import a backup or reset to the shipped catalog.`)) return;
+      closeRecipeModal();
+      commitCatalog({ ...catalog, recipes: catalog.recipes.filter(x => x.id !== id) }, `Deleted “${r.name}”.`);
+    }
+
+    // =========================================================================
+    // 9. INVENTORY ITEM EDITOR
+    // =========================================================================
+    let itemEditor = null; // { mode, id }
+
+    function openItemEditor(mode, id, kind) {
+      const it = mode === "edit"
+        ? { ...itemsById.get(id) }
+        : { name: "", kind: kind || "spirit", category: "", profile: "", notes: "", staple: false };
+      if (mode === "edit" && !it.id) return;
+      itemEditor = { mode, id: mode === "edit" ? id : null, originalKind: it.kind };
+      editorDirty = false;
+      const uses = mode === "edit" ? recipesUsingItem(id) : [];
+      const categories = catalog.items.map(i => i.category);
+      document.getElementById("itemEditorBody").innerHTML = `
+        <div class="p-5 sm:p-8 space-y-4" oninput="markEditorDirty()" onchange="markEditorDirty()">
+          <div class="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
+            <div>
+              <span class="text-xs uppercase tracking-widest text-gold font-semibold">Bar Inventory</span>
+              <h3 class="font-serif text-2xl font-bold text-white mt-0.5">${mode === "edit" ? "Edit Item" : "Add an Item"}</h3>
+              ${mode === "edit" ? `<p class="text-xs text-gray-400 mt-1">Used in ${uses.length} drink${uses.length === 1 ? "" : "s"}.</p>` : ""}
+            </div>
+            <button type="button" onclick="closeItemEditor()" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white" aria-label="Close">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div>
+            <label class="${LABEL_CLS}" for="ie_name">Name</label>
+            <input id="ie_name" class="${INPUT_CLS}" value="${esc(it.name)}" maxlength="60" placeholder="e.g. Elderflower Syrup" />
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="${LABEL_CLS}" for="ie_kind">Section</label>
+              <select id="ie_kind" class="${INPUT_CLS}" onchange="onItemKindChange()">${optionsHtml(KIND_ORDER, it.kind, Object.fromEntries(KIND_ORDER.map(k => [k, ITEM_KINDS[k].label])))}</select>
+            </div>
+            <div>
+              <label class="${LABEL_CLS}" for="ie_category">Category label</label>
+              <input id="ie_category" class="${INPUT_CLS}" list="ie_categories" value="${esc(it.category)}" placeholder="e.g. Base Spirit" />
+              ${datalistHtml("ie_categories", categories)}
+            </div>
+          </div>
+          <div>
+            <label class="${LABEL_CLS}" for="ie_profile">Flavour profile</label>
+            <input id="ie_profile" class="${INPUT_CLS}" value="${esc(it.profile)}" placeholder="e.g. Floral / Light" />
+          </div>
+          <div>
+            <label class="${LABEL_CLS}" for="ie_notes">Notes</label>
+            <textarea id="ie_notes" rows="3" class="${INPUT_CLS}" placeholder="Pairings, serving tips…">${esc(it.notes)}</textarea>
+          </div>
+          <label id="ie_staple_row" class="${it.kind === "mixer" ? "flex" : "hidden"} items-start gap-2.5 p-3 rounded-xl bg-obsidian/70 border border-white/10 cursor-pointer">
+            <input id="ie_staple" type="checkbox" ${it.staple ? "checked" : ""} class="mt-0.5 w-4 h-4 rounded accent-[#d4a359]" />
+            <span class="text-xs text-gray-300"><strong class="text-white">Always on hand.</strong> Drinks that need this still count as Bar-Ready (like soda or tonic).</span>
+          </label>
+          <p id="ie_kind_warning" class="hidden text-xs text-amber-300">On-demand mixers aren't stock-tracked, so this item's stock status will be cleared.</p>
+          <div id="ie_errors" class="hidden p-3 rounded-xl bg-red-500/10 border border-red-500/40 text-xs text-red-200"></div>
+          <div class="flex items-center justify-between gap-2 pt-3 border-t border-white/10">
+            ${mode === "edit"
+              ? `<button type="button" onclick="deleteItemFromEditor()" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-red-300 hover:bg-red-500/15 border border-red-500/30 transition">Delete</button>`
+              : "<span></span>"}
+            <div class="flex gap-2">
+              <button type="button" onclick="closeItemEditor()" class="px-4 py-2 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/5">Cancel</button>
+              <button type="button" onclick="saveItemEditor()" class="px-5 py-2 rounded-xl bg-gold hover:bg-gold-light text-obsidian font-semibold text-sm">Save Item</button>
+            </div>
+          </div>
+        </div>`;
+      showModal("itemEditorModal");
+      document.getElementById("ie_name").focus();
+    }
+
+    function onItemKindChange() {
+      const kind = document.getElementById("ie_kind").value;
+      const row = document.getElementById("ie_staple_row");
+      row.classList.toggle("hidden", kind !== "mixer");
+      row.classList.toggle("flex", kind === "mixer");
+      const losesStock = itemEditor.mode === "edit" && ITEM_KINDS[itemEditor.originalKind].tracked && !ITEM_KINDS[kind].tracked
+        && getItemStockStatus(itemEditor.id) !== "in";
+      document.getElementById("ie_kind_warning").classList.toggle("hidden", !losesStock);
+    }
+
+    function saveItemEditor() {
+      const v = id => document.getElementById(id).value.trim();
+      const name = v("ie_name"), kind = v("ie_kind");
+      const errors = [];
+      if (!name) errors.push("Give the item a name.");
+      const clash = catalog.items.find(i => i.name.toLowerCase() === name.toLowerCase() && i.id !== itemEditor.id);
+      if (clash) errors.push(`“${clash.name}” is already in your inventory.`);
+      if (errors.length) return showFormErrors("ie_errors", errors);
+
+      const item = {
+        id: itemEditor.id, name, kind, category: v("ie_category"), profile: v("ie_profile"), notes: v("ie_notes"),
+        staple: kind === "mixer" && document.getElementById("ie_staple").checked
+      };
+      const items = catalog.items.slice();
+      if (itemEditor.mode === "edit") {
+        items[items.findIndex(i => i.id === item.id)] = item;
+      } else {
+        item.id = uniqueId(slugify(name), new Set(items.map(i => i.id)));
+        items.push(item);
+      }
+      if (commitCatalog({ ...catalog, items }, `Saved “${name}”.`)) {
+        editorDirty = false;
+        hideModal("itemEditorModal");
+      }
+    }
+
+    function deleteItemFromEditor() {
+      const it = itemsById.get(itemEditor.id);
+      const uses = recipesUsingItem(it.id);
+      if (uses.length) {
+        const names = uses.slice(0, 5).map(r => `• ${r.name}`).join("\n") + (uses.length > 5 ? `\n…and ${uses.length - 5} more` : "");
+        alert(`“${it.name}” is used in ${uses.length} drink${uses.length > 1 ? "s" : ""}:\n\n${names}\n\nRemove it from those recipes first. If you've simply run out, mark it Out of Stock instead.`);
+        return;
+      }
+      if (!confirm(`Delete “${it.name}” from your inventory?`)) return;
+      editorDirty = false;
+      hideModal("itemEditorModal");
+      commitCatalog({ ...catalog, items: catalog.items.filter(i => i.id !== it.id) }, `Deleted “${it.name}”.`);
+    }
+
+    function closeItemEditor() {
+      if (!confirmDiscard()) return;
+      editorDirty = false;
+      hideModal("itemEditorModal");
+    }
+
+    // =========================================================================
+    // 10. CATALOG DATA: EXPORT / IMPORT / PUBLISH / RESET
+    // =========================================================================
+    const BACKUP_FORMAT = "private-reserve-backup";
+
+    function openDataModal() {
+      renderDataModal();
+      showModal("dataModal");
+    }
+    function closeDataModal() { hideModal("dataModal"); }
+
+    function renderDataModal() {
+      const counts = `${catalog.recipes.length} recipes · ${catalog.items.length} inventory items`;
+      let status;
+      if (usingLocalCopy) {
+        status = `
+          <div class="p-4 rounded-2xl bg-gold/10 border border-gold/30 space-y-1">
+            <p class="text-sm text-white font-semibold">You're using an edited copy saved in this browser</p>
+            <p class="text-xs text-gray-300">${counts}. Other devices don't see these edits until you export and import them, or publish them as <code class="text-gold">data/catalog.js</code>.</p>
+          </div>`;
+        if (shippedChangedSinceEdit()) {
+          status += `
+            <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/40 space-y-2">
+              <p class="text-sm text-amber-200 font-semibold">The shipped catalog has changed since you started editing</p>
+              <p class="text-xs text-gray-300">The published version (${esc(shippedCatalog.updated || "undated")}) isn't reflected in your copy. Keep yours, or export a backup and switch to the shipped one.</p>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="keepLocalCopy()" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs font-semibold text-white">Keep my copy</button>
+                <button onclick="resetToShippedCatalog()" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-xs font-semibold text-amber-200">Switch to shipped catalog</button>
+              </div>
+            </div>`;
+        }
+      } else {
+        status = `
+          <div class="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+            <p class="text-sm text-white font-semibold">You're using the shipped catalog</p>
+            <p class="text-xs text-gray-300">${counts} from <code class="text-gold">data/catalog.js</code>${shippedCatalog?.updated ? `, updated ${esc(shippedCatalog.updated)}` : ""}. Adding, editing or deleting anything saves an edited copy in this browser.</p>
+          </div>`;
+      }
+      if (localLoadError) {
+        status += `<div class="p-3 rounded-xl bg-red-500/10 border border-red-500/40 text-xs text-red-200">A previously saved edited copy couldn't be read and was ignored. Your next edit will replace it.</div>`;
+      }
+      if (shippedErrors.length) {
+        status += `
+          <div class="p-3 rounded-xl bg-red-500/10 border border-red-500/40 text-xs text-red-200 space-y-1">
+            <p class="font-semibold">data/catalog.js has problems${usingLocalCopy ? " (your edited copy is unaffected)" : ""}:</p>
+            <ul class="list-disc pl-4">${shippedErrors.slice(0, 8).map(e => `<li>${esc(e)}</li>`).join("")}</ul>
+          </div>`;
+      }
+
+      const action = (onclick, title, body, tone = "") => `
+        <button onclick="${onclick}" class="w-full text-left p-4 rounded-2xl bg-obsidian/80 border ${tone || "border-white/10 hover:border-gold/50"} transition">
+          <span class="block text-sm font-semibold text-white">${title}</span>
+          <span class="block text-xs text-gray-400 mt-0.5">${body}</span>
+        </button>`;
+
+      document.getElementById("dataModalBody").innerHTML = `
+        ${status}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          ${action("exportBackup()", "Export backup (.json)", "Recipes, inventory, stock levels and checklist. Use it to move to another device or keep a safe copy.")}
+          ${action("triggerImport()", "Import backup", "Load a backup .json (or a catalog.js). Replaces the catalog in this browser after you confirm.")}
+          ${action("downloadCatalogJs()", "Download catalog.js", "Publish your edits for every device: replace <code class='text-gold'>data/catalog.js</code> in the repo and push.")}
+          ${usingLocalCopy && shippedCatalog
+            ? action("resetToShippedCatalog()", "Reset to shipped catalog", "Discard this browser's edited copy. Export a backup first if you might want it back.", "border-red-500/30 hover:border-red-500/60")
+            : ""}
+        </div>
+        <div id="dataErrors" class="hidden p-3 rounded-xl bg-red-500/10 border border-red-500/40 text-xs text-red-200"></div>`;
+    }
+
+    function showDataErrors(errors) {
+      const el = document.getElementById("dataErrors");
+      el.innerHTML = `<p class="font-semibold mb-1">That file couldn't be imported:</p><ul class="list-disc pl-4 space-y-0.5">${errors.slice(0, 10).map(e => `<li>${esc(e)}</li>`).join("")}</ul>${errors.length > 10 ? `<p class="mt-1">…and ${errors.length - 10} more.</p>` : ""}`;
+      el.classList.remove("hidden");
+    }
+
+    function catalogSnapshot(updated) {
+      return { schema: CATALOG_SCHEMA, updated: updated ?? catalog.updated, items: catalog.items, recipes: catalog.recipes };
+    }
+
+    function exportBackup() {
+      const payload = {
+        format: BACKUP_FORMAT,
+        exportedAt: new Date().toISOString(),
+        catalog: catalogSnapshot(),
+        stock: stockStatuses,
+        shopping: [...checkedShoppingItems]
+      };
+      downloadFile(`private-reserve-backup-${todayStamp()}.json`, JSON.stringify(payload, null, 2), "application/json");
+      showToast("Backup downloaded.");
+    }
+
+    function downloadCatalogJs() {
+      const header = [
+        "/*",
+        " * The Private Reserve — catalog data (inventory items + recipes).",
+        " * Loaded by index.html before the app script; works from file:// and GitHub Pages.",
+        " * Everything after \"window.BAR_CATALOG = \" is strict JSON. The app's",
+        " * \"Catalog Data → Download catalog.js\" regenerates this whole file, and",
+        " * \"Import\" accepts the same object. Schema is documented in README.md.",
+        " */",
+        ""
+      ].join("\n");
+      const body = JSON.stringify(catalogSnapshot(new Date().toISOString().replace(/\.\d+Z$/, "Z")), null, 2);
+      downloadFile("catalog.js", `${header}window.BAR_CATALOG = ${body};\n`, "text/javascript");
+      showToast("catalog.js downloaded. Replace data/catalog.js in the repo and push to publish it.");
+    }
+
+    function triggerImport() {
+      const input = document.getElementById("importFileInput");
+      input.value = "";
+      input.click();
+    }
+
+    async function handleImportFile(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      let parsed;
+      try {
+        let text = await file.text();
+        const m = text.match(/^window\.BAR_CATALOG\s*=\s*/m); // accept a catalog.js as well as .json
+        if (m) text = text.slice(m.index + m[0].length).trim().replace(/;\s*$/, "");
+        parsed = JSON.parse(text);
+      } catch (e) {
+        return showDataErrors(["It isn't valid JSON or a catalog.js file."]);
+      }
+      const isBackup = parsed && parsed.format === BACKUP_FORMAT;
+      const res = validateCatalog(isBackup ? parsed.catalog : parsed);
+      if (!res.catalog) return showDataErrors(res.errors);
+
+      const summary = `Replace the catalog in this browser with ${res.catalog.recipes.length} recipes and ${res.catalog.items.length} inventory items`
+        + (isBackup ? ", plus the backup's stock levels and checklist" : "")
+        + "?\n\nExport a backup first if you want to keep what you have now.";
+      if (!confirm(summary)) return;
+      if (!commitCatalog(res.catalog, null, { rebase: true })) return;
+      if (isBackup) {
+        stockStatuses = sanitizeStock(parsed.stock);
+        saveStockStatuses();
+        checkedShoppingItems = new Set((Array.isArray(parsed.shopping) ? parsed.shopping : []).filter(id => itemsById.get(id)?.kind === "mixer"));
+        saveShoppingChecklist();
+        refreshAllViews();
+      }
+      showToast(`Imported ${res.catalog.recipes.length} recipes and ${res.catalog.items.length} items.`);
+    }
+
+    function keepLocalCopy() {
+      writeJSON(STORAGE_KEYS.catalog, { basedOn: shippedCatalog.updated, savedAt: new Date().toISOString(), catalog: catalogSnapshot() });
+      localBasedOn = shippedCatalog.updated;
+      refreshAllViews();
+      showToast("Keeping your edited copy.");
+    }
+
+    function resetToShippedCatalog() {
+      if (!shippedCatalog) return;
+      if (!confirm("Discard this browser's edited copy and switch to the shipped catalog?\n\nExport a backup first if you might want your edits back.")) return;
+      removeKey(STORAGE_KEYS.catalog);
+      setActiveCatalog(shippedCatalog, false, "");
+      localLoadError = false;
+      pruneOrphanState();
+      refreshAllViews();
+      showToast("Switched to the shipped catalog.");
+    }
+
+    // Escape closes the top-most dialog; editors ask before discarding changes.
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (isModalOpen("recipeEditorModal")) return closeRecipeEditor();
+      if (isModalOpen("itemEditorModal")) return closeItemEditor();
+      closeRecipeModal();
+      closeShoppingModal();
+      closeStockDrawer();
+      closeDataModal();
     });
 
     // =========================================================================
-    // 6. INITIALIZATION
+    // 11. INITIALIZATION
     // =========================================================================
     window.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("totalRecipeCount").textContent = RECIPES.length;
-      renderMultiFilterControls();
+      loadCatalog();
+      stockStatuses = loadStockStatuses();
+      checkedShoppingItems = loadShoppingChecklist();
       refreshAllViews();
       renderGlasswareGuide();
+      if (shippedChangedSinceEdit()) {
+        showToast("The shipped catalog changed since your edits. See Catalog Data.", "warn");
+      } else if (shippedErrors.length && !usingLocalCopy) {
+        showToast("The catalog couldn't be loaded. See Catalog Data.", "error");
+      }
     });
   </script>
 </body>

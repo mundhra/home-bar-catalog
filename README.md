@@ -16,7 +16,8 @@ A single-file web app that catalogs a personal home bar and serves **57 recipes*
   * **Category** (*Cocktail*, *Mocktail*, *Wine & Low-ABV*) and **Flavour Vibe** (*Refreshing & Crisp*, *Tropical & Fruity*, *Rich & Dessert*, *Herbal & Bold*).
   * **Readiness:** *Bar-Ready Now* lists drinks that need nothing beyond stocked items and basic soda/tonic (no juice, citrus or dairy).
 * **Stock manager:** mark each of the 23 bar items **In Stock**, **Low** or **Out**, from the header drawer or the Inventory tab. Statuses are saved in the browser's `localStorage`. Two toggles act on them: *Hide Out-of-Stock Drinks* and *Use Up Low-Stock Items*.
-* **Order & restock list:** a tick-off checklist of on-demand mixers and juices, plus automatic alerts for any bar item marked Low or Out.
+* **Order & restock list:** a tick-off checklist of on-demand mixers and juices (ticks are saved), plus automatic alerts for any bar item marked Low or Out.
+* **Edit in the app:** add, edit, duplicate and delete recipes and inventory items, with export/import backups to move between devices. See *Editing Recipes & Inventory*.
 * **Print / PDF:** print styles render a clean, light menu (`Ctrl+P` → *Save as PDF*).
 
 ---
@@ -64,7 +65,8 @@ Open `index.html` directly in a browser. No build step and no server needed.
 * **HTML5 + vanilla JavaScript** in one file, with no build step and no backend.
 * **Tailwind CSS** via the Play CDN (`cdn.tailwindcss.com`) and **Google Fonts** (Cormorant Garamond, Inter).
 * **Inline SVG** for glassware and garnishes.
-* **`localStorage`** for stock statuses (key `private_reserve_stock_v1`).
+* **`data/catalog.js`** holds all inventory items and recipes (see below).
+* **`localStorage`** (per browser): `private_reserve_stock_v2` (stock levels by item id; v1 name-keyed data migrates automatically), `private_reserve_shopping_v1` (checklist ticks) and `private_reserve_catalog_v1` (your edited copy of the catalog, if any).
 
 > ⚠️ **Needs a network connection.** Styling comes from the Tailwind CDN at runtime, so without internet the page loads unstyled. It does not work offline yet, even when launched from the home screen.
 
@@ -72,51 +74,66 @@ Open `index.html` directly in a browser. No build step and no server needed.
 
 ## 🧩 Editing Recipes & Inventory
 
-All data sits in the `<script>` block near the bottom of `index.html`:
+### In the app
+* **+ Add Recipe** (above the drink grid) opens the recipe builder: glass, garnish and colours with a live preview; ingredients picked from your inventory (or "Other" for untracked extras); one step per line.
+* Open any drink for **Edit Recipe**, **Duplicate** or **Delete**.
+* On the **Inventory** tab, each section has **+ Add** and every item has **Edit**. Renaming an item never breaks recipes or stock, because both refer to it by id. An item used by recipes can't be deleted (mark it Out instead).
+* Edits are saved as an **edited copy in this browser**; the header's **Catalog Data** button shows a dot when one is active.
 
-| Constant | Holds |
+### Catalog Data (header button)
+| Action | What it does |
 |---|---|
-| `SYRUPS_DATA`, `SPIRITS_DATA` | Stock-tracked bar items (name, profile, notes) |
-| `ON_DEMAND_ITEMS` | Mixers and juices on the restock checklist |
-| `GLASSWARE_GUIDE` | Glassware tab content |
-| `RECIPES` | Every drink |
-| `FILTER_GROUPS` | Chips shown in the ingredient multi-select panel |
+| Export backup | Downloads a `.json` with recipes, inventory, stock levels and checklist. |
+| Import backup | Loads a backup `.json` (or a `catalog.js`) after validation and confirmation. This is how you move edits between phone and laptop. |
+| Download catalog.js | Turns your edits into the shipped default: replace `data/catalog.js` in the repo and push. Every device then gets it, and browsers whose edited copy matches it drop that copy automatically. |
+| Reset to shipped catalog | Discards this browser's edited copy. |
 
-### Recipe shape
+If the shipped catalog changes after you've started editing, the app warns you and lets you keep your copy or switch.
+
+### File format: `data/catalog.js`
+`window.BAR_CATALOG = { ... };` where the object is strict JSON:
 
 ```js
 {
-  id: "watermelon-mint-cooler",          // unique, used for modal and SVG ids
-  name: "Emerald Watermelon Cooler",
-  type: "Mocktail",                      // "Cocktail" | "Mocktail" | "Wine & Low-ABV"
-  vibe: "Refreshing & Crisp",            // one of the four vibes
-  glass: "Highball",                     // Highball | Rocks | Coupe | Martini | Copa | Hurricane | Flute
-  method: "Build & Stir",
-  ice: "Cubed Ice (Full Column)",
-  colors: ["#fb7185", "#e11d48"],        // gradient for the SVG
-  garnishType: "mint-lime",
-  readyNow: false,                       // true only if no juice/citrus/dairy is needed
-  tags: ["Watermelon Syrup", "Mint Mojito Syrup", "Kombucha"],
-  ingredients: [
-    { name: "Watermelon Syrup", amount: "20 ml", stocked: true },   // stocked: true → stock-tracked
-    { name: "Fresh Lime Juice", amount: "15 ml", stocked: false }
+  "schema": 1,
+  "updated": "2026-11-14",
+  "items": [
+    { "id": "vodka", "name": "Vodka", "kind": "spirit", "category": "Base Spirit",
+      "profile": "Clean, crisp, neutral", "notes": "..." },
+    { "id": "soda", "name": "Club Soda", "kind": "mixer", "category": "Carbonated Staple",
+      "profile": "", "notes": "", "staple": true }
   ],
-  steps: ["..."],
-  servingNotes: "..."
+  "recipes": [
+    {
+      "id": "watermelon-mint-cooler",
+      "name": "Emerald Watermelon Cooler",
+      "type": "Mocktail",                 // Cocktail | Mocktail | Wine & Low-ABV
+      "vibe": "Refreshing & Crisp",       // Refreshing & Crisp | Tropical & Fruity | Rich & Dessert | Herbal & Bold
+      "glass": "Highball",                // Highball | Rocks | Coupe | Martini | Copa | Hurricane | Flute
+      "method": "Build & Stir",
+      "ice": "Cubed Ice (Full Column)",
+      "colors": ["#fb7185", "#e11d48"],   // SVG gradient, #rrggbb
+      "garnishType": "mint-lime",         // none | citrus-wheel | mint-lime | orange-twist | berry-rim | umbrella-straw
+      "ingredients": [
+        { "item": "watermelon-syrup", "amount": "20 ml" },
+        { "item": "kombucha", "note": "Original or Ginger", "amount": "120 ml" },
+        { "name": "Egg white", "amount": "1" }          // untracked extra, no item
+      ],
+      "steps": ["..."],
+      "servingNotes": "..."
+    }
+  ]
 }
 ```
+(Comments above are for explanation only; the real file has none.)
 
-### Rules that are easy to break
-
-* **Ingredient names drive stock and filters by substring match.** A `stocked: true` ingredient must *contain* a catalog item's exact name to be tracked. For example, `"Kombucha (Citrus or Ginger)"` contains `Kombucha`. Filter chips match against `tags` and ingredient names the same way.
-* **Adding a bottle or syrup** means editing `SYRUPS_DATA`/`SPIRITS_DATA` *and* `FILTER_GROUPS`, and updating the hard-coded counts in the markup ("23 Items", "Syrups (12)", "All 23 …", "Reset All 23 Items").
-* **`readyNow` is a hand-set flag.** It is not computed from ingredients or stock, so keep it consistent with the recipe.
-* **Edit the file whole.** Never paste an AI-generated partial file with `// ... existing code ...` placeholders. Commit `2798987` did this. It deleted most of the app's JavaScript and the live page rendered nothing until the code was restored. After any edit, open the page and check that the recipe grid renders and the browser console shows no errors.
+* **`kind`** decides tracking: `syrup`, `spirit` and `base` are stock-tracked; `mixer` items go on the restock checklist. `"staple": true` marks a mixer as always on hand.
+* **Bar-Ready is derived:** a drink is Bar-Ready when every ingredient is a tracked item or a staple mixer.
+* The app validates the file on load (ids, references, enums, colours). Problems are listed under Catalog Data rather than breaking the page. Editing in the app and using **Download catalog.js** avoids hand-editing JSON altogether.
 
 ---
 
 ## 📌 Known Limitations
 
-* Stock statuses live in one browser's `localStorage`, so phone and laptop do not share state, and clearing site data resets them.
-* Restock checklist ticks are not saved and reset on reload.
-* "Bar-Ready" is static. It ignores whether you actually have soda or tonic in, and ignores stock statuses.
+* Stock levels, checklist ticks and edited copies live in one browser's `localStorage`; use Export/Import or publish `catalog.js` to move them.
+* Bar-Ready ignores current stock levels and whether mixers are actually in the fridge.
