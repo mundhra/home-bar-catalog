@@ -1,5 +1,5 @@
 /*
- * Main: global key handling and start-up. Loaded last.
+ * Main: global key handling, start-up and offline support. Loaded last.
  */
 
 // Escape closes the top-most dialog; editors ask before discarding changes.
@@ -28,3 +28,10 @@ window.addEventListener("DOMContentLoaded", () => {
     showToast("The catalog couldn't be loaded. See Catalog Data.", "error");
   }
 });
+
+// Offline support (see sw.js). Service workers only run over http(s), not file://.
+if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(err => console.warn("Offline support unavailable:", err));
+  });
+}

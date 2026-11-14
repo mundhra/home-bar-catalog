@@ -1,0 +1,12 @@
+{
+  "name": "home-bar-catalog",
+  "private": true,
+  "description": "Build tooling only: compiles css/app.css. The site itself has no Node dependency.",
+  "scripts": {
+    "build:css": "tailwindcss -c tailwind.config.js -i src/input.css -o css/app.css --minify",
+    "watch:css": "tailwindcss -c tailwind.config.js -i src/input.css -o css/app.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "3.4.17"
+  }
+}

@@ -52,30 +52,59 @@ Club soda, tonic water, ginger ale/beer, cola, fresh limes and lemons, orange, p
 2. Go to **Settings → Pages**, set **Source** to **Deploy from a branch**, choose **`main`** and **`/ (root)`**, then **Save**.
 3. Every push to `main` goes live in about a minute.
 
-### iPhone home-screen shortcut
-1. Open the live URL in **Safari**.
-2. Tap **Share** (`□↑`), then **Add to Home Screen**.
+### Install on your phone (works offline)
+* **iPhone/iPad:** open the live URL in **Safari**, tap **Share** (`□↑`), then **Add to Home Screen**.
+* **Android:** open it in **Chrome** and tap **Install app** (or ⋮ → **Add to Home screen**).
+
+It opens full-screen with its own icon and keeps working with no connection, after one online visit.
+When you're online it picks up the latest version on the next launch.
+
+> **iPhone note:** the home-screen app has **its own storage**, separate from Safari. Stock levels,
+> mixers on hand and in-app edits made in Safari don't carry over. Move them with
+> **Catalog Data → Export backup** in Safari, then **Import backup** in the app.
 
 ### Running locally
-Open `index.html` directly in a browser. No build step and no server needed.
+Open `index.html` directly in a browser. No server needed. (Offline support only switches on over
+`http(s)`, so it's inactive when opened from disk; everything else works.)
 
 ---
 
 ## 🛠️ Tech Stack
 
-* **HTML5 + vanilla JavaScript**, no build step and no backend.
-* **Tailwind CSS** via the Play CDN (`cdn.tailwindcss.com`) and **Google Fonts** (Cormorant Garamond, Inter).
+* **HTML5 + vanilla JavaScript**, no backend. The only build step is the stylesheet (below).
+* **Tailwind CSS 3.4.17** (MIT), compiled ahead of time into `css/app.css`; **Google Fonts** (Cormorant Garamond, Inter), cached for offline use.
+* **Service worker** (`sw.js`) and **web app manifest** (`manifest.webmanifest`) for installing to the home screen and offline use.
 * **Inline SVG** for glassware and garnishes.
 * **`data/catalog.js`** holds all inventory items and recipes (see below).
 * **`localStorage`** (per browser): `private_reserve_stock_v2` (stock levels by item id; v1 name-keyed data migrates automatically), `private_reserve_onhand_v1` (which mixers are on hand; old `private_reserve_shopping_v1` checklist ticks migrate automatically) and `private_reserve_catalog_v1` (your edited copy of the catalog, if any).
 
-> ⚠️ **Needs a network connection.** Styling comes from the Tailwind CDN at runtime, so without internet the page loads unstyled. It does not work offline yet, even when launched from the home screen.
+### Styles (the one build step)
+
+`css/app.css` is generated from `src/input.css` and the Tailwind classes used in `index.html` and `js/`.
+It's committed, so the site and "open from disk" need no build. **After adding or changing
+classes, rebuild and commit it:**
+
+```
+npm install          # once; installs the pinned Tailwind (build tooling only)
+npm run build:css    # or: npm run watch:css while editing
+```
+
+CI fails if `css/app.css` is out of date. Class names must appear in full in the source
+(`"bg-red-500"`, not `"bg-" + colour`), or Tailwind won't generate them.
+
+### Offline (service worker)
+
+`sw.js` precaches the files listed in `PRECACHE`, serves same-origin files network-first (so a
+deploy shows up on the next online launch) with the cache as fallback, and caches Google Fonts on
+first use. **When you add a file the page loads, add it to `PRECACHE`;** the tests fail otherwise.
+Bump `CACHE` when removing files.
 
 ### Project layout
 
 ```
-index.html          page markup only; loads the scripts below in order
+index.html          page markup only; loads the stylesheet and the scripts below in order
 data/catalog.js     inventory items + recipes (strict JSON, see below)
+css/app.css         compiled stylesheet (generated, committed; source in src/input.css)
 js/core.js          constants, enums, storage keys, small helpers
 js/glassware.js     glassware guide content + SVG glass/garnish renderer
 js/store.js         catalog validation, loading, saving; stock & checklist state
@@ -84,7 +113,10 @@ js/ui.js            tabs, filters, recipe modal, dialogs
 js/editors.js       recipe builder + inventory item editor
 js/data-panel.js    export / import / download catalog.js / reset
 js/main.js          key handling and start-up (loaded last)
+sw.js               service worker (offline support)
+manifest.webmanifest, icons/   home-screen app name, colours and icons
 tests/              smoke tests (see Testing)
+package.json, tailwind.config.js   stylesheet build tooling only
 ```
 
 These are plain scripts, not ES modules: browsers block modules on `file://`, and this keeps "open `index.html` directly" working. They share one global scope, so **a name declared in two files breaks the page**. The tests check for that.
@@ -95,15 +127,16 @@ These are plain scripts, not ES modules: browsers block modules on `file://`, an
 
 ```
 python tests/run.py               # everything
-python tests/run.py main          # one scenario: main | legacy | stale | same | broken
+python tests/run.py main          # one scenario: main | legacy | stale | same | broken | offline
 ```
 
 Needs Python 3.8+ and Chrome, Chromium or Edge (set `CHROME=/path/to/browser` if it isn't found). No packages to install.
 
-* **Static checks:** pasted `... existing code ...` placeholders, the same function or variable declared twice across `js/`, `<script src>` files that don't exist, and a `data/catalog.js` that isn't valid.
+* **Static checks:** pasted `... existing code ...` placeholders, the same function or variable declared twice across `js/`, `<script src>` files that don't exist, files the page loads that are missing from the service worker's `PRECACHE`, and a `data/catalog.js` that isn't valid.
 * **Browser scenarios** in headless Chrome, each with empty storage: rendering, filters, Bar-Ready, stock and checklist saving, the recipe and item editors, HTML escaping, export/import/download, migration of old stock data, and stale or broken catalogs.
+* **Offline:** serves the site on a local port, lets the service worker install, then cuts the network and checks every precached file is served, the styles apply and every recipe renders.
 * Expected values are computed from `data/catalog.js`, so the tests keep passing as you add or change recipes.
-* GitHub Actions runs the same command on every push and pull request (`.github/workflows/tests.yml`). Check it's green before relying on a deploy.
+* GitHub Actions runs the same tests on every push and pull request, after checking `css/app.css` is up to date (`.github/workflows/tests.yml`). Check it's green before relying on a deploy.
 
 ---
 

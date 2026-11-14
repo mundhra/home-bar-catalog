@@ -45,6 +45,13 @@ window.addEventListener("load", () => setTimeout(async () => {
   const filterCount = value => { setReadinessFilter(value); const c = cards(); setReadinessFilter("ALL"); return c; };
 
   const mode = location.hash.slice(1) || "main";
+  // Over http (offline tests only): keep a slow request to the test server in flight so
+  // Chrome's virtual clock waits for service-worker and Cache Storage work.
+  const holdClock = () => {
+    let done = false;
+    (async () => { while (!done) await fetch(`__hold?${Math.random()}`, { cache: "no-store" }).catch(() => {}); })();
+    return () => { done = true; };
+  };
   try {
     ok("no load errors", __errs.length === 0, __errs.join(" | "));
 
@@ -67,6 +74,35 @@ window.addEventListener("load", () => setTimeout(async () => {
 
     } else if (mode === "same") {
       ok("copy identical to shipped is dropped on load", !usingLocalCopy && LS("private_reserve_catalog_v1") === null);
+
+    } else if (mode === "pwa-install") {
+      const release = holdClock();
+      // Served over http by tests/run.py. Network requests keep Chrome's virtual clock
+      // from racing ahead while the service worker installs and precaches.
+      let reg = null;
+      for (let i = 0; i < 60 && !(reg && reg.active && navigator.serviceWorker.controller); i++) {
+        await fetch(`index.html?poll=${i}`, { cache: "no-store" }).catch(() => {});
+        reg = await navigator.serviceWorker.getRegistration();
+      }
+      // This test page loaded before the worker took control; fetch it once through the
+      // worker so the offline run can open it (otherwise it gets the index.html fallback).
+      await fetch(location.href.split("#")[0]).catch(() => {});
+      release();
+      ok("service worker installed and controlling the page", !!(reg && reg.active && navigator.serviceWorker.controller));
+
+    } else if (mode === "pwa-offline") {
+      // Same profile, server now drops every connection: everything must come from the service worker.
+      const release = holdClock();
+      const failed = [];
+      for (const path of window.__PRECACHE) {
+        const res = await fetch(new URL(path, document.baseURI).href).catch(() => null);
+        if (!res || !res.ok) failed.push(path);
+      }
+      release();
+      ok("every PRECACHE file is served offline", failed.length === 0, failed.join(", "));
+      ok("stylesheet applied offline", getComputedStyle(document.body).backgroundColor === "rgb(15, 17, 21)");
+      ok("all recipes render offline", cards() === N, `${cards()}/${N}`);
+      ok("manifest linked", !!document.querySelector('link[rel="manifest"]'));
 
     } else if (mode === "broken") {
       ok("missing catalog: error state shown", document.getElementById("recipeGrid").textContent.includes("couldn't be loaded"));
