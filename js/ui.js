@@ -96,6 +96,18 @@ function openRecipeModal(id) {
   if (!r) return;
   const { lowItems, outItems } = getRecipeStockAnalysis(r);
 
+  // What's needed to make it now (tiles only show a short badge).
+  const missing = missingItems(r);
+  const missingMixers = missing.filter(it => !isTracked(it));
+  const readiness = missing.length === 0
+    ? `<span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 font-semibold">✓ Can make now</span>`
+    : "";
+  const missingNote = missingMixers.length ? `
+      <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 text-xs text-gray-300 flex flex-wrap items-center justify-between gap-2">
+        <p><strong class="text-white">Not on hand:</strong> ${esc(missingMixers.map(it => it.name).join(", "))}</p>
+        <button onclick="closeRecipeModal(); openShoppingModal();" class="px-3 py-1 rounded-lg bg-obsidian/80 text-gold border border-gold/30 font-semibold hover:bg-gold hover:text-obsidian transition no-print">Shopping list</button>
+      </div>` : "";
+
   let modalAlert = "";
   if (outItems.length > 0 || lowItems.length > 0) {
     modalAlert = `
@@ -139,7 +151,8 @@ function openRecipeModal(id) {
           <div class="flex flex-wrap items-center gap-2 mb-2">
             <span class="text-xs px-2.5 py-0.5 rounded-full bg-gold/20 text-gold font-semibold">${esc(r.type)}</span>
             <span class="text-xs px-2.5 py-0.5 rounded-full bg-white/10 text-gray-200">${esc(r.vibe)}</span>
-            ${isBarReady(r) ? `<span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300">Bar-Ready</span>` : ""}
+            ${readiness}
+            ${isBarReady(r) ? `<span class="text-xs px-2.5 py-0.5 rounded-full bg-white/10 text-gray-200">Bar-Ready</span>` : ""}
           </div>
           <h2 class="font-serif text-3xl sm:text-4xl font-bold text-white">${esc(r.name)}</h2>
         </div>
@@ -149,6 +162,7 @@ function openRecipeModal(id) {
       </div>
 
       ${modalAlert}
+      ${missingNote}
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-obsidian/90 rounded-2xl p-4 border border-gold/20 items-center">
         <div class="flex items-center justify-center sm:border-r border-white/10 py-2">

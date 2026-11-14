@@ -143,68 +143,40 @@ function renderRecipes() {
     const readyBadge = missing.length === 0
       ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold">✓ Can make now</span>`
       : missing.length === 1
-        ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/25 truncate max-w-[60%]">Need: ${esc(missing[0].name)}</span>`
+        ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/25 truncate max-w-full">Need: ${esc(missing[0].name)}</span>`
         : `<span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10">Missing ${missing.length}</span>`;
 
-    let stockWarningBanner = "";
-    if (isOut) {
-      stockWarningBanner = `
-        <div class="mb-3 px-2.5 py-1.5 rounded-lg bg-red-500/15 border border-red-500/40 text-red-300 text-[11px] font-medium flex items-center gap-1.5">
-          <span>Out of Stock:</span>
-          <strong class="truncate">${esc(outItems.join(", "))}</strong>
-        </div>`;
-    } else if (isLow) {
-      stockWarningBanner = `
-        <div class="mb-3 px-2.5 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-300 text-[11px] font-medium flex items-center gap-1.5">
-          <span>Low Stock:</span>
-          <strong class="truncate">${esc(lowItems.join(", "))}</strong>
-        </div>`;
-    }
-
-    const ingPreview = r.ingredients.map(i => {
+    // Tile = enough to choose a drink. Amounts, glass/technique, ice and stock
+    // details live in the full spec (openRecipeModal).
+    const names = [];
+    r.ingredients.forEach(i => {
       const it = i.item ? itemsById.get(i.item) : null;
+      const label = it ? it.name : (i.name || "");
+      if (!label || names.some(n => n.label === label)) return;
       const st = isTracked(it) ? getItemStockStatus(it.id) : null;
-      const mixerMissing = !!it && !isTracked(it) && !isOnHand(it.id);
-      const dotColor = mixerMissing ? "border border-gray-400" : !st ? "bg-sky-400" : st === "out" ? "bg-red-500" : st === "low" ? "bg-amber-400" : "bg-emerald-400";
-      const textStyle = st === "out" ? "line-through text-red-300/80" : st === "low" ? "text-amber-200" : mixerMissing ? "text-gray-400" : "text-gray-200";
-      return `
-        <li class="flex items-center justify-between gap-3 text-xs py-1 border-b border-white/5 last:border-0">
-          <span class="${textStyle} flex items-center gap-1.5 min-w-0">
-            <span class="w-1.5 h-1.5 rounded-full shrink-0 ${dotColor}"></span>
-            <span class="truncate">${esc(ingredientLabel(i))}</span>
-          </span>
-          <span class="font-mono text-[11px] text-gray-400 shrink-0">${esc(i.amount)}</span>
-        </li>`;
-    }).join("");
+      const missingMixer = !!it && !isTracked(it) && !isOnHand(it.id);
+      const style = st === "out" ? "line-through text-red-300/80"
+        : st === "low" ? "text-amber-200"
+        : missingMixer ? "text-gray-500"
+        : "text-gray-300";
+      names.push({ label, style });
+    });
+    const ingredientLine = names.map(n => `<span class="${n.style}">${esc(n.label)}</span>`).join('<span class="text-gray-600"> · </span>');
 
     return `
-      <article onclick="openRecipeModal('${r.id}')" class="glass-card rounded-2xl p-5 flex flex-col justify-between cursor-pointer group ${isOut ? 'opacity-55 border-red-500/30 grayscale-[35%]' : isLow ? 'border-amber-500/35' : ''}">
-        <div>
-          <div class="flex flex-wrap items-center justify-between gap-1.5 mb-2.5">
-            <span class="text-[11px] px-2.5 py-0.5 rounded-full border font-semibold ${typeBadgeColor}">${esc(r.type)}</span>
+      <article onclick="openRecipeModal('${r.id}')" class="glass-card rounded-2xl p-4 flex items-start gap-3 cursor-pointer group ${isOut ? 'opacity-60 border-red-500/30 grayscale-[35%]' : isLow ? 'border-amber-500/35' : ''}">
+        <div class="min-w-0 flex-1 space-y-1.5">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-[10px] px-2 py-0.5 rounded-full border font-semibold ${typeBadgeColor}">${esc(r.type)}</span>
             ${readyBadge}
           </div>
-          ${stockWarningBanner}
-          <div class="flex items-center justify-between gap-3 bg-obsidian/60 rounded-xl p-3 border border-white/5 mb-4">
-            <div class="space-y-1 min-w-0">
-              <p class="text-[11px] uppercase tracking-wider text-gold font-medium">${esc(r.vibe)}</p>
-              <h3 class="font-serif text-xl font-bold text-white group-hover:text-gold transition leading-snug">${esc(r.name)}</h3>
-              <div class="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-gray-400">
-                <span class="px-2 py-0.5 rounded bg-white/5 text-gray-200 font-medium">${esc(r.glass)} Glass</span>
-                ${r.method ? `<span>• ${esc(r.method)}</span>` : ""}
-              </div>
-            </div>
-            ${renderGlassSVG(r.glass, r.colors, r.garnishType, r.id)}
+          <div>
+            <p class="text-[10px] uppercase tracking-wider text-gold/90 font-medium">${esc(r.vibe)}</p>
+            <h3 class="font-serif text-xl font-bold text-white group-hover:text-gold transition leading-snug">${esc(r.name)}</h3>
           </div>
-          <ul class="space-y-0.5 mb-4">${ingPreview}</ul>
+          <p class="text-xs leading-relaxed line-clamp-2">${ingredientLine}</p>
         </div>
-        <div class="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
-          <span class="text-gray-400 truncate max-w-[70%]">Ice: <strong class="text-gray-300 font-medium">${esc(r.ice || "—")}</strong></span>
-          <span class="text-gold font-semibold group-hover:translate-x-0.5 transition flex items-center gap-1">
-            <span>Full Spec</span>
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-          </span>
-        </div>
+        <div class="shrink-0 self-center [&>svg]:w-14 [&>svg]:h-16" aria-hidden="true">${renderGlassSVG(r.glass, r.colors, r.garnishType, r.id)}</div>
       </article>`;
   }).join("");
 }
