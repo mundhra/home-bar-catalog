@@ -132,9 +132,12 @@ window.addEventListener("load", () => setTimeout(async () => {
       const release = holdClock();
       // Served over http by tests/run.py. Network requests keep Chrome's virtual clock
       // from racing ahead while the service worker installs and precaches.
+      // Wait by real time, not a poll count: slower CI runners take longer to install.
+      // Each /__hold request takes ~250 ms, which paces the loop.
       let reg = null;
-      for (let i = 0; i < 60 && !(reg && reg.active && navigator.serviceWorker.controller); i++) {
-        await fetch(`index.html?poll=${i}`, { cache: "no-store" }).catch(() => {});
+      const started = Date.now();
+      while (!(reg && reg.active && navigator.serviceWorker.controller) && Date.now() - started < 20000) {
+        await fetch(`__hold?${Math.random()}`, { cache: "no-store" }).catch(() => {});
         reg = await navigator.serviceWorker.getRegistration();
       }
       // This test page loaded before the worker took control; fetch it once through the
