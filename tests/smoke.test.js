@@ -30,17 +30,19 @@ window.addEventListener("load", () => setTimeout(async () => {
   const A = byUse(tracked)[0];          // most-used tracked bottle/syrup
   const B = byUse(tracked)[1];          // second most-used tracked item
   const M = byUse(mixers)[0];           // most-used mixer
-  const expectedReady = RAW.recipes.filter(r => r.ingredients.every(i => {
-    const it = i.item && rawItem(i.item);
-    return it && (it.kind !== "mixer" || it.staple === true);
-  })).length;
+  // Substitutes and optional ingredients (feature 1) are part of the model.
+  const candidatesRaw = i => (i.item ? [i.item, ...(i.substitutes || [])] : []).map(rawItem).filter(Boolean);
+  const expectedReady = RAW.recipes.filter(r => r.ingredients.every(i =>
+    i.optional === true || candidatesRaw(i).some(it => it.kind !== "mixer" || it.staple === true))).length;
   const N = RAW.recipes.length;
   // availability: { out: Set(trackedIdsOut), onHand: Set(mixerIdsOnHand) }
   const defaultOnHand = () => new Set(mixers.filter(m => m.staple === true).map(m => m.id));
-  const missingRaw = (r, av) => [...new Set(r.ingredients.filter(i => i.item).map(i => i.item))].filter(id => {
-    const it = rawItem(id);
-    return it.kind === "mixer" ? !av.onHand.has(id) : av.out.has(id);
-  });
+  const availableRaw = (it, av) => it.kind === "mixer" ? av.onHand.has(it.id) : !av.out.has(it.id);
+  const missingRaw = (r, av) => [...new Set(r.ingredients
+    .filter(i => !i.optional)
+    .map(i => candidatesRaw(i))
+    .filter(c => c.length && !c.some(it => availableRaw(it, av)))
+    .map(c => c[0].id))];
   const countWhere = (av, n) => RAW.recipes.filter(r => missingRaw(r, av).length === n).length;
   const filterCount = value => { setReadinessFilter(value); const c = cards(); setReadinessFilter("ALL"); return c; };
 
@@ -247,6 +249,51 @@ window.addEventListener("load", () => setTimeout(async () => {
       jumpToIngredient(B.id);
       ok("jump to ingredient", selectedIngredients.has(B.id) && cards() === usesOf(B.id));
       resetAllFilters();
+
+      // ---------- substitutes & optional ingredients ----------
+      const subMixer = mixers.find(m => m.id !== M.id && !m.staple) || mixers.find(m => m.id !== M.id);
+      const subTest = {
+        id: "zz-sub-test", name: "Zz Substitute Test", type: "Mocktail", vibe: VIBES[0], glass: "Highball",
+        method: "Build", ice: "Cubed Ice", colors: ["#ffffff", "#000000"], garnishType: "none",
+        ingredients: [
+          { item: A.id, amount: "30 ml", substitutes: [B.id] },
+          { item: subMixer.id, amount: "10 ml", optional: true },
+          { name: "Pinch of salt", amount: "1", optional: true }
+        ],
+        steps: ["Stir."], servingNotes: ""
+      };
+      ok("substitutes and optional saved", commitCatalog({ ...catalog, recipes: [...catalog.recipes, subTest] }));
+      const st = () => recipeById("zz-sub-test");
+      setOnHand(subMixer.id, false);
+      ok("optional missing mixer doesn't block", canMakeNow(st()) && isBarReady(st()));
+      setItemStockStatus(A.id, "out");
+      ok("substitute covers an out-of-stock item", canMakeNow(st()) && getRecipeStockAnalysis(st()).outItems.length === 0);
+      ok("tile shows the substitute in use", chosenCandidate(st().ingredients[0]).id === B.id);
+      openRecipeModal("zz-sub-test");
+      ok("recipe view explains the swap", document.getElementById("modalContent").textContent.includes(`Use ${B.name}`)
+        && document.getElementById("modalContent").textContent.includes("optional"));
+      closeRecipeModal();
+      setItemStockStatus(B.id, "out");
+      ok("both out: missing lists the listed item", missingItems(st()).length === 1 && missingItems(st())[0].id === A.id
+        && getRecipeStockAnalysis(st()).outItems.includes(A.name));
+      resetAllStockStatuses(); resetMixersToDefaults();
+      alerts = []; openItemEditor("edit", B.id); deleteItemFromEditor();
+      ok("item used only as a substitute can't be deleted", alerts.length === 1 && itemsById.has(B.id));
+      closeItemEditor();
+      const badSub = JSON.parse(JSON.stringify(st())); badSub.ingredients[0].substitutes = ["no-such-item"];
+      ok("unknown substitute rejected", validateCatalog({ ...catalog, recipes: [badSub] }).errors.some(e => e.includes("substitutes")));
+      // editor round trip
+      openRecipeEditor("edit", "zz-sub-test");
+      ok("editor shows the substitute chip", document.getElementById("re_ingredients").textContent.includes(`or ${B.name}`));
+      removeEditorSubstitute(0, 0);
+      const firstRow = document.querySelector("#re_ingredients [data-row]");
+      firstRow.querySelector(".re-ing-optional").checked = true;
+      addEditorSubstitute(1, M.id);
+      saveRecipeEditor();
+      const ed = st().ingredients;
+      ok("editor saves substitute and optional changes", !ed[0].substitutes && ed[0].optional === true && ed[1].substitutes?.[0] === M.id && ed[1].optional === true);
+      closeRecipeModal();
+      resetToShippedCatalog();
 
       // ---------- recipe editor ----------
       openRecipeEditor("add"); saveRecipeEditor();

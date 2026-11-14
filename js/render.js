@@ -150,15 +150,15 @@ function renderRecipes() {
     // details live in the full spec (openRecipeModal).
     const names = [];
     r.ingredients.forEach(i => {
-      const it = i.item ? itemsById.get(i.item) : null;
+      const it = chosenCandidate(i); // shows the substitute you'd actually use
       const label = it ? it.name : (i.name || "");
       if (!label || names.some(n => n.label === label)) return;
       const st = isTracked(it) ? getItemStockStatus(it.id) : null;
       const missingMixer = !!it && !isTracked(it) && !isOnHand(it.id);
-      const style = st === "out" ? "line-through text-red-300/80"
+      const style = (i.optional ? "italic " : "") + (st === "out" ? "line-through text-red-300/80"
         : st === "low" ? "text-amber-200"
-        : missingMixer ? "text-gray-500"
-        : "text-gray-300";
+        : missingMixer || i.optional ? "text-gray-500"
+        : "text-gray-300");
       names.push({ label, style });
     });
     const ingredientLine = names.map(n => `<span class="${n.style}">${esc(n.label)}</span>`).join('<span class="text-gray-600"> · </span>');

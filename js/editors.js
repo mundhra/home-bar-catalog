@@ -35,8 +35,11 @@ function openRecipeEditor(mode, id) {
     if (mode === "duplicate") draft.name = `${src.name} (Copy)`;
   }
   // Editor rows: text is the note for inventory items, or the name for "other"
-  draft.rows = draft.ingredients.map(i => ({ item: i.item || "", text: i.item ? (i.note || "") : (i.name || ""), amount: i.amount || "" }));
-  if (!draft.rows.length) draft.rows.push({ item: "", text: "", amount: "" });
+  draft.rows = draft.ingredients.map(i => ({
+    item: i.item || "", text: i.item ? (i.note || "") : (i.name || ""), amount: i.amount || "",
+    optional: i.optional === true, subs: [...(i.substitutes || [])]
+  }));
+  if (!draft.rows.length) draft.rows.push(blankEditorRow());
   recipeEditor = { mode, id: mode === "edit" ? id : null, draft };
   editorDirty = mode === "duplicate";
   closeRecipeModal();
@@ -55,13 +58,38 @@ function ingredientOptions(selected) {
   return `<option value="" ${!selected ? "selected" : ""}>Other (not in inventory)…</option>${groups}`;
 }
 
+function blankEditorRow() { return { item: "", text: "", amount: "", optional: false, subs: [] }; }
+
+// "Optional" checkbox + substitutes (only for inventory items).
+function renderSubstituteControls(row, idx) {
+  const chips = row.subs.map((id, j) => `
+    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-200 text-[11px]">
+      or ${esc(itemsById.get(id)?.name || id)}
+      <button type="button" onclick="removeEditorSubstitute(${idx}, ${j})" class="font-bold hover:text-white" aria-label="Remove substitute">&times;</button>
+    </span>`).join("");
+  const options = catalog.items.filter(it => it.id !== row.item && !row.subs.includes(it.id))
+    .map(it => `<option value="${it.id}">${esc(it.name)}</option>`).join("");
+  return `
+    <div class="col-span-full flex flex-wrap items-center gap-2 pt-1">
+      <label class="inline-flex items-center gap-1.5 text-[11px] text-gray-300 cursor-pointer">
+        <input type="checkbox" class="re-ing-optional w-3.5 h-3.5 rounded accent-[#d4a359]" ${row.optional ? "checked" : ""} /> Optional
+      </label>
+      ${row.item ? `
+        ${chips}
+        <select onchange="addEditorSubstitute(${idx}, this.value)" class="px-2 py-1 rounded-lg bg-obsidian border border-white/10 text-[11px] text-gray-300 focus:border-gold focus:outline-none" aria-label="Add a substitute for ingredient ${idx + 1}">
+          <option value="">+ or… (substitute)</option>${options}
+        </select>` : ""}
+    </div>`;
+}
+
 function renderEditorIngredientRows() {
   return recipeEditor.draft.rows.map((row, idx) => `
-    <div data-row class="grid grid-cols-[minmax(0,1fr)_6.5rem_auto] sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_7rem_auto] gap-2 items-center p-2 rounded-xl bg-obsidian/60 border border-white/5">
+    <div data-row data-subs="${esc(JSON.stringify(row.subs))}" class="grid grid-cols-[minmax(0,1fr)_6.5rem_auto] sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_7rem_auto] gap-2 items-center p-2 rounded-xl bg-obsidian/60 border border-white/5">
       <select class="re-ing-item col-span-3 sm:col-span-1 ${INPUT_CLS}" onchange="onEditorItemChange(this)" aria-label="Ingredient ${idx + 1}">${ingredientOptions(row.item)}</select>
       <input class="re-ing-text ${INPUT_CLS}" value="${esc(row.text)}" placeholder="${row.item ? "Note, e.g. Chilled" : "Ingredient name"}" aria-label="Ingredient ${idx + 1} ${row.item ? "note" : "name"}" />
       <input class="re-ing-amount ${INPUT_CLS}" value="${esc(row.amount)}" placeholder="45 ml" aria-label="Ingredient ${idx + 1} amount" />
       <button type="button" onclick="removeEditorIngredient(${idx})" class="w-8 h-8 rounded-lg text-gray-400 hover:text-red-300 hover:bg-red-500/15 text-lg leading-none" aria-label="Remove ingredient ${idx + 1}">&times;</button>
+      ${renderSubstituteControls(row, idx)}
     </div>`).join("");
 }
 
@@ -175,17 +203,41 @@ function syncRecipeDraftFromForm() {
   d.ice = v("re_ice");
   d.steps = v("re_steps").split("\n").map(s => s.trim()).filter(Boolean);
   d.servingNotes = v("re_notes");
-  d.rows = [...document.querySelectorAll("#re_ingredients [data-row]")].map(row => ({
-    item: row.querySelector(".re-ing-item").value,
-    text: row.querySelector(".re-ing-text").value,
-    amount: row.querySelector(".re-ing-amount").value
-  }));
+  d.rows = [...document.querySelectorAll("#re_ingredients [data-row]")].map(row => {
+    const item = row.querySelector(".re-ing-item").value;
+    let subs = [];
+    try { subs = JSON.parse(row.dataset.subs || "[]"); } catch (e) { subs = []; }
+    return {
+      item,
+      text: row.querySelector(".re-ing-text").value,
+      amount: row.querySelector(".re-ing-amount").value,
+      optional: row.querySelector(".re-ing-optional").checked,
+      subs: item ? subs.filter(s => s !== item) : []
+    };
+  });
 }
 
 function updateEditorPreview() {
   const v = id => document.getElementById(id).value;
   document.getElementById("re_preview").innerHTML =
     renderGlassSVG(v("re_glass"), [v("re_c1"), v("re_c2")], v("re_garnish"), "editor-preview");
+}
+
+function rerenderEditorRows() {
+  document.getElementById("re_ingredients").innerHTML = renderEditorIngredientRows();
+  markEditorDirty();
+}
+function addEditorSubstitute(idx, id) {
+  if (!id) return;
+  syncRecipeDraftFromForm();
+  const row = recipeEditor.draft.rows[idx];
+  if (row && id !== row.item && !row.subs.includes(id)) row.subs.push(id);
+  rerenderEditorRows();
+}
+function removeEditorSubstitute(idx, j) {
+  syncRecipeDraftFromForm();
+  recipeEditor.draft.rows[idx].subs.splice(j, 1);
+  rerenderEditorRows();
 }
 
 function onEditorItemChange(select) {
@@ -195,7 +247,7 @@ function onEditorItemChange(select) {
 
 function addEditorIngredient() {
   syncRecipeDraftFromForm();
-  recipeEditor.draft.rows.push({ item: "", text: "", amount: "" });
+  recipeEditor.draft.rows.push(blankEditorRow());
   document.getElementById("re_ingredients").innerHTML = renderEditorIngredientRows();
   markEditorDirty();
   const selects = document.querySelectorAll("#re_ingredients .re-ing-item");
@@ -205,7 +257,7 @@ function addEditorIngredient() {
 function removeEditorIngredient(idx) {
   syncRecipeDraftFromForm();
   recipeEditor.draft.rows.splice(idx, 1);
-  if (!recipeEditor.draft.rows.length) recipeEditor.draft.rows.push({ item: "", text: "", amount: "" });
+  if (!recipeEditor.draft.rows.length) recipeEditor.draft.rows.push(blankEditorRow());
   document.getElementById("re_ingredients").innerHTML = renderEditorIngredientRows();
   markEditorDirty();
 }
@@ -234,7 +286,11 @@ function saveRecipeEditor() {
   const recipe = {
     id: recipeEditor.id, name: d.name, type: d.type, vibe: d.vibe, glass: d.glass,
     method: d.method, ice: d.ice, colors: d.colors, garnishType: d.garnishType,
-    ingredients: rows.map(r => r.item ? { item: r.item, note: r.text, amount: r.amount } : { name: r.text, amount: r.amount }),
+    ingredients: rows.map(r => {
+      const ing = r.item ? { item: r.item, note: r.text, amount: r.amount, substitutes: r.subs } : { name: r.text, amount: r.amount };
+      if (r.optional) ing.optional = true;
+      return ing;
+    }),
     steps: d.steps, servingNotes: d.servingNotes
   };
   const recipes = catalog.recipes.slice();
@@ -372,7 +428,7 @@ function saveItemEditor() {
 
 function deleteItemFromEditor() {
   const it = itemsById.get(itemEditor.id);
-  const uses = recipesUsingItem(it.id);
+  const uses = recipesReferencingItem(it.id);
   if (uses.length) {
     const names = uses.slice(0, 5).map(r => `• ${r.name}`).join("\n") + (uses.length > 5 ? `\n…and ${uses.length - 5} more` : "");
     alert(`“${it.name}” is used in ${uses.length} drink${uses.length > 1 ? "s" : ""}:\n\n${names}\n\nRemove it from those recipes first. If you've simply run out, mark it Out of Stock instead.`);

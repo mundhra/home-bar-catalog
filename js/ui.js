@@ -123,16 +123,24 @@ function openRecipeModal(id) {
   const ingRows = r.ingredients.map(i => {
     const it = i.item ? itemsById.get(i.item) : null;
     const st = isTracked(it) ? getItemStockStatus(it.id) : null;
+    const usingSub = !!it && !isItemAvailable(it) && ingredientCandidates(i).slice(1).some(isItemAvailable);
     let badgeClass = "bg-sky-500/15 text-sky-300 border border-sky-500/30";
     let badgeLabel = it ? "On-Demand" : "Extra";
-    if (st === "out") { badgeClass = "bg-red-500/20 text-red-300 border border-red-500/40"; badgeLabel = "Out of Stock"; }
+    if (usingSub) { badgeClass = "bg-violet-500/15 text-violet-300 border border-violet-500/30"; badgeLabel = "Substitute"; }
+    else if (st === "out") { badgeClass = "bg-red-500/20 text-red-300 border border-red-500/40"; badgeLabel = "Out of Stock"; }
     else if (st === "low") { badgeClass = "bg-amber-500/20 text-amber-300 border border-amber-500/40"; badgeLabel = "Low Stock"; }
     else if (st === "in") { badgeClass = "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"; badgeLabel = "In Stock"; }
+    // When a substitute is in use, say which one; don't repeat it as an "or …" option.
+    const extras = usingSub ? (i.optional ? "optional" : "") : ingredientExtrasText(i);
+    const using = usingSub ? `Use ${chosenCandidate(i).name}` : "";
     return `
       <div class="flex items-center justify-between gap-3 py-2.5 px-3.5 rounded-xl bg-obsidian/80 border border-white/5">
         <div class="flex items-center gap-2.5 min-w-0">
           <span class="px-2 py-0.5 text-[10px] uppercase font-bold rounded shrink-0 ${badgeClass}">${badgeLabel}</span>
-          <span class="text-sm font-medium ${st === 'out' ? 'line-through text-red-300' : 'text-white'}">${esc(ingredientLabel(i))}</span>
+          <span class="min-w-0">
+            <span class="block text-sm font-medium ${st === 'out' && !usingSub ? 'line-through text-red-300' : usingSub ? 'line-through text-gray-400' : 'text-white'}">${esc(ingredientLabel(i))}</span>
+            ${using || extras ? `<span class="block text-[11px] ${usingSub ? 'text-violet-300' : 'text-gray-400'}">${esc([using, extras].filter(Boolean).join(" · "))}</span>` : ""}
+          </span>
         </div>
         <span class="font-mono text-sm text-gold font-semibold shrink-0">${esc(i.amount)}</span>
       </div>`;

@@ -16,14 +16,19 @@ function normalizeItem(it) {
   return out;
 }
 function normalizeIngredient(ing) {
+  let out;
   if (ing.item) {
-    const out = { item: ing.item };
+    out = { item: ing.item };
     const note = str(ing.note);
     if (note) out.note = note;
     out.amount = str(ing.amount);
-    return out;
+    const subs = [...new Set((Array.isArray(ing.substitutes) ? ing.substitutes : []).filter(s => s && s !== ing.item))];
+    if (subs.length) out.substitutes = subs;
+  } else {
+    out = { name: str(ing.name), amount: str(ing.amount) };
   }
-  return { name: str(ing.name), amount: str(ing.amount) };
+  if (ing.optional === true) out.optional = true;
+  return out;
 }
 function normalizeRecipe(r) {
   return {
@@ -88,9 +93,15 @@ function validateCatalog(raw) {
         if (ing.item != null) {
           if (typeof ing.item !== "string" || !itemIds.has(ing.item)) err(`${w}: unknown inventory item "${ing.item}".`);
           if (ing.note != null && typeof ing.note !== "string") err(`${w}: note must be text.`);
+          if (ing.substitutes != null && (!Array.isArray(ing.substitutes) || !ing.substitutes.every(s => typeof s === "string" && itemIds.has(s)))) {
+            err(`${w}: substitutes must be inventory item ids.`);
+          }
         } else if (!str(ing.name)) {
           err(`${w}: needs an inventory item or a name.`);
+        } else if (ing.substitutes != null && ing.substitutes.length) {
+          err(`${w}: substitutes need an inventory item.`);
         }
+        if (ing.optional != null && typeof ing.optional !== "boolean") err(`${w}: optional must be true or false.`);
         if (!str(ing.amount)) err(`${w}: amount is required.`);
       });
     }
@@ -197,15 +208,36 @@ function ingredientLabel(ing) {
   if (!it) return ing.name || "Unknown ingredient";
   return ing.note ? `${it.name} (${ing.note})` : it.name;
 }
-// Bar-Ready = needs nothing but stock-tracked bottles and "always on hand" mixers.
+// Inventory items that can fill an ingredient: the item itself, then its substitutes.
+function ingredientCandidates(ing) {
+  if (!ing.item) return [];
+  return [ing.item, ...(ing.substitutes || [])].map(id => itemsById.get(id)).filter(Boolean);
+}
+// The item you'd actually pour: the first one available, else the listed one.
+function chosenCandidate(ing) {
+  const cands = ingredientCandidates(ing);
+  return cands.find(isItemAvailable) || cands[0] || null;
+}
+// "or Fresh Lemon Juice · optional" — shown under an ingredient in the recipe view and card.
+function ingredientExtrasText(ing) {
+  const parts = [];
+  const subs = ingredientCandidates(ing).slice(1);
+  if (subs.length) parts.push(`or ${subs.map(s => s.name).join(" / ")}`);
+  if (ing.optional) parts.push("optional");
+  return parts.join(" · ");
+}
+// Bar-Ready = needs nothing but stock-tracked bottles and "always on hand" mixers
+// (a substitute counts; optional ingredients are ignored).
 function isBarReady(r) {
-  return r.ingredients.every(ing => {
-    const it = ing.item && itemsById.get(ing.item);
-    return !!it && (isTracked(it) || it.staple === true);
-  });
+  return r.ingredients.every(ing =>
+    ing.optional === true || ingredientCandidates(ing).some(it => isTracked(it) || it.staple === true));
 }
 function recipesUsingItem(id) {
   return catalog.recipes.filter(r => r.ingredients.some(i => i.item === id));
+}
+// Includes recipes that only list the item as a substitute (deleting it would break them).
+function recipesReferencingItem(id) {
+  return catalog.recipes.filter(r => r.ingredients.some(i => i.item === id || (i.substitutes || []).includes(id)));
 }
 
 // =========================================================================
@@ -323,11 +355,16 @@ function resetAllStockStatuses() {
 function getRecipeStockAnalysis(recipe) {
   const lowItems = [], outItems = [];
   recipe.ingredients.forEach(ing => {
+    if (ing.optional) return;
     const it = ing.item && itemsById.get(ing.item);
     if (!isTracked(it)) return; // on-demand mixers aren't stock-tracked
     const st = getItemStockStatus(it.id);
-    if (st === "low" && !lowItems.includes(it.name)) lowItems.push(it.name);
-    if (st === "out" && !outItems.includes(it.name)) outItems.push(it.name);
+    if (st === "out") {
+      const covered = ingredientCandidates(ing).slice(1).some(isItemAvailable); // a substitute saves the drink
+      if (!covered && !outItems.includes(it.name)) outItems.push(it.name);
+    } else if (st === "low" && !lowItems.includes(it.name)) {
+      lowItems.push(it.name);
+    }
   });
   return { lowItems, outItems };
 }
@@ -335,8 +372,9 @@ function getRecipeStockAnalysis(recipe) {
 // =========================================================================
 // WHAT CAN I MAKE TONIGHT?
 //   A tracked bottle/syrup is available unless marked Out (Low still counts).
-//   A mixer is available when it's on hand. Untracked extras (no inventory
-//   item, e.g. egg white) are assumed available.
+//   A mixer is available when it's on hand. An ingredient is covered if its item
+//   or any of its substitutes is available; optional ingredients never block.
+//   Untracked extras (no inventory item, e.g. egg white) are assumed available.
 // =========================================================================
 function isItemAvailable(it) {
   if (!it) return true;
@@ -347,8 +385,9 @@ function isItemAvailable(it) {
 function missingItems(recipe) {
   const missing = [];
   recipe.ingredients.forEach(ing => {
-    const it = ing.item && itemsById.get(ing.item);
-    if (it && !isItemAvailable(it) && !missing.includes(it)) missing.push(it);
+    if (ing.optional) return;
+    const cands = ingredientCandidates(ing);
+    if (cands.length && !cands.some(isItemAvailable) && !missing.includes(cands[0])) missing.push(cands[0]);
   });
   return missing;
 }

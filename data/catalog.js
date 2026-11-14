@@ -7,7 +7,7 @@
  */
 window.BAR_CATALOG = {
   "schema": 1,
-  "updated": "2026-11-14T14:49:22Z",
+  "updated": "2026-11-14T19:33:16Z",
   "items": [
     {
       "id": "watermelon-syrup",
@@ -320,7 +320,10 @@ window.BAR_CATALOG = {
         },
         {
           "item": "lime",
-          "amount": "15 ml"
+          "amount": "15 ml",
+          "substitutes": [
+            "lemon"
+          ]
         },
         {
           "item": "kombucha",
@@ -597,7 +600,10 @@ window.BAR_CATALOG = {
         },
         {
           "item": "lime",
-          "amount": "15 ml"
+          "amount": "15 ml",
+          "substitutes": [
+            "lemon"
+          ]
         },
         {
           "item": "ginger",
@@ -639,7 +645,10 @@ window.BAR_CATALOG = {
         },
         {
           "item": "lemon",
-          "amount": "15 ml"
+          "amount": "15 ml",
+          "substitutes": [
+            "lime"
+          ]
         }
       ],
       "steps": [
@@ -711,7 +720,10 @@ window.BAR_CATALOG = {
         },
         {
           "item": "lime",
-          "amount": "15 ml"
+          "amount": "15 ml",
+          "substitutes": [
+            "lemon"
+          ]
         },
         {
           "item": "kombucha",
@@ -751,7 +763,10 @@ window.BAR_CATALOG = {
         },
         {
           "item": "lime",
-          "amount": "15 ml"
+          "amount": "15 ml",
+          "substitutes": [
+            "lemon"
+          ]
         },
         {
           "item": "ginger",
@@ -797,7 +812,10 @@ window.BAR_CATALOG = {
         },
         {
           "item": "lemon",
-          "amount": "15 ml"
+          "amount": "15 ml",
+          "substitutes": [
+            "lime"
+          ]
         }
       ],
       "steps": [
@@ -835,7 +853,10 @@ window.BAR_CATALOG = {
         },
         {
           "item": "lime",
-          "amount": "15 ml"
+          "amount": "15 ml",
+          "substitutes": [
+            "lemon"
+          ]
         },
         {
           "item": "kombucha",
@@ -1281,7 +1302,10 @@ window.BAR_CATALOG = {
         },
         {
           "item": "lime",
-          "amount": "12 ml"
+          "amount": "12 ml",
+          "substitutes": [
+            "lemon"
+          ]
         }
       ],
       "steps": [
@@ -1845,7 +1869,10 @@ window.BAR_CATALOG = {
         },
         {
           "item": "lime",
-          "amount": "15 ml"
+          "amount": "15 ml",
+          "substitutes": [
+            "lemon"
+          ]
         },
         {
           "item": "ginger",
@@ -2042,7 +2069,10 @@ window.BAR_CATALOG = {
         },
         {
           "item": "lime",
-          "amount": "15 ml"
+          "amount": "15 ml",
+          "substitutes": [
+            "lemon"
+          ]
         },
         {
           "item": "ginger",
@@ -2316,7 +2346,10 @@ window.BAR_CATALOG = {
         },
         {
           "item": "lemon",
-          "amount": "10 ml"
+          "amount": "10 ml",
+          "substitutes": [
+            "lime"
+          ]
         }
       ],
       "steps": [
@@ -2358,7 +2391,10 @@ window.BAR_CATALOG = {
         },
         {
           "item": "lime",
-          "amount": "12 ml"
+          "amount": "12 ml",
+          "substitutes": [
+            "lemon"
+          ]
         }
       ],
       "steps": [
@@ -2613,7 +2649,10 @@ window.BAR_CATALOG = {
         },
         {
           "item": "lime",
-          "amount": "15 ml"
+          "amount": "15 ml",
+          "substitutes": [
+            "lemon"
+          ]
         },
         {
           "item": "soda",
@@ -2728,7 +2767,10 @@ window.BAR_CATALOG = {
         },
         {
           "item": "lemon",
-          "amount": "15 ml"
+          "amount": "15 ml",
+          "substitutes": [
+            "lime"
+          ]
         },
         {
           "item": "lemon-lime-soda",
@@ -2800,7 +2842,10 @@ window.BAR_CATALOG = {
         },
         {
           "item": "lime",
-          "amount": "10 ml"
+          "amount": "10 ml",
+          "substitutes": [
+            "lemon"
+          ]
         },
         {
           "item": "soda",
@@ -2838,7 +2883,10 @@ window.BAR_CATALOG = {
         },
         {
           "item": "lime",
-          "amount": "15 ml"
+          "amount": "15 ml",
+          "substitutes": [
+            "lemon"
+          ]
         },
         {
           "item": "ginger",
@@ -2874,7 +2922,10 @@ window.BAR_CATALOG = {
         },
         {
           "item": "lime",
-          "amount": "5 ml"
+          "amount": "5 ml",
+          "substitutes": [
+            "lemon"
+          ]
         },
         {
           "item": "lemon-lime-soda",

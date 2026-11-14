@@ -82,7 +82,8 @@ function layoutRecipeCard(ctx, recipe, glassImg, draw) {
     const amount = ing.amount;
     const amountW = ctx.measureText(amount).width;
     ctx.font = `500 32px ${SANS}`;
-    const lines = wrapText(ctx, ingredientLabel(ing), W - 2 * P - amountW - 60);
+    const extras = ingredientExtrasText(ing);
+    const lines = wrapText(ctx, ingredientLabel(ing) + (extras ? ` (${extras})` : ""), W - 2 * P - amountW - 60);
     lines.forEach((line, i) => {
       y += i === 0 ? 50 : 40;
       if (i === 0 && draw) { ctx.fillStyle = C.gold; ctx.beginPath(); ctx.arc(P + 6, y - 10, 5, 0, Math.PI * 2); ctx.fill(); }
