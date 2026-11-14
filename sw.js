@@ -30,6 +30,7 @@ const PRECACHE = [
   "js/share.js",
   "js/vendor/qrcode.js",
   "js/party.js",
+  "js/recommend.js",
   "js/main.js",
   "manifest.webmanifest",
   "icons/favicon-32.png",

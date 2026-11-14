@@ -258,6 +258,8 @@ function openRecipeModal(id) {
         <p class="text-sm text-gray-200 leading-relaxed">${esc(r.servingNotes)}</p>
       </div>` : ""}
 
+      ${guest ? "" : similarDrinksHtml(r)}
+
       ${guest ? "" : `<div class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-white/10 no-print">
         <button onclick="deleteRecipe('${r.id}')" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-red-300 hover:bg-red-500/15 border border-red-500/30 transition">Delete</button>
         <div class="w-full sm:w-auto grid grid-cols-3 sm:flex gap-2">

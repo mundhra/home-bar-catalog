@@ -370,6 +370,33 @@ window.addEventListener("load", () => setTimeout(async () => {
       closeRecipeModal();
       ok("published drinks aren't local-only", !isLocalOnlyRecipe(dl) && isLocalOnlyRecipe("zz-not-published"));
 
+      // ---------- recommendations ----------
+      const strip = document.getElementById("recommendStrip");
+      ok("no picks without favourites or ratings", strip.classList.contains("hidden") && recommendations().length === 0);
+      const likedA = RAW.recipes[0].id, likedB = RAW.recipes[5].id, disliked = RAW.recipes[1].id;
+      toggleFavourite(likedA); setRating(likedB, 5); setRating(disliked, 1);
+      const recs = recommendations();
+      ok("picks appear after liking drinks", !strip.classList.contains("hidden") && strip.querySelectorAll("button").length === recs.length && recs.length > 0 && recs.length <= 6);
+      ok("picks exclude liked and rated drinks", recs.every(x => ![likedA, likedB, disliked].includes(x.recipe.id)));
+      const byReason = new Map(); recs.forEach(x => { if (!byReason.has(x.because.id)) byReason.set(x.because.id, []); byReason.get(x.because.id).push(x.score); });
+      ok("picks sorted by score within each liked drink", [...byReason.values()].every(s => s.every((v, i) => i === 0 || s[i - 1] >= v)));
+      ok("picks draw on every liked drink with matches", byReason.size === new Set(recommendations(50).map(x => x.because.id)).size);
+      ok("each pick says why", recs.every(x => [likedA, likedB].includes(x.because.id)) && strip.textContent.includes("Because you like"));
+      const simOf = recipeSimilarity(recipeById(likedA), recipeById(likedA));
+      ok("similarity is highest for the same drink", recs.every(x => recipeSimilarity(x.recipe, recipeById(likedA)) <= simOf));
+      document.getElementById("searchInput").value = "a"; applyFilters();
+      ok("picks hide while filtering", strip.classList.contains("hidden"));
+      resetAllFilters();
+      openRecipeModal(likedA);
+      const sims = similarRecipes(recipeById(likedA));
+      ok("recipe view lists similar drinks", sims.length > 0 && sims.length <= 3 && !sims.some(s => s.id === likedA || s.id === disliked)
+        && document.getElementById("modalContent").textContent.includes("Similar drinks"));
+      document.querySelector(`#modalContent button[onclick="openRecipeModal('${sims[0].id}')"]`).click();
+      ok("tapping a similar drink opens it", openRecipeId === sims[0].id);
+      closeRecipeModal();
+      recipePrefs = {}; savePrefs(); renderRecipes();
+      ok("picks disappear when likes are cleared", strip.classList.contains("hidden"));
+
       // ---------- party menus ----------
       const ids3 = RAW.recipes.slice(0, 3).map(r => r.id);
       openMenuEditor();

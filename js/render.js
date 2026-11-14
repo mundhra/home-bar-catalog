@@ -127,6 +127,7 @@ function renderRecipes() {
   renderTonightSummary();
   const isFiltered = currentTypeFilter !== "ALL" || currentVibeFilter !== "ALL" || selectedIngredients.size > 0 || readinessFilter !== "ALL" || searchVal !== "" || hideOutOfStock || useUpLowStock || favouritesOnly;
   document.getElementById("resetFiltersBtn").classList.toggle("hidden", !isFiltered);
+  renderRecommendations(isFiltered);
 
   if (filtered.length === 0) {
     grid.innerHTML = `

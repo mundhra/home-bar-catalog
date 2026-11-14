@@ -19,6 +19,7 @@ An installable, offline-capable web app that catalogs a personal home bar and se
 * **What can I make tonight?** Every card says *✓ Can make now*, *Need: Fresh Lime Juice* or *Missing 2*, based on your stock levels and the mixers you have on hand. The line above the grid shows how many drinks you can make now and how many are one ingredient away; tap either to filter.
 * **Shopping & mixers on hand:** tick the mixers and juices in the fridge (staples like soda and tonic start ticked). The dialog ranks the single items that would unlock the most drinks ("Fresh Lime Juice: unlocks 10 drinks") with a *Got it* button, and lists bottles marked Low or Out.
 * **Edit in the app:** add, edit, duplicate and delete recipes and inventory items, with export/import backups to move between devices. See *Editing Recipes & Inventory*.
+* **Picked for you & similar drinks:** once you heart or rate drinks, a *Picked for you* strip suggests others with similar ingredients, vibe and category (preferring ones you can make now, never ones you rated 1–2 stars). Every recipe also lists three *Similar drinks*.
 * **Direct links:** the address follows the open recipe (`…/#recipe=shirley-temple`), so any drink can be bookmarked or sent; the Share dialog has *Copy link*. Links work for drinks in the published catalog.
 * **Favourites & ratings:** heart any drink and rate it 1–5 stars. Filter to *♥ Favourites* and sort by *Top rated* or *A–Z*. Saved on the device and included in backups.
 * **Party menus:** pick the drinks you'll serve into a named menu (Party tab). Share a guest link or QR code, or print it: guests see a clean, read-only menu with no stock levels or editing, and can tap a drink to see what's in it. Links only show drinks in the published catalog; the app warns if a menu includes drinks that exist only on your phone.
@@ -123,6 +124,7 @@ js/editors.js       recipe builder + inventory item editor
 js/data-panel.js    export / import / download catalog.js / reset
 js/share.js         recipe card image (canvas) + share / download / copy
 js/party.js         party menus, guest links, QR codes, guest view
+js/recommend.js     "Picked for you" and "Similar drinks" scoring
 js/vendor/qrcode.js qrcode-generator 2.0.4 (MIT), vendored unmodified
 js/main.js          key handling and start-up (loaded last)
 sw.js               service worker (offline support)
