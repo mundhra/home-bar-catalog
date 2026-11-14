@@ -7,7 +7,7 @@
  */
 window.BAR_CATALOG = {
   "schema": 1,
-  "updated": "2026-11-14",
+  "updated": "2026-11-14T14:49:22Z",
   "items": [
     {
       "id": "watermelon-syrup",
@@ -227,6 +227,15 @@ window.BAR_CATALOG = {
       "category": "Carbonated Staple",
       "profile": "",
       "notes": "",
+      "staple": true
+    },
+    {
+      "id": "lemon-lime-soda",
+      "name": "Lemon-Lime Soda",
+      "kind": "mixer",
+      "category": "Carbonated Staple",
+      "profile": "Sweet citrus fizz",
+      "notes": "Sprite, 7UP or similar.",
       "staple": true
     },
     {
@@ -2513,6 +2522,442 @@ window.BAR_CATALOG = {
         "Top with Ginger Ale or Ginger Beer and stir gently."
       ],
       "servingNotes": "Jägermeister already features bitter orange peel in its botanical blend—fresh orange juice and ginger bring it to life."
+    },
+    {
+      "id": "shirley-temple",
+      "name": "Shirley Temple",
+      "type": "Mocktail",
+      "vibe": "Refreshing & Crisp",
+      "glass": "Highball",
+      "method": "Build",
+      "ice": "Cubed Ice",
+      "colors": [
+        "#fecdd3",
+        "#fb7185"
+      ],
+      "garnishType": "citrus-wheel",
+      "ingredients": [
+        {
+          "item": "lemon-lime-soda",
+          "note": "Chilled",
+          "amount": "180 ml"
+        },
+        {
+          "item": "grenadine",
+          "amount": "15 ml"
+        }
+      ],
+      "steps": [
+        "Fill a Highball glass with ice cubes.",
+        "Pour in the chilled lemon-lime soda.",
+        "Drizzle the grenadine down the inside of the glass so it settles into a pink gradient. Don't stir."
+      ],
+      "servingNotes": "Garnish with an orange wheel on the rim. The classic zero-proof pour, ready from the bar with no fresh juice needed."
+    },
+    {
+      "id": "sunrise-citrus-fizz",
+      "name": "Sunrise Citrus Fizz",
+      "type": "Mocktail",
+      "vibe": "Tropical & Fruity",
+      "glass": "Highball",
+      "method": "Build & Layer",
+      "ice": "Cubed Ice",
+      "colors": [
+        "#fdba74",
+        "#e11d48"
+      ],
+      "garnishType": "citrus-wheel",
+      "ingredients": [
+        {
+          "item": "orange",
+          "note": "Chilled",
+          "amount": "120 ml"
+        },
+        {
+          "item": "lemon-lime-soda",
+          "amount": "Top (60 ml)"
+        },
+        {
+          "item": "grenadine",
+          "amount": "15 ml"
+        }
+      ],
+      "steps": [
+        "Fill a Highball glass with ice cubes and pour in the orange juice.",
+        "Top with lemon-lime soda.",
+        "Slowly pour the grenadine down the side so it sinks and blooms into a sunrise."
+      ],
+      "servingNotes": "Orange wheel on the rim. Serve unstirred so guests see the red-to-gold gradient."
+    },
+    {
+      "id": "orange-mint-nojito",
+      "name": "Orange Mint Nojito",
+      "type": "Mocktail",
+      "vibe": "Refreshing & Crisp",
+      "glass": "Highball",
+      "method": "Build & Stir",
+      "ice": "Crushed Ice",
+      "colors": [
+        "#fed7aa",
+        "#f59e0b"
+      ],
+      "garnishType": "mint-lime",
+      "ingredients": [
+        {
+          "item": "mint-mojito-syrup",
+          "amount": "20 ml"
+        },
+        {
+          "item": "orange",
+          "amount": "60 ml"
+        },
+        {
+          "item": "lime",
+          "amount": "15 ml"
+        },
+        {
+          "item": "soda",
+          "amount": "Top (90 ml)"
+        }
+      ],
+      "steps": [
+        "Add the mint mojito syrup, orange juice and lime juice to a Highball glass.",
+        "Pack the glass with crushed ice.",
+        "Top with club soda and lift gently from the bottom with a barspoon."
+      ],
+      "servingNotes": "Garnish with a slapped mint sprig and a lime wheel. Brighter and fruitier than a classic virgin mojito."
+    },
+    {
+      "id": "orange-creamsicle-float",
+      "name": "Orange Creamsicle Float",
+      "type": "Mocktail",
+      "vibe": "Rich & Dessert",
+      "glass": "Highball",
+      "method": "Shake & Top",
+      "ice": "Cubed Ice",
+      "colors": [
+        "#fed7aa",
+        "#fb923c"
+      ],
+      "garnishType": "orange-twist",
+      "ingredients": [
+        {
+          "item": "orange",
+          "amount": "120 ml"
+        },
+        {
+          "item": "vanilla-syrup",
+          "amount": "15 ml"
+        },
+        {
+          "item": "dairy",
+          "note": "Chilled",
+          "amount": "45 ml"
+        },
+        {
+          "item": "soda",
+          "amount": "Top (30 ml)"
+        }
+      ],
+      "steps": [
+        "Shake the orange juice, vanilla syrup and cream hard with ice for 10 seconds.",
+        "Strain into an ice-filled Highball glass.",
+        "Top with a splash of club soda for a light, foamy head."
+      ],
+      "servingNotes": "Express an orange twist over the top. Tastes like the ice-lolly from childhood summers."
+    },
+    {
+      "id": "island-sunset-punch",
+      "name": "Island Sunset Punch",
+      "type": "Mocktail",
+      "vibe": "Tropical & Fruity",
+      "glass": "Hurricane",
+      "method": "Shake & Layer",
+      "ice": "Crushed Ice",
+      "colors": [
+        "#fde047",
+        "#f97316"
+      ],
+      "garnishType": "umbrella-straw",
+      "ingredients": [
+        {
+          "item": "pineapple",
+          "amount": "60 ml"
+        },
+        {
+          "item": "orange",
+          "amount": "60 ml"
+        },
+        {
+          "item": "passion-fruit-syrup",
+          "amount": "15 ml"
+        },
+        {
+          "item": "soda",
+          "amount": "Top (30 ml)"
+        },
+        {
+          "item": "grenadine",
+          "amount": "10 ml"
+        }
+      ],
+      "steps": [
+        "Shake the pineapple juice, orange juice and passion fruit syrup with ice.",
+        "Strain into a Hurricane glass packed with crushed ice and top with club soda.",
+        "Sink the grenadine down the side for a sunset layer."
+      ],
+      "servingNotes": "Cocktail umbrella and a long straw. Scales well into a punch bowl for parties (multiply by the number of guests)."
+    },
+    {
+      "id": "blue-lagoon-zero",
+      "name": "Blue Lagoon Zero",
+      "type": "Mocktail",
+      "vibe": "Refreshing & Crisp",
+      "glass": "Hurricane",
+      "method": "Build & Stir",
+      "ice": "Crushed Ice",
+      "colors": [
+        "#7dd3fc",
+        "#2563eb"
+      ],
+      "garnishType": "citrus-wheel",
+      "ingredients": [
+        {
+          "item": "cacao-blue-syrup",
+          "amount": "20 ml"
+        },
+        {
+          "item": "lemon",
+          "amount": "15 ml"
+        },
+        {
+          "item": "lemon-lime-soda",
+          "amount": "150 ml"
+        }
+      ],
+      "steps": [
+        "Add the Cacao Blue syrup and lemon juice to a Hurricane glass.",
+        "Fill with crushed ice.",
+        "Top with lemon-lime soda and stir once to an even electric blue."
+      ],
+      "servingNotes": "Lemon wheel and a straw. A crowd-pleaser for the zero-proof crowd."
+    },
+    {
+      "id": "strawberry-lemonade-fizz",
+      "name": "Strawberry Lemonade Fizz",
+      "type": "Mocktail",
+      "vibe": "Refreshing & Crisp",
+      "glass": "Highball",
+      "method": "Build & Stir",
+      "ice": "Cubed Ice",
+      "colors": [
+        "#fda4af",
+        "#e11d48"
+      ],
+      "garnishType": "berry-rim",
+      "ingredients": [
+        {
+          "item": "strawberry-syrup",
+          "amount": "20 ml"
+        },
+        {
+          "item": "lemon",
+          "amount": "25 ml"
+        },
+        {
+          "item": "lemon-lime-soda",
+          "amount": "120 ml"
+        }
+      ],
+      "steps": [
+        "Add the strawberry syrup and lemon juice to a Highball glass.",
+        "Fill with ice cubes.",
+        "Top with lemon-lime soda and stir gently."
+      ],
+      "servingNotes": "Sugar-rim the glass first if you like, then garnish with a lemon wheel."
+    },
+    {
+      "id": "coconut-pineapple-cooler",
+      "name": "Coconut Pineapple Cooler",
+      "type": "Mocktail",
+      "vibe": "Tropical & Fruity",
+      "glass": "Hurricane",
+      "method": "Shake & Top",
+      "ice": "Crushed Ice",
+      "colors": [
+        "#fef9c3",
+        "#facc15"
+      ],
+      "garnishType": "umbrella-straw",
+      "ingredients": [
+        {
+          "item": "pineapple",
+          "amount": "90 ml"
+        },
+        {
+          "item": "coconut-syrup",
+          "amount": "20 ml"
+        },
+        {
+          "item": "lime",
+          "amount": "10 ml"
+        },
+        {
+          "item": "soda",
+          "amount": "Top (60 ml)"
+        }
+      ],
+      "steps": [
+        "Shake the pineapple juice, coconut syrup and lime juice with ice until frothy.",
+        "Strain into a Hurricane glass over crushed ice.",
+        "Top with club soda."
+      ],
+      "servingNotes": "A light, fizzy take on a virgin piña colada. Umbrella and straw."
+    },
+    {
+      "id": "cranberry-orange-mule",
+      "name": "Cranberry Orange Mule",
+      "type": "Mocktail",
+      "vibe": "Herbal & Bold",
+      "glass": "Highball",
+      "method": "Build & Stir",
+      "ice": "Cubed Ice",
+      "colors": [
+        "#fda4af",
+        "#be123c"
+      ],
+      "garnishType": "mint-lime",
+      "ingredients": [
+        {
+          "item": "cranberry",
+          "amount": "60 ml"
+        },
+        {
+          "item": "orange",
+          "amount": "30 ml"
+        },
+        {
+          "item": "lime",
+          "amount": "15 ml"
+        },
+        {
+          "item": "ginger",
+          "note": "Ginger beer works best",
+          "amount": "Top (100 ml)"
+        }
+      ],
+      "steps": [
+        "Add the cranberry, orange and lime juice to an ice-filled Highball glass.",
+        "Top with ginger beer.",
+        "Stir once from the bottom."
+      ],
+      "servingNotes": "Lime wheel and a mint sprig. Spicy, tart and festive."
+    },
+    {
+      "id": "cranberry-sparkler",
+      "name": "Cranberry Sparkler",
+      "type": "Mocktail",
+      "vibe": "Refreshing & Crisp",
+      "glass": "Flute",
+      "method": "Build",
+      "ice": "No Ice (Pre-Chilled)",
+      "colors": [
+        "#fecdd3",
+        "#be123c"
+      ],
+      "garnishType": "berry-rim",
+      "ingredients": [
+        {
+          "item": "cranberry",
+          "note": "Well chilled",
+          "amount": "75 ml"
+        },
+        {
+          "item": "lime",
+          "amount": "5 ml"
+        },
+        {
+          "item": "lemon-lime-soda",
+          "note": "Well chilled",
+          "amount": "75 ml"
+        }
+      ],
+      "steps": [
+        "Chill the flute, cranberry juice and soda well beforehand.",
+        "Pour the cranberry and lime juice into the flute.",
+        "Top slowly with lemon-lime soda to keep the bubbles."
+      ],
+      "servingNotes": "A zero-proof toast drink. Hand these out when the bubbly comes out."
+    },
+    {
+      "id": "orange-espresso-tonic",
+      "name": "Orange Espresso Tonic",
+      "type": "Mocktail",
+      "vibe": "Herbal & Bold",
+      "glass": "Highball",
+      "method": "Build & Layer",
+      "ice": "Cubed Ice",
+      "colors": [
+        "#fdba74",
+        "#78350f"
+      ],
+      "garnishType": "orange-twist",
+      "ingredients": [
+        {
+          "item": "orange",
+          "amount": "45 ml"
+        },
+        {
+          "item": "tonic",
+          "amount": "120 ml"
+        },
+        {
+          "item": "espresso",
+          "note": "Chilled",
+          "amount": "45 ml"
+        }
+      ],
+      "steps": [
+        "Fill a Highball glass with ice and add the orange juice.",
+        "Top with tonic water.",
+        "Slowly pour the chilled espresso over the back of a spoon so it floats on top."
+      ],
+      "servingNotes": "Express an orange twist over the glass. Bitter, bright and very grown-up for a mocktail."
+    },
+    {
+      "id": "vanilla-cream-cola",
+      "name": "Vanilla Cream Cola",
+      "type": "Mocktail",
+      "vibe": "Rich & Dessert",
+      "glass": "Highball",
+      "method": "Build & Float",
+      "ice": "Cubed Ice",
+      "colors": [
+        "#a16207",
+        "#422006"
+      ],
+      "garnishType": "none",
+      "ingredients": [
+        {
+          "item": "cola",
+          "note": "Chilled",
+          "amount": "180 ml"
+        },
+        {
+          "item": "vanilla-syrup",
+          "amount": "15 ml"
+        },
+        {
+          "item": "dairy",
+          "amount": "30 ml"
+        }
+      ],
+      "steps": [
+        "Add the vanilla syrup to an ice-filled Highball glass.",
+        "Top with chilled cola and stir gently.",
+        "Float the cream on top and serve with a straw so guests can stir it in."
+      ],
+      "servingNotes": "Soda-fountain style. Serve with a long spoon."
     }
   ]
 };

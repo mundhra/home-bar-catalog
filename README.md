@@ -1,6 +1,6 @@
 # 🍸 The Private Reserve — Home Bar Cocktail & Mocktail Catalog
 
-An installable, offline-capable web app that catalogs a personal home bar and serves **57 recipes** built around it: cocktails, zero-proof mocktails and low-ABV wine drinks. It tracks stock and mixers on hand to show what you can make tonight, lets you add and edit recipes in the app, and shares any recipe as an image.
+An installable, offline-capable web app that catalogs a personal home bar and serves **69 recipes** built around it: cocktails, zero-proof mocktails and low-ABV wine drinks. It tracks stock and mixers on hand to show what you can make tonight, lets you add and edit recipes in the app, and shares any recipe as an image.
 
 🔗 **Live app (GitHub Pages):** <https://mundhra.github.io/home-bar-catalog/>
 
@@ -8,7 +8,7 @@ An installable, offline-capable web app that catalogs a personal home bar and se
 
 ## ✨ Features
 
-* **57 recipes:** 41 cocktails, 10 mocktails (8 of them kombucha-based) and 6 wine & low-ABV drinks. Every recipe is built on the stocked bottles and syrups below, plus common mixers where noted.
+* **69 recipes:** 41 cocktails, 22 zero-proof mocktails (8 kombucha-based, plus orange-juice, lemon-lime soda and club-soda builds) and 6 wine & low-ABV drinks. Every recipe is built on the stocked bottles and syrups below, plus common mixers where noted.
 * **Glassware & garnish illustrations:** each drink gets an inline SVG of its glass (Highball, Rocks, Coupe, Martini, Copa Balloon, Hurricane, Champagne Flute) showing the drink colour, ice and garnish. The **Glassware & Garnish Guide** tab explains when to use each glass.
 * **Filtering:**
   * **Search** by drink name, flavour, glass, notes or ingredient.
@@ -42,7 +42,7 @@ An installable, offline-capable web app that catalogs a personal home bar and se
 * **Kombucha** *(Ginger, Berry, Citrus, Original)*
 
 ### On-demand staples (not stock-tracked)
-Club soda, tonic water, ginger ale/beer, cola, fresh limes and lemons, orange, pineapple and cranberry juice, milk/cream, and espresso/cold brew. Mark them on hand or not in the Shopping dialog or on the Inventory tab. Soda, tonic, ginger ale/beer and cola are *staples*: on hand unless you untick them.
+Club soda, tonic water, ginger ale/beer, cola, lemon-lime soda (Sprite, 7UP), fresh limes and lemons, orange, pineapple and cranberry juice, milk/cream, and espresso/cold brew. Mark them on hand or not in the Shopping dialog or on the Inventory tab. Soda, tonic, ginger ale/beer, cola and lemon-lime soda are *staples*: on hand unless you untick them.
 
 ---
 
