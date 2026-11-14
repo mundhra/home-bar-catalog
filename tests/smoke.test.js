@@ -46,7 +46,8 @@ window.addEventListener("load", () => setTimeout(async () => {
   const countWhere = (av, n) => RAW.recipes.filter(r => missingRaw(r, av).length === n).length;
   const filterCount = value => { setReadinessFilter(value); const c = cards(); setReadinessFilter("ALL"); return c; };
 
-  const mode = location.hash.slice(1) || "main";
+  // Scenario from ?mode= (when the app itself needs the hash, e.g. guest links) or #scenario.
+  const mode = new URLSearchParams(location.search).get("mode") || location.hash.slice(1) || "main";
   // Over http (offline tests only): keep a slow request to the test server in flight so
   // Chrome's virtual clock waits for service-worker and Cache Storage work.
   const holdClock = () => {
@@ -161,6 +162,20 @@ window.addEventListener("load", () => setTimeout(async () => {
       ok("stylesheet applied offline", getComputedStyle(document.body).backgroundColor === "rgb(15, 17, 21)");
       ok("all recipes render offline", cards() === N, `${cards()}/${N}`);
       ok("manifest linked", !!document.querySelector('link[rel="manifest"]'));
+
+    } else if (mode === "guest") {
+      // Opened as ?mode=guest#menu=Zz%20Guest%20Night~<3 real ids>,no-such-drink
+      ok("guest mode active", !!guestMenu && document.body.classList.contains("guest-mode"));
+      ok("host UI hidden", ["headerActions", "mainNav", "view-menu", "view-inventory", "view-party"]
+        .every(id => document.getElementById(id).classList.contains("hidden")));
+      ok("shows the menu's drinks, skipping unknown ids", document.querySelectorAll("#guestGrid article").length === 3,
+        document.querySelectorAll("#guestGrid article").length);
+      ok("menu title from the link", document.getElementById("view-guest").textContent.includes("Zz Guest Night"));
+      openRecipeModal(guestMenu.ids[0]);
+      const gt = document.getElementById("modalContent").textContent;
+      ok("guest recipe view is read-only", !gt.includes("Edit Recipe") && !gt.includes("Duplicate") && !gt.includes("In Stock") && !gt.includes("Can make now"));
+      ok("guest still sees amounts", RAW.recipes.find(r => r.id === guestMenu.ids[0]).ingredients.every(i => gt.includes(i.amount)));
+      closeRecipeModal();
 
     } else if (mode === "broken") {
       ok("missing catalog: error state shown", document.getElementById("recipeGrid").textContent.includes("couldn't be loaded"));
@@ -293,6 +308,51 @@ window.addEventListener("load", () => setTimeout(async () => {
       const ed = st().ingredients;
       ok("editor saves substitute and optional changes", !ed[0].substitutes && ed[0].optional === true && ed[1].substitutes?.[0] === M.id && ed[1].optional === true);
       closeRecipeModal();
+      resetToShippedCatalog();
+
+      // ---------- party menus ----------
+      const ids3 = RAW.recipes.slice(0, 3).map(r => r.id);
+      openMenuEditor();
+      setVal("me_title", "Zz Party");
+      saveMenuEditor();
+      ok("menu needs at least one drink", !document.getElementById("me_errors").classList.contains("hidden") && partyMenus.length === 0);
+      ids3.forEach(id => toggleMenuDrink(id, true));
+      setMenuEditorFilter("CAN");
+      ok("menu editor 'Can make now' filter", document.querySelectorAll("#me_list label").length === catalog.recipes.filter(canMakeNow).length);
+      setMenuEditorFilter("SEL");
+      ok("menu editor 'Selected' filter", document.querySelectorAll("#me_list label").length === 3);
+      saveMenuEditor();
+      const pm = partyMenus[0];
+      ok("menu saved", partyMenus.length === 1 && JSON.stringify(pm.recipeIds) === JSON.stringify(ids3) && LS("private_reserve_menus_v1").length === 1);
+      ok("party tab lists it", document.getElementById("partyMenus").textContent.includes("Zz Party") && document.getElementById("partyTabCount").textContent === "1");
+      const parsedLink = parseMenuHash("#" + buildMenuLink(pm).split("#")[1]);
+      ok("guest link round-trips", parsedLink.title === "Zz Party" && JSON.stringify(parsedLink.ids) === JSON.stringify(ids3));
+      ok("bad links rejected or cleaned", parseMenuHash("#menu=x") === null && parseMenuHash("#main") === null
+        && parseMenuHash("#menu=%E0~a,BAD ID,b").ids.join() === "a,b");
+      openMenuShare(pm.id);
+      ok("QR code drawn", !!document.querySelector("#menuQr svg path, #menuQr svg rect"));
+      ok("no local-only warning for published drinks", !document.getElementById("menuShareBody").textContent.includes("only on this device"));
+      closeMenuShare();
+      const localDrink = { ...JSON.parse(JSON.stringify(RAW.recipes[0])), id: "zz-local-only", name: "Zz Local Only" };
+      commitCatalog({ ...catalog, recipes: [...catalog.recipes, localDrink] });
+      partyMenus[0].recipeIds.push("zz-local-only"); saveMenus();
+      openMenuShare(pm.id);
+      ok("warns about drinks guests can't see", document.getElementById("menuShareBody").textContent.includes("Zz Local Only"));
+      closeMenuShare();
+      window.print = () => {};
+      printMenu(pm.id);
+      ok("print view: menu drinks + QR", document.querySelectorAll("#guestGrid article").length === 4 && !!document.querySelector("#view-guest svg path, #view-guest svg rect")
+        && document.body.classList.contains("printing-menu"));
+      window.dispatchEvent(new Event("afterprint"));
+      ok("print view cleared afterwards", !document.body.classList.contains("printing-menu") && document.getElementById("view-guest").innerHTML === "");
+      downloads = []; exportBackup();
+      const menuBackup = JSON.parse(downloads[0].text);
+      ok("backup includes party menus", Array.isArray(menuBackup.menus) && menuBackup.menus[0].title === "Zz Party");
+      partyMenus = []; saveMenus();
+      await handleImportFile(fileOf(JSON.stringify(menuBackup), "b.json"));
+      ok("import restores party menus", partyMenus.length === 1 && partyMenus[0].recipeIds.length === 4);
+      openMenuEditor(pm.id); deleteMenuFromEditor();
+      ok("menu deleted", partyMenus.length === 0 && LS("private_reserve_menus_v1").length === 0);
       resetToShippedCatalog();
 
       // ---------- recipe editor ----------

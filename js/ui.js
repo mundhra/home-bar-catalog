@@ -6,7 +6,7 @@
 // INTERACTION HANDLERS (tabs, filters, modals)
 // =========================================================================
 function switchTab(tabName) {
-  ["menu", "inventory", "glassware"].forEach(t => {
+  ["menu", "inventory", "glassware", "party"].forEach(t => {
     document.getElementById(`view-${t}`).classList.toggle("hidden", t !== tabName);
     const btn = document.getElementById(`tab-${t}`);
     const base = "tab-btn whitespace-nowrap shrink-0 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-sm transition flex items-center gap-2";
@@ -96,20 +96,21 @@ function openRecipeModal(id) {
   if (!r) return;
   const { lowItems, outItems } = getRecipeStockAnalysis(r);
 
+  const guest = !!guestMenu; // guest menu: read-only, no stock or editing
   // What's needed to make it now (tiles only show a short badge).
   const missing = missingItems(r);
   const missingMixers = missing.filter(it => !isTracked(it));
-  const readiness = missing.length === 0
+  const readiness = guest ? "" : missing.length === 0
     ? `<span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 font-semibold">✓ Can make now</span>`
     : "";
-  const missingNote = missingMixers.length ? `
+  const missingNote = !guest && missingMixers.length ? `
       <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 text-xs text-gray-300 flex flex-wrap items-center justify-between gap-2">
         <p><strong class="text-white">Not on hand:</strong> ${esc(missingMixers.map(it => it.name).join(", "))}</p>
         <button onclick="closeRecipeModal(); openShoppingModal();" class="px-3 py-1 rounded-lg bg-obsidian/80 text-gold border border-gold/30 font-semibold hover:bg-gold hover:text-obsidian transition no-print">Shopping list</button>
       </div>` : "";
 
   let modalAlert = "";
-  if (outItems.length > 0 || lowItems.length > 0) {
+  if (!guest && (outItems.length > 0 || lowItems.length > 0)) {
     modalAlert = `
       <div class="p-3.5 rounded-2xl ${outItems.length > 0 ? 'bg-red-500/15 border-red-500/40 text-red-200' : 'bg-amber-500/15 border-amber-500/40 text-amber-200'} border text-xs flex flex-wrap items-center justify-between gap-2">
         <div>
@@ -121,6 +122,17 @@ function openRecipeModal(id) {
   }
 
   const ingRows = r.ingredients.map(i => {
+    if (guest) {
+      const extras = ingredientExtrasText(i);
+      return `
+      <div class="flex items-center justify-between gap-3 py-2.5 px-3.5 rounded-xl bg-obsidian/80 border border-white/5">
+        <span class="min-w-0">
+          <span class="block text-sm font-medium text-white">${esc(ingredientLabel(i))}</span>
+          ${extras ? `<span class="block text-[11px] text-gray-400">${esc(extras)}</span>` : ""}
+        </span>
+        <span class="font-mono text-sm text-gold font-semibold shrink-0">${esc(i.amount)}</span>
+      </div>`;
+    }
     const it = i.item ? itemsById.get(i.item) : null;
     const st = isTracked(it) ? getItemStockStatus(it.id) : null;
     const usingSub = !!it && !isItemAvailable(it) && ingredientCandidates(i).slice(1).some(isItemAvailable);
@@ -160,7 +172,7 @@ function openRecipeModal(id) {
             <span class="text-xs px-2.5 py-0.5 rounded-full bg-gold/20 text-gold font-semibold">${esc(r.type)}</span>
             <span class="text-xs px-2.5 py-0.5 rounded-full bg-white/10 text-gray-200">${esc(r.vibe)}</span>
             ${readiness}
-            ${isBarReady(r) ? `<span class="text-xs px-2.5 py-0.5 rounded-full bg-white/10 text-gray-200">Bar-Ready</span>` : ""}
+            ${!guest && isBarReady(r) ? `<span class="text-xs px-2.5 py-0.5 rounded-full bg-white/10 text-gray-200">Bar-Ready</span>` : ""}
           </div>
           <h2 class="font-serif text-3xl sm:text-4xl font-bold text-white">${esc(r.name)}</h2>
         </div>
@@ -209,14 +221,14 @@ function openRecipeModal(id) {
         <p class="text-sm text-gray-200 leading-relaxed">${esc(r.servingNotes)}</p>
       </div>` : ""}
 
-      <div class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-white/10 no-print">
+      ${guest ? "" : `<div class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-white/10 no-print">
         <button onclick="deleteRecipe('${r.id}')" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-red-300 hover:bg-red-500/15 border border-red-500/30 transition">Delete</button>
         <div class="w-full sm:w-auto grid grid-cols-3 sm:flex gap-2">
           <button onclick="openShareDialog('${r.id}')" class="px-3 py-2 rounded-xl text-xs font-semibold text-gold bg-gold/10 hover:bg-gold/20 border border-gold/30 transition"><span class="sm:hidden">Share</span><span class="hidden sm:inline">Share as Image</span></button>
           <button onclick="openRecipeEditor('duplicate', '${r.id}')" class="px-3 py-2 rounded-xl text-xs font-semibold text-gray-200 bg-white/5 hover:bg-white/15 border border-white/10 transition">Duplicate</button>
           <button onclick="openRecipeEditor('edit', '${r.id}')" class="px-3 py-2 rounded-xl text-xs font-semibold bg-gold hover:bg-gold-light text-obsidian transition"><span class="sm:hidden">Edit</span><span class="hidden sm:inline">Edit Recipe</span></button>
         </div>
-      </div>
+      </div>`}
     </div>`;
 
   showModal("recipeModal");

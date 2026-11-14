@@ -36,7 +36,7 @@
           </div>
         </div>
 
-        <div class="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2 no-print shrink-0">
+        <div id="headerActions" class="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2 no-print shrink-0">
           <button onclick="openStockDrawer()" title="Stock Manager" aria-label="Stock Manager" class="p-2 lg:px-3.5 lg:py-2 rounded-xl bg-surface hover:bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-medium flex items-center gap-2 transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
             <span class="hidden lg:inline">Stock Manager</span>
@@ -60,7 +60,7 @@
       </div>
 
       <!-- Main Navigation Tabs (short labels on phones) -->
-      <nav class="flex gap-1.5 sm:gap-2 mt-2.5 pt-2 sm:mt-4 sm:pt-3 border-t border-white/10 overflow-x-auto scrollbar-thin no-print" aria-label="Tabs">
+      <nav id="mainNav" class="flex gap-1.5 sm:gap-2 mt-2.5 pt-2 sm:mt-4 sm:pt-3 border-t border-white/10 overflow-x-auto scrollbar-thin no-print" aria-label="Tabs">
         <button onclick="switchTab('menu')" id="tab-menu" class="tab-btn whitespace-nowrap shrink-0 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 bg-gold text-obsidian shadow">
           <span class="sm:hidden">Menu</span><span class="hidden sm:inline">Interactive Drink Menu</span>
           <span class="px-2 py-0.5 text-xs rounded-full bg-obsidian/20 font-bold" id="totalRecipeCount">57</span>
@@ -72,6 +72,10 @@
         <button onclick="switchTab('glassware')" id="tab-glassware" class="tab-btn whitespace-nowrap shrink-0 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 text-gray-300 hover:text-white hover:bg-white/5">
           <span class="sm:hidden">Glassware</span><span class="hidden sm:inline">Glassware & Garnish Guide</span>
           <span class="px-2 py-0.5 text-xs rounded-full bg-obsidian/20 font-bold">7<span class="hidden sm:inline"> Styles</span></span>
+        </button>
+        <button onclick="switchTab('party')" id="tab-party" class="tab-btn whitespace-nowrap shrink-0 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 text-gray-300 hover:text-white hover:bg-white/5">
+          <span class="sm:hidden">Party</span><span class="hidden sm:inline">Party Menus</span>
+          <span class="px-2 py-0.5 text-xs rounded-full bg-obsidian/20 font-bold" id="partyTabCount">0</span>
         </button>
       </nav>
     </div>
@@ -248,6 +252,21 @@
       </div>
     </section>
 
+    <!-- ==================== TAB 4: PARTY MENUS ==================== -->
+    <section id="view-party" class="hidden space-y-6">
+      <div class="glass-card rounded-2xl p-6 border-l-4 border-l-gold flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="font-serif text-2xl sm:text-3xl font-bold text-white">Party Menus</h2>
+          <p class="text-sm text-gray-300 mt-1">Pick the drinks you'll serve. Guests open a link or scan a QR code to see a clean menu, with no stock levels or editing.</p>
+        </div>
+        <button onclick="openMenuEditor()" class="shrink-0 px-4 py-2 rounded-xl bg-gold hover:bg-gold-light text-obsidian text-sm font-semibold no-print">+ New Menu</button>
+      </div>
+      <div id="partyMenus" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </section>
+
+    <!-- ==================== GUEST MENU (opened from a #menu= link, or for printing) ==================== -->
+    <section id="view-guest" class="hidden space-y-6"></section>
+
   </main>
 
   <!-- ==================== RECIPE DETAIL MODAL ==================== -->
@@ -362,6 +381,21 @@
     </div>
   </div>
 
+  <!-- ==================== PARTY MENU EDITOR ==================== -->
+  <div id="menuEditorModal" class="fixed inset-0 z-[60] hidden items-start sm:items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto no-print" onclick="closeMenuEditor()">
+    <div id="menuEditorBody" class="glass-card bg-charcoal border border-gold/40 rounded-3xl max-w-2xl w-full shadow-2xl my-auto" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Party menu editor"></div>
+  </div>
+
+  <!-- ==================== PARTY MENU SHARE / QR ==================== -->
+  <div id="menuShareModal" class="fixed inset-0 z-[60] hidden items-start sm:items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto no-print" onclick="closeMenuShare()">
+    <div class="glass-card bg-charcoal border border-gold/40 rounded-3xl max-w-sm w-full p-5 sm:p-6 shadow-2xl my-auto relative" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Share party menu">
+      <button onclick="closeMenuShare()" class="absolute top-3 right-3 p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white" aria-label="Close">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <div id="menuShareBody" class="space-y-4"></div>
+    </div>
+  </div>
+
   <input type="file" id="importFileInput" accept=".json,.js,application/json,text/javascript" class="hidden" onchange="handleImportFile(this)" />
   <div id="toast" class="hidden" role="status" aria-live="polite"></div>
   <div id="updateBanner" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-[85] items-center gap-3 px-4 py-2.5 rounded-xl bg-charcoal border border-gold/50 shadow-2xl text-sm text-gray-100 whitespace-nowrap no-print" role="status" aria-live="polite">
@@ -379,6 +413,8 @@
   <script src="js/editors.js"></script>
   <script src="js/data-panel.js"></script>
   <script src="js/share.js"></script>
+  <script src="js/vendor/qrcode.js"></script>
+  <script src="js/party.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

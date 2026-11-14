@@ -7,6 +7,8 @@ document.addEventListener("keydown", (e) => {
   if (e.key !== "Escape") return;
   if (isModalOpen("recipeEditorModal")) return closeRecipeEditor();
   if (isModalOpen("itemEditorModal")) return closeItemEditor();
+  if (isModalOpen("menuEditorModal")) return closeMenuEditor();
+  closeMenuShare();
   closeRecipeModal();
   closeShoppingModal();
   closeStockDrawer();
@@ -21,13 +23,21 @@ window.addEventListener("DOMContentLoaded", () => {
   loadCatalog();
   stockStatuses = loadStockStatuses();
   mixerOnHand = loadMixerOnHand();
+  partyMenus = loadMenus();
   refreshAllViews();
   renderGlasswareGuide();
+  const guest = parseMenuHash(location.hash);
+  if (guest) enterGuestMode(guest);
   if (shippedChangedSinceEdit()) {
     showToast("The shipped catalog changed since your edits. See Catalog Data.", "warn");
   } else if (shippedErrors.length && !usingLocalCopy) {
     showToast("The catalog couldn't be loaded. See Catalog Data.", "error");
   }
+});
+
+// Opening or leaving a guest-menu link while the page is open: reload into the right mode.
+window.addEventListener("hashchange", () => {
+  if (!!parseMenuHash(location.hash) !== !!guestMenu) location.reload();
 });
 
 // New-version check. GitHub Pages stamps every file with the deploy time, so one

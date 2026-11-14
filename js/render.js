@@ -14,6 +14,7 @@ function refreshAllViews() {
   renderInventory();
   renderStockDrawer();
   renderShoppingChecklist();
+  renderParty();
   if (isModalOpen("dataModal")) renderDataModal();
 }
 

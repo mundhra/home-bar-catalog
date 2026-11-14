@@ -34,7 +34,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 TESTS = ROOT / "tests"
 GENERATED = TESTS / ".generated.html"
-SCENARIOS = ["main", "legacy", "stale", "same", "broken"]
+SCENARIOS = ["main", "legacy", "stale", "same", "broken", "guest"]
 HTTP_SCENARIOS = ["share", "update"]      # need real time (canvas, fonts): served over local http
 EXTRA = HTTP_SCENARIOS + ["offline"]
 
@@ -188,9 +188,17 @@ def results_from(dom, stderr):
     return unescape(m.group(1)).splitlines()
 
 
+def scenario_url(base, scenario):
+    if scenario == "guest":
+        # The app needs the hash for the guest link, so the scenario goes in the query string.
+        ids = [r["id"] for r in load_catalog()["recipes"][:3]] + ["no-such-drink"]
+        return f"{base}?mode=guest#menu=Zz%20Guest%20Night~{','.join(ids)}"
+    return f"{base}#{scenario}"
+
+
 def run_scenario(browser, scenario):
     with tempfile.TemporaryDirectory(prefix="bar-tests-") as profile:
-        return results_from(*dump_dom(browser, f"{GENERATED.as_uri()}#{scenario}", profile))
+        return results_from(*dump_dom(browser, scenario_url(GENERATED.as_uri(), scenario), profile))
 
 
 class TestServer(http.server.SimpleHTTPRequestHandler):

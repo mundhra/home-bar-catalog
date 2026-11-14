@@ -37,6 +37,13 @@ body {
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: #d4a359;
 }
+/* Printing a party menu: only the guest view (with its QR code) goes to paper. */
+@media print {
+  body.printing-menu header,
+  body.printing-menu main > section:not(#view-guest) { display: none !important; }
+  body.printing-menu #view-guest { display: block !important; }
+}
+
 @media print {
   body {
     background: #ffffff !important;
