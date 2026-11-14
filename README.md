@@ -1,6 +1,6 @@
 # 🍸 The Private Reserve — Home Bar Cocktail & Mocktail Catalog
 
-A single-file web app that catalogs a personal home bar and serves **57 recipes** built around it: cocktails, zero-proof mocktails and low-ABV wine drinks. It includes SVG glassware illustrations, per-bottle stock tracking and a restock checklist.
+An installable, offline-capable web app that catalogs a personal home bar and serves **57 recipes** built around it: cocktails, zero-proof mocktails and low-ABV wine drinks. It tracks stock and mixers on hand to show what you can make tonight, lets you add and edit recipes in the app, and shares any recipe as an image.
 
 🔗 **Live app (GitHub Pages):** <https://mundhra.github.io/home-bar-catalog/>
 
@@ -116,7 +116,7 @@ js/data-panel.js    export / import / download catalog.js / reset
 js/share.js         recipe card image (canvas) + share / download / copy
 js/main.js          key handling and start-up (loaded last)
 sw.js               service worker (offline support)
-manifest.webmanifest, icons/   home-screen app name, colours and icons
+manifest.webmanifest, icons/   home-screen app name, colours and icons (SVG sources in icons/src/)
 tests/              smoke tests (see Testing)
 package.json, tailwind.config.js   stylesheet build tooling only
 ```
