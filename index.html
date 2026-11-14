@@ -2645,41 +2645,6 @@
       }).join("");
     }
 
-    function renderInventoryMatrices() {
-      const syrupsGrid = document.getElementById("inventorySyrupsGrid");
-      syrupsGrid.innerHTML = SYRUPS_DATA.map(s => `
-        <div class="glass-card rounded-2xl p-4 flex flex-col justify-between gap-3">
-          <div>
-            <div class="flex items-center justify-between gap-2">
-              <h4 class="font-semibold text-white text-base">${s.name}</h4>
-              <span class="text-[11px] px-2 py-0.5 rounded-md bg-gold/15 text-gold font-medium">${s.profile}</span>
-            </div>
-            <p class="text-xs text-gray-300 mt-2 leading-relaxed">${s.notes}</p>
-          </div>
-          <button onclick="jumpToIngredient('${s.name}')" class="w-full py-2 rounded-xl bg-white/5 hover:bg-gold hover:text-obsidian text-gold text-xs font-semibold transition">
-            Filter Recipes with ${s.name} →
-          </button>
-        </div>
-      `).join("");
-
-      const spiritsGrid = document.getElementById("inventorySpiritsGrid");
-      spiritsGrid.innerHTML = SPIRITS_DATA.map(sp => `
-        <div class="glass-card rounded-2xl p-4 flex flex-col justify-between gap-3">
-          <div>
-            <div class="flex items-center justify-between gap-2">
-              <h4 class="font-semibold text-white text-base">${sp.name}</h4>
-              <span class="text-[11px] px-2 py-0.5 rounded-md bg-white/10 text-gray-200 font-medium">${sp.category}</span>
-            </div>
-            <p class="text-[11px] text-gold mt-0.5">${sp.profile}</p>
-            <p class="text-xs text-gray-300 mt-2 leading-relaxed">${sp.notes}</p>
-          </div>
-          <button onclick="jumpToIngredient('${sp.name}')" class="w-full py-2 rounded-xl bg-white/5 hover:bg-gold hover:text-obsidian text-gold text-xs font-semibold transition">
-            Filter Recipes with ${sp.name} →
-          </button>
-        </div>
-      `).join("");
-    }
-
     function renderGlasswareGuide() {
       const grid = document.getElementById("glasswareGuideGrid");
       if (!grid) return;
