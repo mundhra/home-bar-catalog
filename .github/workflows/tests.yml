@@ -19,5 +19,11 @@ jobs:
           npm ci --no-audit --no-fund
           npm run build:css
           git diff --exit-code -- css/app.css || { echo "::error::css/app.css is stale. Run 'npm run build:css' and commit it."; exit 1; }
+      - name: Upload the CSS CI built (to compare when the check above fails)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: css-built-on-ci
+          path: css/app.css
       - name: Static checks and headless-browser smoke tests (incl. offline)
         run: python3 tests/run.py
