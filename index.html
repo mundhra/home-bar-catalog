@@ -364,6 +364,10 @@
 
   <input type="file" id="importFileInput" accept=".json,.js,application/json,text/javascript" class="hidden" onchange="handleImportFile(this)" />
   <div id="toast" class="hidden" role="status" aria-live="polite"></div>
+  <div id="updateBanner" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-[85] items-center gap-3 px-4 py-2.5 rounded-xl bg-charcoal border border-gold/50 shadow-2xl text-sm text-gray-100 whitespace-nowrap no-print" role="status" aria-live="polite">
+    <span>A new version is available.</span>
+    <button onclick="location.reload()" class="px-3 py-1 rounded-lg bg-gold hover:bg-gold-light text-obsidian font-semibold text-xs">Reload</button>
+  </div>
 
   <!-- Catalog data (inventory + recipes), then the app scripts. Order matters. -->
   <script src="data/catalog.js"></script>

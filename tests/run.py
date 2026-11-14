@@ -3,7 +3,7 @@
 Smoke tests for The Private Reserve.
 
     python tests/run.py                 # static checks + every browser scenario
-    python tests/run.py main legacy     # only the named scenarios (also: share, offline)
+    python tests/run.py main legacy     # only the named scenarios (also: share, update, offline)
     CHROME=/path/to/chrome python tests/run.py
 
 Needs Python 3.8+ and Chrome, Chromium or Edge. No other dependencies.
@@ -35,7 +35,7 @@ ROOT = Path(__file__).resolve().parent.parent
 TESTS = ROOT / "tests"
 GENERATED = TESTS / ".generated.html"
 SCENARIOS = ["main", "legacy", "stale", "same", "broken"]
-HTTP_SCENARIOS = ["share"]      # need real time (canvas, fonts): served over local http
+HTTP_SCENARIOS = ["share", "update"]      # need real time (canvas, fonts): served over local http
 EXTRA = HTTP_SCENARIOS + ["offline"]
 
 # Runs before any app script: collect errors.

@@ -113,6 +113,21 @@ window.addEventListener("load", () => setTimeout(async () => {
       closeRecipeModal();
       release();
 
+    } else if (mode === "update") {
+      const release = holdClock();
+      await checkForUpdate(true);
+      const banner = document.getElementById("updateBanner");
+      ok("records the deployed version", typeof loadedVersion === "string" && loadedVersion.length > 0, String(loadedVersion));
+      ok("no banner when nothing changed", banner.classList.contains("hidden"));
+      loadedVersion = "an older deploy";
+      await checkForUpdate(true);
+      ok("Reload banner when a newer deploy exists", !banner.classList.contains("hidden"));
+      lastUpdateCheck = Date.now();
+      const before = lastUpdateCheck;
+      await checkForUpdate();
+      ok("background checks are throttled to once a minute", lastUpdateCheck === before);
+      release();
+
     } else if (mode === "pwa-install") {
       const release = holdClock();
       // Served over http by tests/run.py. Network requests keep Chrome's virtual clock

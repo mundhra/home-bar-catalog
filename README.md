@@ -58,7 +58,11 @@ Club soda, tonic water, ginger ale/beer, cola, lemon-lime soda (Sprite, 7UP), fr
 * **Android:** open it in **Chrome** and tap **Install app** (or ⋮ → **Add to Home screen**).
 
 It opens full-screen with its own icon and keeps working with no connection, after one online visit.
-When you're online it picks up the latest version on the next launch.
+
+**Updates are automatic.** About a minute after a push, GitHub Pages has the new version. Opening the
+app online loads it (each file is checked with GitHub, so there's no 10-minute cache delay), and if
+the app was already open, switching back to it shows **"A new version is available · Reload"**.
+The home-screen icon and name are the exception: iOS only picks those up if you remove and re-add the app.
 
 > **iPhone note:** the home-screen app has **its own storage**, separate from Safari. Stock levels,
 > mixers on hand and in-app edits made in Safari don't carry over. Move them with

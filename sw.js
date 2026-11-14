@@ -3,6 +3,8 @@
  *
  * - Same-origin files: network first (so a deploy shows up on the next online
  *   visit), falling back to the cache when offline or after NETWORK_TIMEOUT_MS.
+ *   Requests revalidate with the server ({cache: "no-cache"}) instead of trusting
+ *   GitHub Pages' 10-minute max-age; unchanged files come back as tiny 304s.
  *   Every successful response refreshes the cache.
  * - Google Fonts: cache first; cached on the first online visit.
  *
@@ -62,7 +64,7 @@ self.addEventListener("fetch", event => {
 
 async function networkFirst(request) {
   const cache = await caches.open(CACHE);
-  const fromNetwork = fetch(request).then(response => {
+  const fromNetwork = fetch(request, { cache: "no-cache" }).then(response => {
     if (response.ok) cache.put(request, response.clone());
     return response;
   });
