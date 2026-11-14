@@ -19,6 +19,7 @@ An installable, offline-capable web app that catalogs a personal home bar and se
 * **What can I make tonight?** Every card says *✓ Can make now*, *Need: Fresh Lime Juice* or *Missing 2*, based on your stock levels and the mixers you have on hand. The line above the grid shows how many drinks you can make now and how many are one ingredient away; tap either to filter.
 * **Shopping & mixers on hand:** tick the mixers and juices in the fridge (staples like soda and tonic start ticked). The dialog ranks the single items that would unlock the most drinks ("Fresh Lime Juice: unlocks 10 drinks") with a *Got it* button, and lists bottles marked Low or Out.
 * **Edit in the app:** add, edit, duplicate and delete recipes and inventory items, with export/import backups to move between devices. See *Editing Recipes & Inventory*.
+* **Favourites & ratings:** heart any drink and rate it 1–5 stars. Filter to *♥ Favourites* and sort by *Top rated* or *A–Z*. Saved on the device and included in backups.
 * **Party menus:** pick the drinks you'll serve into a named menu (Party tab). Share a guest link or QR code, or print it: guests see a clean, read-only menu with no stock levels or editing, and can tap a drink to see what's in it. Links only show drinks in the published catalog; the app warns if a menu includes drinks that exist only on your phone.
 * **Substitutes & optional ingredients:** a recipe can say "Fresh Lime Juice *or* Fresh Lemon Juice", or mark an ingredient optional. *Can make now* counts a drink as makeable if any listed option is in stock.
 * **Share a recipe as an image:** *Share as Image* in any recipe makes a 1080-px-wide card (name, glass illustration, ingredients, method, garnish) and opens the phone's share sheet. Desktop browsers offer Download and Copy instead. Works offline.
@@ -83,7 +84,7 @@ Open `index.html` directly in a browser. No server needed. (Offline support only
 * **Service worker** (`sw.js`) and **web app manifest** (`manifest.webmanifest`) for installing to the home screen and offline use.
 * **Inline SVG** for glassware and garnishes.
 * **`data/catalog.js`** holds all inventory items and recipes (see below).
-* **`localStorage`** (per browser): `private_reserve_stock_v2` (stock levels by item id; v1 name-keyed data migrates automatically), `private_reserve_menus_v1` (party menus), `private_reserve_onhand_v1` (which mixers are on hand; old `private_reserve_shopping_v1` checklist ticks migrate automatically) and `private_reserve_catalog_v1` (your edited copy of the catalog, if any).
+* **`localStorage`** (per browser): `private_reserve_stock_v2` (stock levels by item id; v1 name-keyed data migrates automatically), `private_reserve_menus_v1` (party menus), `private_reserve_ratings_v1` (favourites and star ratings), `private_reserve_onhand_v1` (which mixers are on hand; old `private_reserve_shopping_v1` checklist ticks migrate automatically) and `private_reserve_catalog_v1` (your edited copy of the catalog, if any).
 
 ### Styles (the one build step)
 

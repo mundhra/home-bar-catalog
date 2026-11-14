@@ -414,3 +414,47 @@ function markAvailable(id) {
   if (isTracked(it)) setItemStockStatus(id, "in");
   else setOnHand(id, true);
 }
+
+// =========================================================================
+// FAVOURITES & RATINGS (per browser; included in backups)
+// =========================================================================
+let recipePrefs = {}; // recipeId -> { fav: true, stars: 1..5 }
+
+function sanitizePrefs(obj) {
+  const out = {};
+  if (!obj || typeof obj !== "object") return out;
+  Object.entries(obj).forEach(([id, p]) => {
+    if (!ID_RE.test(id) || !p || typeof p !== "object") return;
+    const e = {};
+    if (p.fav === true) e.fav = true;
+    if (Number.isInteger(p.stars) && p.stars >= 1 && p.stars <= 5) e.stars = p.stars;
+    if (Object.keys(e).length) out[id] = e;
+  });
+  return out;
+}
+function loadPrefs() { return sanitizePrefs(readJSON(STORAGE_KEYS.ratings)); }
+function savePrefs() { writeJSON(STORAGE_KEYS.ratings, recipePrefs); }
+
+const isFavourite = id => !!(recipePrefs[id] && recipePrefs[id].fav);
+const ratingOf = id => (recipePrefs[id] && recipePrefs[id].stars) || 0;
+
+function updatePref(id, change) {
+  const e = { ...(recipePrefs[id] || {}), ...change };
+  if (!e.fav) delete e.fav;
+  if (!e.stars) delete e.stars;
+  if (Object.keys(e).length) recipePrefs[id] = e; else delete recipePrefs[id];
+  savePrefs();
+  renderRecipes();
+  if (isModalOpen("recipeModal") && openRecipeId === id) openRecipeModal(id);
+}
+
+function toggleFavourite(id, event) {
+  if (event) event.stopPropagation(); // the heart sits on a clickable tile
+  updatePref(id, { fav: !isFavourite(id) });
+}
+
+// Tapping the current rating again clears it.
+function setRating(id, stars) {
+  updatePref(id, { stars: ratingOf(id) === stars ? 0 : stars });
+}
+

@@ -24,6 +24,7 @@ window.addEventListener("DOMContentLoaded", () => {
   stockStatuses = loadStockStatuses();
   mixerOnHand = loadMixerOnHand();
   partyMenus = loadMenus();
+  recipePrefs = loadPrefs();
   refreshAllViews();
   renderGlasswareGuide();
   const guest = parseMenuHash(location.hash);

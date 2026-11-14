@@ -77,6 +77,7 @@ function resetAllFilters() {
   document.getElementById("readinessFilter").value = "ALL";
   document.getElementById("hideOutOfStockToggle").checked = false;
   document.getElementById("useUpLowStockToggle").checked = false;
+  document.getElementById("favouritesToggle").checked = false;
   setTypeFilter("ALL");
   setVibeFilter("ALL");
 }
@@ -91,12 +92,22 @@ function jumpToIngredient(id) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+let openRecipeId = null; // which recipe the recipe view is showing (for live re-render)
+
 function openRecipeModal(id) {
   const r = recipeById(id);
   if (!r) return;
   const { lowItems, outItems } = getRecipeStockAnalysis(r);
 
+  openRecipeId = id;
   const guest = !!guestMenu; // guest menu: read-only, no stock or editing
+  const myRating = ratingOf(r.id);
+  const stars = guest ? "" : `
+          <div class="flex items-center gap-0.5 mt-2 no-print" role="group" aria-label="Your rating">
+            ${[1, 2, 3, 4, 5].map(n => `<button type="button" onclick="setRating('${r.id}', ${n})" aria-label="Rate ${n} of 5" aria-pressed="${n <= myRating}"
+              class="text-xl leading-none px-0.5 transition ${n <= myRating ? "text-gold" : "text-gray-600 hover:text-gold/70"}">★</button>`).join("")}
+            <span class="text-[11px] text-gray-400 ml-2">${myRating ? "Your rating" : "Rate it"}</span>
+          </div>`;
   // What's needed to make it now (tiles only show a short badge).
   const missing = missingItems(r);
   const missingMixers = missing.filter(it => !isTracked(it));
@@ -175,7 +186,9 @@ function openRecipeModal(id) {
             ${!guest && isBarReady(r) ? `<span class="text-xs px-2.5 py-0.5 rounded-full bg-white/10 text-gray-200">Bar-Ready</span>` : ""}
           </div>
           <h2 class="font-serif text-3xl sm:text-4xl font-bold text-white">${esc(r.name)}</h2>
+          ${stars}
         </div>
+        ${guest ? "" : heartButton(r.id, "mt-1")}
         <button onclick="closeRecipeModal()" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-gray-300 hover:text-white transition" aria-label="Close">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>

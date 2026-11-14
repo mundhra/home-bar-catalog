@@ -34,7 +34,8 @@ const STORAGE_KEYS = {
   catalog: "private_reserve_catalog_v1",   // { basedOn, savedAt, catalog } — edited copy
   stock: "private_reserve_stock_v2",       // { itemId: "low" | "out" }
   legacyStock: "private_reserve_stock_v1", // { itemName: "low" | "out" } — migrated once
-  menus: "private_reserve_menus_v1",      // [{ id, title, recipeIds, updatedAt }] party menus
+  menus: "private_reserve_menus_v1",
+  ratings: "private_reserve_ratings_v1",  // { recipeId: { fav: true, stars: 1..5 } }      // [{ id, title, recipeIds, updatedAt }] party menus
   onHand: "private_reserve_onhand_v1",    // { mixerId: true | false } — overrides; staples default to on hand
   legacyShopping: "private_reserve_shopping_v1" // [mixerId, ...] old checklist ticks — migrated once
 };

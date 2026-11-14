@@ -72,6 +72,8 @@ function renderRecipes() {
   const readinessFilter = document.getElementById("readinessFilter").value;
   const hideOutOfStock = document.getElementById("hideOutOfStockToggle").checked;
   const useUpLowStock = document.getElementById("useUpLowStockToggle").checked;
+  const favouritesOnly = document.getElementById("favouritesToggle").checked;
+  const sortBy = document.getElementById("sortSelect").value;
 
   if (!catalog.recipes.length && shippedErrors.length && !usingLocalCopy) {
     grid.innerHTML = `
@@ -88,6 +90,7 @@ function renderRecipes() {
     const { lowItems, outItems } = getRecipeStockAnalysis(r);
     if (hideOutOfStock && outItems.length > 0) return false;
     if (useUpLowStock && lowItems.length === 0) return false;
+    if (favouritesOnly && !isFavourite(r.id)) return false;
     if (currentTypeFilter !== "ALL" && r.type !== currentTypeFilter) return false;
     if (currentVibeFilter !== "ALL" && r.vibe !== currentVibeFilter) return false;
     if (readinessFilter === "CAN_MAKE" && !canMakeNow(r)) return false;
@@ -112,9 +115,17 @@ function renderRecipes() {
     return true;
   });
 
+  if (sortBy === "RATING") {
+    // Highest rated first; favourites break ties; unrated keep catalog order at the end.
+    const score = r => ratingOf(r.id) * 2 + (isFavourite(r.id) ? 1 : 0);
+    filtered.sort((a, b) => score(b) - score(a));
+  } else if (sortBy === "NAME") {
+    filtered.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
   document.getElementById("visibleCount").textContent = filtered.length;
   renderTonightSummary();
-  const isFiltered = currentTypeFilter !== "ALL" || currentVibeFilter !== "ALL" || selectedIngredients.size > 0 || readinessFilter !== "ALL" || searchVal !== "" || hideOutOfStock || useUpLowStock;
+  const isFiltered = currentTypeFilter !== "ALL" || currentVibeFilter !== "ALL" || selectedIngredients.size > 0 || readinessFilter !== "ALL" || searchVal !== "" || hideOutOfStock || useUpLowStock || favouritesOnly;
   document.getElementById("resetFiltersBtn").classList.toggle("hidden", !isFiltered);
 
   if (filtered.length === 0) {
@@ -167,9 +178,13 @@ function renderRecipes() {
     return `
       <article onclick="openRecipeModal('${r.id}')" class="glass-card rounded-2xl p-4 flex items-start gap-3 cursor-pointer group ${isOut ? 'opacity-60 border-red-500/30 grayscale-[35%]' : isLow ? 'border-amber-500/35' : ''}">
         <div class="min-w-0 flex-1 space-y-1.5">
-          <div class="flex flex-wrap items-center gap-1.5">
-            <span class="text-[10px] px-2 py-0.5 rounded-full border font-semibold ${typeBadgeColor}">${esc(r.type)}</span>
-            ${readyBadge}
+          <div class="flex items-start gap-1.5">
+            <div class="flex flex-wrap items-center gap-1.5 min-w-0">
+              <span class="text-[10px] px-2 py-0.5 rounded-full border font-semibold ${typeBadgeColor}">${esc(r.type)}</span>
+              ${readyBadge}
+              ${ratingOf(r.id) ? `<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-gold/10 text-gold border border-gold/25" title="Your rating">★ ${ratingOf(r.id)}</span>` : ""}
+            </div>
+            ${heartButton(r.id, "ml-auto -mt-1 -mr-1")}
           </div>
           <div>
             <p class="text-[10px] uppercase tracking-wider text-gold/90 font-medium">${esc(r.vibe)}</p>
@@ -180,6 +195,15 @@ function renderRecipes() {
         <div class="shrink-0 self-center [&>svg]:w-14 [&>svg]:h-16" aria-hidden="true">${renderGlassSVG(r.glass, r.colors, r.garnishType, r.id)}</div>
       </article>`;
   }).join("");
+}
+
+// Heart toggle used on tiles and in the recipe view.
+function heartButton(id, extraClass = "") {
+  const on = isFavourite(id);
+  return `<button type="button" onclick="toggleFavourite('${id}', event)" aria-pressed="${on}" aria-label="${on ? "Remove from favourites" : "Add to favourites"}"
+    class="shrink-0 p-1.5 rounded-lg transition no-print ${on ? "text-rose-400 hover:text-rose-300" : "text-gray-500 hover:text-rose-300"} ${extraClass}">
+    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="${on ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 6.9 4.5c2 0 3.4 1.1 4.1 2.3.7-1.2 2.1-2.3 4.1-2.3 3.5 0 5.5 3.5 4.2 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg>
+  </button>`;
 }
 
 function renderStockToggleButtons(id) {

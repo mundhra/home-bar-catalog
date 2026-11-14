@@ -60,7 +60,7 @@ function renderDataModal() {
   document.getElementById("dataModalBody").innerHTML = `
     ${status}
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      ${action("exportBackup()", "Export backup (.json)", "Recipes, inventory, stock levels, mixers on hand and party menus. Use it to move to another device or keep a safe copy.")}
+      ${action("exportBackup()", "Export backup (.json)", "Recipes, inventory, stock levels, mixers on hand, party menus, favourites and ratings. Use it to move to another device or keep a safe copy.")}
       ${action("triggerImport()", "Import backup", "Load a backup .json (or a catalog.js). Replaces the catalog in this browser after you confirm.")}
       ${action("downloadCatalogJs()", "Download catalog.js", "Publish your edits for every device: replace <code class='text-gold'>data/catalog.js</code> in the repo and push.")}
       ${usingLocalCopy && shippedCatalog
@@ -87,7 +87,8 @@ function exportBackup() {
     catalog: catalogSnapshot(),
     stock: stockStatuses,
     onHand: mixerOnHand,
-    menus: partyMenus
+    menus: partyMenus,
+    ratings: recipePrefs
   };
   downloadFile(`private-reserve-backup-${todayStamp()}.json`, JSON.stringify(payload, null, 2), "application/json");
   showToast("Backup downloaded.");
@@ -143,6 +144,10 @@ async function handleImportFile(input) {
     mixerOnHand = sanitizeOnHand(parsed.onHand
       || Object.fromEntries((Array.isArray(parsed.shopping) ? parsed.shopping : []).map(id => [id, true])));
     saveMixerOnHand();
+    if (parsed.ratings && typeof parsed.ratings === "object") {
+      recipePrefs = sanitizePrefs(parsed.ratings);
+      savePrefs();
+    }
     if (Array.isArray(parsed.menus)) {
       partyMenus = sanitizeMenus(parsed.menus);
       saveMenus();

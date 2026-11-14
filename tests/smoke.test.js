@@ -174,6 +174,7 @@ window.addEventListener("load", () => setTimeout(async () => {
       openRecipeModal(guestMenu.ids[0]);
       const gt = document.getElementById("modalContent").textContent;
       ok("guest recipe view is read-only", !gt.includes("Edit Recipe") && !gt.includes("Duplicate") && !gt.includes("In Stock") && !gt.includes("Can make now"));
+      ok("guests get no hearts or stars", !document.querySelector('#modalContent button[aria-label^="Rate"], #modalContent button[aria-pressed], #guestGrid button[aria-pressed]'));
       ok("guest still sees amounts", RAW.recipes.find(r => r.id === guestMenu.ids[0]).ingredients.every(i => gt.includes(i.amount)));
       closeRecipeModal();
 
@@ -309,6 +310,40 @@ window.addEventListener("load", () => setTimeout(async () => {
       ok("editor saves substitute and optional changes", !ed[0].substitutes && ed[0].optional === true && ed[1].substitutes?.[0] === M.id && ed[1].optional === true);
       closeRecipeModal();
       resetToShippedCatalog();
+
+      // ---------- favourites & ratings ----------
+      const [f1, f2, f3] = RAW.recipes.slice(0, 3).map(r => r.id);
+      const heart = document.querySelector(`#recipeGrid article[onclick*="'${f2}'"] button[aria-pressed]`);
+      heart.click();
+      ok("heart on a tile favourites without opening the recipe", isFavourite(f2) && !isModalOpen("recipeModal"));
+      toggleFavourite(f3);
+      ok("favourites saved", LS("private_reserve_ratings_v1")[f3].fav === true);
+      document.getElementById("favouritesToggle").checked = true; applyFilters();
+      ok("Favourites filter", cards() === 2);
+      resetAllFilters();
+      ok("reset clears the Favourites filter", cards() === N && !document.getElementById("favouritesToggle").checked);
+      openRecipeModal(f1);
+      document.querySelector('#modalContent button[aria-label="Rate 4 of 5"]').click();
+      ok("rate from the recipe view", ratingOf(f1) === 4 && isModalOpen("recipeModal")
+        && document.querySelectorAll('#modalContent button[aria-label^="Rate"][aria-pressed="true"]').length === 4);
+      setRating(f1, 4);
+      ok("tapping the same star clears it", ratingOf(f1) === 0);
+      setRating(f1, 5); setRating(f3, 3);
+      closeRecipeModal();
+      ok("rating shows on the tile", document.querySelector(`#recipeGrid article[onclick*="'${f1}'"]`).textContent.includes("★ 5"));
+      document.getElementById("sortSelect").value = "RATING"; applyFilters();
+      const order = [...document.querySelectorAll("#recipeGrid article")].slice(0, 3).map(a => a.getAttribute("onclick").match(/'([^']+)'/)[1]);
+      ok("sort by top rated", JSON.stringify(order) === JSON.stringify([f1, f3, f2]), order.join());
+      document.getElementById("sortSelect").value = "NAME"; applyFilters();
+      const names = [...document.querySelectorAll("#recipeGrid article h3")].map(h => h.textContent);
+      ok("sort A–Z", names.every((n, i) => i === 0 || names[i - 1].localeCompare(n) <= 0));
+      document.getElementById("sortSelect").value = "DEFAULT"; applyFilters();
+      downloads = []; exportBackup();
+      const prefBackup = JSON.parse(downloads[0].text);
+      recipePrefs = {}; savePrefs();
+      await handleImportFile(fileOf(JSON.stringify(prefBackup), "b.json"));
+      ok("backup restores favourites and ratings", ratingOf(f1) === 5 && isFavourite(f2) && isFavourite(f3) && ratingOf(f3) === 3);
+      recipePrefs = {}; savePrefs(); resetToShippedCatalog();
 
       // ---------- party menus ----------
       const ids3 = RAW.recipes.slice(0, 3).map(r => r.id);
