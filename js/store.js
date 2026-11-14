@@ -209,10 +209,10 @@ function recipesUsingItem(id) {
 }
 
 // =========================================================================
-// STOCK STATUSES & RESTOCK CHECKLIST (per browser)
+// STOCK STATUSES & MIXERS ON HAND (per browser)
 // =========================================================================
 let stockStatuses = {};             // itemId -> "low" | "out" (absent = in stock)
-let checkedShoppingItems = new Set();
+let mixerOnHand = {};               // mixerId -> true | false (absent = default: staples on hand)
 let currentTypeFilter = "ALL";
 let currentVibeFilter = "ALL";
 let selectedIngredients = new Set(); // item ids
@@ -247,11 +247,47 @@ function loadStockStatuses() {
 }
 function saveStockStatuses() { writeJSON(STORAGE_KEYS.stock, stockStatuses); }
 
-function loadShoppingChecklist() {
-  const arr = readJSON(STORAGE_KEYS.shopping);
-  return new Set(Array.isArray(arr) ? arr.filter(id => itemsById.get(id)?.kind === "mixer") : []);
+function sanitizeOnHand(obj) {
+  const out = {};
+  if (!obj || typeof obj !== "object") return out;
+  Object.entries(obj).forEach(([id, v]) => {
+    if (itemsById.get(id)?.kind === "mixer" && typeof v === "boolean") out[id] = v;
+  });
+  return out;
 }
-function saveShoppingChecklist() { writeJSON(STORAGE_KEYS.shopping, [...checkedShoppingItems]); }
+
+function loadMixerOnHand() {
+  const current = readJSON(STORAGE_KEYS.onHand);
+  if (current && typeof current === "object") return sanitizeOnHand(current);
+  // One-time migration: ticks on the old restock checklist meant "got it".
+  const ticked = readJSON(STORAGE_KEYS.legacyShopping);
+  if (Array.isArray(ticked)) {
+    const migrated = sanitizeOnHand(Object.fromEntries(ticked.map(id => [id, true])));
+    writeJSON(STORAGE_KEYS.onHand, migrated);
+    return migrated;
+  }
+  return {};
+}
+function saveMixerOnHand() { writeJSON(STORAGE_KEYS.onHand, mixerOnHand); }
+
+function isOnHand(id) {
+  const it = itemsById.get(id);
+  if (!it || it.kind !== "mixer") return false;
+  return id in mixerOnHand ? mixerOnHand[id] : it.staple === true;
+}
+
+function setOnHand(id, value) {
+  if (itemsById.get(id)?.kind !== "mixer") return;
+  mixerOnHand[id] = !!value;
+  saveMixerOnHand();
+  refreshAllViews();
+}
+
+function resetMixersToDefaults() {
+  mixerOnHand = {};
+  saveMixerOnHand();
+  refreshAllViews();
+}
 
 // Drop state that points at items which no longer exist or are no longer tracked.
 function pruneOrphanState() {
@@ -260,10 +296,10 @@ function pruneOrphanState() {
     stockStatuses = cleanStock;
     saveStockStatuses();
   }
-  const cleanShopping = new Set([...checkedShoppingItems].filter(id => itemsById.get(id)?.kind === "mixer"));
-  if (cleanShopping.size !== checkedShoppingItems.size) {
-    checkedShoppingItems = cleanShopping;
-    saveShoppingChecklist();
+  const cleanOnHand = sanitizeOnHand(mixerOnHand);
+  if (JSON.stringify(cleanOnHand) !== JSON.stringify(mixerOnHand)) {
+    mixerOnHand = cleanOnHand;
+    saveMixerOnHand();
   }
   selectedIngredients = new Set([...selectedIngredients].filter(id => itemsById.has(id)));
 }
@@ -294,4 +330,48 @@ function getRecipeStockAnalysis(recipe) {
     if (st === "out" && !outItems.includes(it.name)) outItems.push(it.name);
   });
   return { lowItems, outItems };
+}
+
+// =========================================================================
+// WHAT CAN I MAKE TONIGHT?
+//   A tracked bottle/syrup is available unless marked Out (Low still counts).
+//   A mixer is available when it's on hand. Untracked extras (no inventory
+//   item, e.g. egg white) are assumed available.
+// =========================================================================
+function isItemAvailable(it) {
+  if (!it) return true;
+  return isTracked(it) ? getItemStockStatus(it.id) !== "out" : isOnHand(it.id);
+}
+
+// Distinct inventory items this recipe needs but you don't have right now.
+function missingItems(recipe) {
+  const missing = [];
+  recipe.ingredients.forEach(ing => {
+    const it = ing.item && itemsById.get(ing.item);
+    if (it && !isItemAvailable(it) && !missing.includes(it)) missing.push(it);
+  });
+  return missing;
+}
+
+function canMakeNow(recipe) { return missingItems(recipe).length === 0; }
+
+// For every item that is the *only* thing missing from some drink: how many
+// drinks getting it would unlock. Sorted by impact.
+function unlockSuggestions() {
+  const counts = new Map();
+  catalog.recipes.forEach(r => {
+    const missing = missingItems(r);
+    if (missing.length === 1) counts.set(missing[0], (counts.get(missing[0]) || 0) + 1);
+  });
+  return [...counts.entries()]
+    .map(([item, unlocks]) => ({ item, unlocks }))
+    .sort((a, b) => b.unlocks - a.unlocks || a.item.name.localeCompare(b.item.name));
+}
+
+// Mark an item as available: restock a tracked item, or put a mixer on hand.
+function markAvailable(id) {
+  const it = itemsById.get(id);
+  if (!it) return;
+  if (isTracked(it)) setItemStockStatus(id, "in");
+  else setOnHand(id, true);
 }

@@ -213,17 +213,17 @@ function openStockDrawer() {
 }
 function closeStockDrawer() { hideModal("stockDrawerModal"); }
 
-function toggleShoppingItem(id) {
-  if (checkedShoppingItems.has(id)) checkedShoppingItems.delete(id);
-  else checkedShoppingItems.add(id);
-  saveShoppingChecklist();
-  renderShoppingChecklist();
-  updateStockBadges();
+function setReadinessFilter(value) {
+  document.getElementById("readinessFilter").value = value;
+  applyFilters();
 }
 
-function resetChecklist() {
-  checkedShoppingItems.clear();
-  saveShoppingChecklist();
-  renderShoppingChecklist();
-  updateStockBadges();
+// From the shopping dialog: show the drinks that need only this one item.
+function showOneAwayFor(id) {
+  resetAllFilters();
+  switchTab("menu");
+  selectedIngredients.add(id);
+  renderMultiFilterControls();
+  setReadinessFilter("ONE_AWAY");
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }

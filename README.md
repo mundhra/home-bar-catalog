@@ -14,9 +14,10 @@ A single-file web app that catalogs a personal home bar and serves **57 recipes*
   * **Search** by drink name, flavour, glass, notes or ingredient.
   * **Ingredient multi-select:** pick any mix of spirits, wines, kombucha, syrups, juices and mixers, then match **Any (OR)** or **All (AND)**. Selected ingredients show as removable chips.
   * **Category** (*Cocktail*, *Mocktail*, *Wine & Low-ABV*) and **Flavour Vibe** (*Refreshing & Crisp*, *Tropical & Fruity*, *Rich & Dessert*, *Herbal & Bold*).
-  * **Readiness:** *Bar-Ready Now* lists drinks that need nothing beyond stocked items and basic soda/tonic (no juice, citrus or dairy).
+  * **Readiness:** *Can Make Now*, *One Ingredient Away*, *Bar-Ready* (needs only bottles, syrups and staple mixers) or *Needs Fresh Mixers*.
 * **Stock manager:** mark each of the 23 bar items **In Stock**, **Low** or **Out**, from the header drawer or the Inventory tab. Statuses are saved in the browser's `localStorage`. Two toggles act on them: *Hide Out-of-Stock Drinks* and *Use Up Low-Stock Items*.
-* **Order & restock list:** a tick-off checklist of on-demand mixers and juices (ticks are saved), plus automatic alerts for any bar item marked Low or Out.
+* **What can I make tonight?** Every card says *✓ Can make now*, *Need: Fresh Lime Juice* or *Missing 2*, based on your stock levels and the mixers you have on hand. The line above the grid shows how many drinks you can make now and how many are one ingredient away; tap either to filter.
+* **Shopping & mixers on hand:** tick the mixers and juices in the fridge (staples like soda and tonic start ticked). The dialog ranks the single items that would unlock the most drinks ("Fresh Lime Juice: unlocks 10 drinks") with a *Got it* button, and lists bottles marked Low or Out.
 * **Edit in the app:** add, edit, duplicate and delete recipes and inventory items, with export/import backups to move between devices. See *Editing Recipes & Inventory*.
 * **Print / PDF:** print styles render a clean, light menu (`Ctrl+P` → *Save as PDF*).
 
@@ -40,7 +41,7 @@ A single-file web app that catalogs a personal home bar and serves **57 recipes*
 * **Kombucha** *(Ginger, Berry, Citrus, Original)*
 
 ### On-demand staples (not stock-tracked)
-Club soda, tonic water, ginger ale/beer, cola, fresh limes and lemons, orange, pineapple and cranberry juice, milk/cream, and espresso/cold brew. These appear on the restock checklist and in the ingredient filter.
+Club soda, tonic water, ginger ale/beer, cola, fresh limes and lemons, orange, pineapple and cranberry juice, milk/cream, and espresso/cold brew. Mark them on hand or not in the Shopping dialog or on the Inventory tab. Soda, tonic, ginger ale/beer and cola are *staples*: on hand unless you untick them.
 
 ---
 
@@ -66,7 +67,7 @@ Open `index.html` directly in a browser. No build step and no server needed.
 * **Tailwind CSS** via the Play CDN (`cdn.tailwindcss.com`) and **Google Fonts** (Cormorant Garamond, Inter).
 * **Inline SVG** for glassware and garnishes.
 * **`data/catalog.js`** holds all inventory items and recipes (see below).
-* **`localStorage`** (per browser): `private_reserve_stock_v2` (stock levels by item id; v1 name-keyed data migrates automatically), `private_reserve_shopping_v1` (checklist ticks) and `private_reserve_catalog_v1` (your edited copy of the catalog, if any).
+* **`localStorage`** (per browser): `private_reserve_stock_v2` (stock levels by item id; v1 name-keyed data migrates automatically), `private_reserve_onhand_v1` (which mixers are on hand; old `private_reserve_shopping_v1` checklist ticks migrate automatically) and `private_reserve_catalog_v1` (your edited copy of the catalog, if any).
 
 > ⚠️ **Needs a network connection.** Styling comes from the Tailwind CDN at runtime, so without internet the page loads unstyled. It does not work offline yet, even when launched from the home screen.
 
@@ -161,13 +162,14 @@ If the shipped catalog changes after you've started editing, the app warns you a
 ```
 (Comments above are for explanation only; the real file has none.)
 
-* **`kind`** decides tracking: `syrup`, `spirit` and `base` are stock-tracked; `mixer` items go on the restock checklist. `"staple": true` marks a mixer as always on hand.
+* **`kind`** decides tracking: `syrup`, `spirit` and `base` are stock-tracked; `mixer` items are marked on hand or not. `"staple": true` makes a mixer on hand by default.
 * **Bar-Ready is derived:** a drink is Bar-Ready when every ingredient is a tracked item or a staple mixer.
+* **Can make now** is worked out live: every tracked item it uses isn't marked Out (Low still counts), every mixer is on hand, and untracked extras (no `item`, e.g. egg white) are assumed available.
 * The app validates the file on load (ids, references, enums, colours). Problems are listed under Catalog Data rather than breaking the page. Editing in the app and using **Download catalog.js** avoids hand-editing JSON altogether.
 
 ---
 
 ## 📌 Known Limitations
 
-* Stock levels, checklist ticks and edited copies live in one browser's `localStorage`; use Export/Import or publish `catalog.js` to move them.
-* Bar-Ready ignores current stock levels and whether mixers are actually in the fridge.
+* Stock levels, mixers on hand and edited copies live in one browser's `localStorage`; use Export/Import or publish `catalog.js` to move them.
+* Untracked extras (egg white, bitters…) never block *Can make now*; add them to the inventory if you want them tracked.

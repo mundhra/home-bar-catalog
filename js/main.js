@@ -19,7 +19,7 @@ document.addEventListener("keydown", (e) => {
 window.addEventListener("DOMContentLoaded", () => {
   loadCatalog();
   stockStatuses = loadStockStatuses();
-  checkedShoppingItems = loadShoppingChecklist();
+  mixerOnHand = loadMixerOnHand();
   refreshAllViews();
   renderGlasswareGuide();
   if (shippedChangedSinceEdit()) {

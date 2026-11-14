@@ -1,5 +1,5 @@
 /*
- * Render: drink grid, inventory, stock drawer, restock checklist, filter chips.
+ * Render: drink grid, tonight summary, inventory, stock drawer, shopping dialog, filter chips.
  * All catalog text is passed through esc() before it reaches innerHTML.
  */
 
@@ -43,8 +43,26 @@ function updateStockBadges() {
     <span class="flex items-center gap-1 ${outCount > 0 ? 'text-red-400 font-semibold' : ''}"><span class="w-2 h-2 rounded-full bg-red-400"></span> ${outCount} Out</span>
   `;
 
-  const remainingMixers = itemsOfKind("mixer").filter(m => !checkedShoppingItems.has(m.id)).length;
-  document.getElementById("shoppingBadge").textContent = remainingMixers + alertTotal;
+  // Shopping badge: things worth buying = low/out bottles + anything that alone unlocks a drink.
+  const toBuy = new Set(Object.keys(stockStatuses));
+  unlockSuggestions().forEach(s => toBuy.add(s.item.id));
+  const shopBadge = document.getElementById("shoppingBadge");
+  shopBadge.textContent = toBuy.size;
+  shopBadge.classList.toggle("hidden", toBuy.size === 0);
+}
+
+// "Tonight: X can make now · Y one ingredient away" — each count is a filter shortcut.
+function renderTonightSummary() {
+  const makeable = catalog.recipes.filter(canMakeNow).length;
+  const oneAway = catalog.recipes.filter(r => missingItems(r).length === 1).length;
+  const current = document.getElementById("readinessFilter").value;
+  const chip = (value, label, n, tone) => `
+    <button type="button" onclick="setReadinessFilter('${current === value ? "ALL" : value}')"
+      class="px-2 py-0.5 rounded-full border transition ${current === value ? tone.on : tone.off}">${n} ${label}</button>`;
+  document.getElementById("tonightSummary").innerHTML = `
+    <span class="text-gray-400">Tonight:</span>
+    ${chip("CAN_MAKE", "can make now", makeable, { on: "bg-emerald-500 text-obsidian border-emerald-500 font-semibold", off: "border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/15" })}
+    ${chip("ONE_AWAY", "one ingredient away", oneAway, { on: "bg-amber-400 text-obsidian border-amber-400 font-semibold", off: "border-amber-500/40 text-amber-300 hover:bg-amber-500/15" })}`;
 }
 
 function renderRecipes() {
@@ -71,9 +89,10 @@ function renderRecipes() {
     if (useUpLowStock && lowItems.length === 0) return false;
     if (currentTypeFilter !== "ALL" && r.type !== currentTypeFilter) return false;
     if (currentVibeFilter !== "ALL" && r.vibe !== currentVibeFilter) return false;
-    const ready = isBarReady(r);
-    if (readinessFilter === "READY_NOW" && !ready) return false;
-    if (readinessFilter === "NEEDS_JUICE" && ready) return false;
+    if (readinessFilter === "CAN_MAKE" && !canMakeNow(r)) return false;
+    if (readinessFilter === "ONE_AWAY" && missingItems(r).length !== 1) return false;
+    if (readinessFilter === "READY_NOW" && !isBarReady(r)) return false;
+    if (readinessFilter === "NEEDS_JUICE" && isBarReady(r)) return false;
 
     if (selectedIngredients.size > 0) {
       const uses = id => r.ingredients.some(i => i.item === id);
@@ -93,6 +112,7 @@ function renderRecipes() {
   });
 
   document.getElementById("visibleCount").textContent = filtered.length;
+  renderTonightSummary();
   const isFiltered = currentTypeFilter !== "ALL" || currentVibeFilter !== "ALL" || selectedIngredients.size > 0 || readinessFilter !== "ALL" || searchVal !== "" || hideOutOfStock || useUpLowStock;
   document.getElementById("resetFiltersBtn").classList.toggle("hidden", !isFiltered);
 
@@ -119,9 +139,12 @@ function renderRecipes() {
         ? "bg-purple-500/15 text-purple-300 border-purple-500/30"
         : "bg-gold/15 text-gold border-gold/30";
 
-    const readyBadge = isBarReady(r)
-      ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Bar-Ready</span>`
-      : `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">+ On-Demand Juice/Citrus</span>`;
+    const missing = missingItems(r);
+    const readyBadge = missing.length === 0
+      ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold">✓ Can make now</span>`
+      : missing.length === 1
+        ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/25 truncate max-w-[60%]">Need: ${esc(missing[0].name)}</span>`
+        : `<span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10">Missing ${missing.length}</span>`;
 
     let stockWarningBanner = "";
     if (isOut) {
@@ -141,8 +164,9 @@ function renderRecipes() {
     const ingPreview = r.ingredients.map(i => {
       const it = i.item ? itemsById.get(i.item) : null;
       const st = isTracked(it) ? getItemStockStatus(it.id) : null;
-      const dotColor = !st ? "bg-sky-400" : st === "out" ? "bg-red-500" : st === "low" ? "bg-amber-400" : "bg-emerald-400";
-      const textStyle = st === "out" ? "line-through text-red-300/80" : st === "low" ? "text-amber-200" : "text-gray-200";
+      const mixerMissing = !!it && !isTracked(it) && !isOnHand(it.id);
+      const dotColor = mixerMissing ? "border border-gray-400" : !st ? "bg-sky-400" : st === "out" ? "bg-red-500" : st === "low" ? "bg-amber-400" : "bg-emerald-400";
+      const textStyle = st === "out" ? "line-through text-red-300/80" : st === "low" ? "text-amber-200" : mixerMissing ? "text-gray-400" : "text-gray-200";
       return `
         <li class="flex items-center justify-between gap-3 text-xs py-1 border-b border-white/5 last:border-0">
           <span class="${textStyle} flex items-center gap-1.5 min-w-0">
@@ -197,6 +221,17 @@ function renderStockToggleButtons(id) {
     </div>`;
 }
 
+function renderOnHandButtons(id) {
+  const have = isOnHand(id);
+  const btn = (value, label, on) => `
+    <button type="button" onclick="setOnHand('${id}', ${value})" class="py-1 px-2 rounded-lg transition ${have === value ? on : 'text-gray-400 hover:text-white'}">${label}</button>`;
+  return `
+    <div class="grid grid-cols-2 gap-1 p-1 rounded-xl bg-obsidian border border-white/10 text-[11px] font-semibold">
+      ${btn(true, "On hand", "bg-sky-500/25 text-sky-200 border border-sky-500/40")}
+      ${btn(false, "Not on hand", "bg-white/10 text-gray-200 border border-white/20")}
+    </div>`;
+}
+
 function renderInventoryCard(it) {
   const tracked = isTracked(it);
   const st = tracked ? getItemStockStatus(it.id) : "in";
@@ -211,10 +246,10 @@ function renderInventoryCard(it) {
         </div>
         ${it.profile ? `<p class="text-[11px] text-gold mt-0.5">${esc(it.profile)}</p>` : ""}
         ${it.notes ? `<p class="text-xs text-gray-300 mt-2 leading-relaxed">${esc(it.notes)}</p>` : ""}
-        ${it.staple ? `<p class="text-[11px] text-emerald-300 mt-2">Always on hand: doesn't stop a drink being Bar-Ready</p>` : ""}
+        ${it.staple ? `<p class="text-[11px] text-emerald-300 mt-2">Staple: on hand by default, and doesn't stop a drink being Bar-Ready</p>` : ""}
       </div>
       <div class="space-y-2 pt-1 no-print">
-        ${tracked ? renderStockToggleButtons(it.id) : ""}
+        ${tracked ? renderStockToggleButtons(it.id) : renderOnHandButtons(it.id)}
         <div class="flex gap-2">
           <button onclick="jumpToIngredient('${it.id}')" ${uses ? "" : "disabled"} class="flex-1 py-2 rounded-xl bg-white/5 enabled:hover:bg-gold enabled:hover:text-obsidian text-gold text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed">
             ${uses ? `View ${uses} drink${uses > 1 ? "s" : ""} →` : "Not used in any drink"}
@@ -237,12 +272,12 @@ function renderInventory() {
           <h3 class="font-serif text-xl sm:text-2xl font-bold text-gold">${idx + 1}. ${meta.label} (${list.length})</h3>
           <div class="flex items-center gap-3 no-print">
             ${kind === "mixer"
-              ? `<button onclick="openShoppingModal()" class="text-xs text-gold hover:underline font-medium">Open Order Checklist →</button>`
+              ? `<button onclick="openShoppingModal()" class="text-xs text-gold hover:underline font-medium">Shopping list →</button>`
               : `<span class="hidden sm:inline text-xs text-gray-400">Click status pills to update stock</span>`}
             <button onclick="openItemEditor('add', null, '${kind}')" class="px-3 py-1.5 rounded-lg bg-gold/15 hover:bg-gold text-gold hover:text-obsidian border border-gold/30 text-xs font-semibold transition">+ Add</button>
           </div>
         </div>
-        ${kind === "mixer" ? `<p class="text-xs text-gray-400 -mt-2">Not stock-tracked: these go on the Order &amp; Restock checklist. Mixers marked “always on hand” don't stop a drink counting as Bar-Ready.</p>` : ""}
+        ${kind === "mixer" ? `<p class="text-xs text-gray-400 -mt-2">Mark what's in the fridge; it decides what you can make now. Staples (soda, tonic…) start as on hand.</p>` : ""}
         ${cards
           ? `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">${cards}</div>`
           : `<p class="text-xs text-gray-400">Nothing here yet.</p>`}
@@ -270,6 +305,22 @@ function renderStockDrawer() {
 }
 
 function renderShoppingChecklist() {
+  const suggestions = unlockSuggestions();
+  document.getElementById("unlockSection").innerHTML = suggestions.length ? `
+    <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2.5">
+      <h4 class="text-xs uppercase tracking-wider text-emerald-300 font-bold">Buy one thing, unlock more drinks</h4>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        ${suggestions.slice(0, 8).map(({ item, unlocks }) => `
+          <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-obsidian/90 border border-emerald-500/25 text-xs">
+            <div class="min-w-0">
+              <span class="font-semibold text-white block truncate">${esc(item.name)}</span>
+              <button onclick="closeShoppingModal(); showOneAwayFor('${item.id}')" class="text-[10px] text-emerald-300 font-bold uppercase hover:underline">Unlocks ${unlocks} drink${unlocks > 1 ? "s" : ""} →</button>
+            </div>
+            <button onclick="markAvailable('${item.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-obsidian text-[11px] font-semibold transition shrink-0">Got it ✓</button>
+          </div>`).join("")}
+      </div>
+    </div>` : "";
+
   const restockSection = document.getElementById("restockAlertSection");
   const flagged = trackedItems().filter(item => getItemStockStatus(item.id) !== "in");
   if (flagged.length === 0) {
@@ -303,14 +354,15 @@ function renderShoppingChecklist() {
 
   const mixers = itemsOfKind("mixer");
   document.getElementById("shoppingChecklist").innerHTML = mixers.map(item => {
-    const isChecked = checkedShoppingItems.has(item.id);
+    const have = isOnHand(item.id);
     return `
-      <label class="flex items-center justify-between gap-3 p-3 rounded-xl bg-obsidian/70 border border-white/10 hover:border-gold/40 cursor-pointer transition">
+      <label class="flex items-center justify-between gap-3 p-3 rounded-xl bg-obsidian/70 border ${have ? 'border-sky-500/30' : 'border-white/10'} hover:border-gold/40 cursor-pointer transition">
         <div class="flex items-center gap-3">
-          <input type="checkbox" ${isChecked ? "checked" : ""} onchange="toggleShoppingItem('${item.id}')" class="w-4 h-4 rounded accent-[#d4a359]" />
-          <span class="text-sm ${isChecked ? 'line-through text-gray-500' : 'text-gray-100 font-medium'}">${esc(item.name)}</span>
+          <input type="checkbox" ${have ? "checked" : ""} onchange="setOnHand('${item.id}', this.checked)" class="w-4 h-4 rounded accent-[#d4a359]" aria-label="${esc(item.name)} on hand" />
+          <span class="text-sm ${have ? 'text-gray-100 font-medium' : 'text-gray-400'}">${esc(item.name)}</span>
+          ${item.staple ? '<span class="text-[10px] text-emerald-300">staple</span>' : ""}
         </div>
-        <span class="text-[11px] px-2 py-0.5 rounded bg-white/5 text-gray-400 shrink-0">${esc(item.category || "Mixer")}</span>
+        <span class="text-[11px] px-2 py-0.5 rounded bg-white/5 text-gray-400 shrink-0">${have ? "On hand" : "Not on hand"}</span>
       </label>`;
   }).join("") || `<p class="text-xs text-gray-400">No on-demand mixers in the inventory.</p>`;
 }

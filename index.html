@@ -115,9 +115,9 @@
             <span class="hidden lg:inline">Stock Manager</span>
             <span id="stockAlertBadge" class="hidden px-1.5 py-0.5 text-[10px] rounded-full bg-amber-500 text-obsidian font-bold">0</span>
           </button>
-          <button onclick="openShoppingModal()" title="Order & Restock List" aria-label="Order & Restock List" class="p-2 lg:px-3.5 lg:py-2 rounded-xl bg-surface hover:bg-gold/15 border border-gold/30 text-gold text-xs sm:text-sm font-medium flex items-center gap-2 transition">
+          <button onclick="openShoppingModal()" title="Shopping & Mixers On Hand" aria-label="Shopping & Mixers On Hand" class="p-2 lg:px-3.5 lg:py-2 rounded-xl bg-surface hover:bg-gold/15 border border-gold/30 text-gold text-xs sm:text-sm font-medium flex items-center gap-2 transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-            <span class="hidden lg:inline">Order & Restock List</span>
+            <span class="hidden lg:inline">Shopping & On Hand</span>
             <span id="shoppingBadge" class="px-1.5 py-0.5 text-[10px] rounded-full bg-gold text-obsidian font-bold">11</span>
           </button>
           <button onclick="openDataModal()" title="Catalog Data: export, import, publish" aria-label="Catalog Data" class="relative p-2 lg:px-3.5 lg:py-2 rounded-xl bg-surface hover:bg-white/10 border border-white/15 text-gray-200 text-xs sm:text-sm font-medium flex items-center gap-2 transition">
@@ -182,9 +182,11 @@
           <!-- Readiness Filter -->
           <div class="md:col-span-3">
             <select id="readinessFilter" onchange="applyFilters()" class="w-full px-3.5 py-2.5 rounded-xl bg-obsidian/90 border border-white/10 focus:border-gold focus:outline-none text-sm text-gray-200">
-              <option value="ALL">All Readiness Levels</option>
-              <option value="READY_NOW">Bar-Ready Now</option>
-              <option value="NEEDS_JUICE">Requires On-Demand Mixer</option>
+              <option value="ALL">All Drinks</option>
+              <option value="CAN_MAKE">Can Make Now</option>
+              <option value="ONE_AWAY">One Ingredient Away</option>
+              <option value="READY_NOW">Bar-Ready (bottles + staples)</option>
+              <option value="NEEDS_JUICE">Needs Fresh Mixers</option>
             </select>
           </div>
         </div>
@@ -274,7 +276,10 @@
 
       <!-- Active Filter Banner & Reset -->
       <div class="flex items-center justify-between text-xs text-gray-400 px-1">
-        <p>Showing <span id="visibleCount" class="text-gold font-bold">48</span> curated recipes tailored to your bar catalog</p>
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+          <p>Showing <span id="visibleCount" class="text-gold font-bold">0</span> drinks</p>
+          <div id="tonightSummary" class="flex flex-wrap items-center gap-1.5 no-print"></div>
+        </div>
         <div class="flex items-center gap-3 no-print">
           <button onclick="resetAllFilters()" id="resetFiltersBtn" class="hidden text-gold hover:underline font-medium">Reset All Filters</button>
           <button onclick="openRecipeEditor('add')" class="px-3 py-1.5 rounded-lg bg-gold/15 hover:bg-gold text-gold hover:text-obsidian border border-gold/30 font-semibold transition">+ Add Recipe</button>
@@ -360,25 +365,28 @@
   </div>
 
   <!-- ==================== ON-DEMAND SHOPPING CHECKLIST MODAL ==================== -->
-  <div id="shoppingModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onclick="closeShoppingModal(event)">
-    <div class="glass-card bg-charcoal border border-gold/40 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl space-y-5" onclick="event.stopPropagation()">
+  <div id="shoppingModal" class="fixed inset-0 z-50 hidden items-start sm:items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto" onclick="closeShoppingModal(event)">
+    <div class="glass-card bg-charcoal border border-gold/40 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl space-y-5 my-auto" onclick="event.stopPropagation()">
       <div class="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
         <div>
-          <span class="text-xs uppercase tracking-widest text-gold font-semibold">Quick Grocery & Bar Run</span>
-          <h3 class="font-serif text-2xl font-bold text-white mt-0.5">On-Demand Mixers & Juices</h3>
+          <span class="text-xs uppercase tracking-widest text-gold font-semibold">What to Buy</span>
+          <h3 class="font-serif text-2xl font-bold text-white mt-0.5">Shopping & Mixers On Hand</h3>
         </div>
         <button onclick="closeShoppingModal()" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
-      <p class="text-xs text-gray-300 leading-relaxed">Check off on-demand mixers as you order or unpack them. Bottles and syrups marked Low or Out in the Stock Manager appear here automatically.</p>
+      <p class="text-xs text-gray-300 leading-relaxed">Tick the mixers and juices you have right now; that decides what you can make tonight. Bottles marked Low or Out appear below automatically.</p>
+      <!-- Single items that would unlock more drinks -->
+      <div id="unlockSection"></div>
       <!-- Automatic Bar Restock Alerts -->
       <div id="restockAlertSection" class="space-y-3"></div>
+      <h4 class="text-xs uppercase tracking-wider text-gold font-bold">Mixers &amp; juices on hand</h4>
       <div id="shoppingChecklist" class="space-y-2 max-h-80 overflow-y-auto pr-2 scrollbar-thin">
         <!-- Populated via JS -->
       </div>
       <div class="pt-3 border-t border-white/10 flex items-center justify-between">
-        <button onclick="resetChecklist()" class="text-xs text-gray-400 hover:text-gold">Reset Checkboxes</button>
+        <button onclick="resetMixersToDefaults()" class="text-xs text-gray-400 hover:text-gold">Reset to staples only</button>
         <button onclick="closeShoppingModal()" class="px-5 py-2 rounded-xl bg-gold text-obsidian font-semibold text-sm">Done</button>
       </div>
     </div>

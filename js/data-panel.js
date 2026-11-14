@@ -60,7 +60,7 @@ function renderDataModal() {
   document.getElementById("dataModalBody").innerHTML = `
     ${status}
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      ${action("exportBackup()", "Export backup (.json)", "Recipes, inventory, stock levels and checklist. Use it to move to another device or keep a safe copy.")}
+      ${action("exportBackup()", "Export backup (.json)", "Recipes, inventory, stock levels and mixers on hand. Use it to move to another device or keep a safe copy.")}
       ${action("triggerImport()", "Import backup", "Load a backup .json (or a catalog.js). Replaces the catalog in this browser after you confirm.")}
       ${action("downloadCatalogJs()", "Download catalog.js", "Publish your edits for every device: replace <code class='text-gold'>data/catalog.js</code> in the repo and push.")}
       ${usingLocalCopy && shippedCatalog
@@ -86,7 +86,7 @@ function exportBackup() {
     exportedAt: new Date().toISOString(),
     catalog: catalogSnapshot(),
     stock: stockStatuses,
-    shopping: [...checkedShoppingItems]
+    onHand: mixerOnHand
   };
   downloadFile(`private-reserve-backup-${todayStamp()}.json`, JSON.stringify(payload, null, 2), "application/json");
   showToast("Backup downloaded.");
@@ -131,15 +131,17 @@ async function handleImportFile(input) {
   if (!res.catalog) return showDataErrors(res.errors);
 
   const summary = `Replace the catalog in this browser with ${res.catalog.recipes.length} recipes and ${res.catalog.items.length} inventory items`
-    + (isBackup ? ", plus the backup's stock levels and checklist" : "")
+    + (isBackup ? ", plus the backup's stock levels and mixers on hand" : "")
     + "?\n\nExport a backup first if you want to keep what you have now.";
   if (!confirm(summary)) return;
   if (!commitCatalog(res.catalog, null, { rebase: true })) return;
   if (isBackup) {
     stockStatuses = sanitizeStock(parsed.stock);
     saveStockStatuses();
-    checkedShoppingItems = new Set((Array.isArray(parsed.shopping) ? parsed.shopping : []).filter(id => itemsById.get(id)?.kind === "mixer"));
-    saveShoppingChecklist();
+    // Older backups stored checklist ticks ("shopping"); a tick meant "got it".
+    mixerOnHand = sanitizeOnHand(parsed.onHand
+      || Object.fromEntries((Array.isArray(parsed.shopping) ? parsed.shopping : []).map(id => [id, true])));
+    saveMixerOnHand();
     refreshAllViews();
   }
   showToast(`Imported ${res.catalog.recipes.length} recipes and ${res.catalog.items.length} items.`);

@@ -35,6 +35,14 @@ window.addEventListener("load", () => setTimeout(async () => {
     return it && (it.kind !== "mixer" || it.staple === true);
   })).length;
   const N = RAW.recipes.length;
+  // availability: { out: Set(trackedIdsOut), onHand: Set(mixerIdsOnHand) }
+  const defaultOnHand = () => new Set(mixers.filter(m => m.staple === true).map(m => m.id));
+  const missingRaw = (r, av) => [...new Set(r.ingredients.filter(i => i.item).map(i => i.item))].filter(id => {
+    const it = rawItem(id);
+    return it.kind === "mixer" ? !av.onHand.has(id) : av.out.has(id);
+  });
+  const countWhere = (av, n) => RAW.recipes.filter(r => missingRaw(r, av).length === n).length;
+  const filterCount = value => { setReadinessFilter(value); const c = cards(); setReadinessFilter("ALL"); return c; };
 
   const mode = location.hash.slice(1) || "main";
   try {
@@ -44,7 +52,7 @@ window.addEventListener("load", () => setTimeout(async () => {
       const want = { [tracked[0].id]: "out", [tracked[1].id]: "low" };
       ok("v1 name-keyed stock migrated to ids", JSON.stringify(stockStatuses) === JSON.stringify(want), JSON.stringify(stockStatuses));
       ok("v2 stock key written", JSON.stringify(LS("private_reserve_stock_v2")) === JSON.stringify(want));
-      ok("checklist restored, unknown ids dropped", checkedShoppingItems.has(mixers[0].id) && !checkedShoppingItems.has("bogus"));
+      ok("old checklist ticks become on hand", isOnHand(mixers[0].id) && JSON.stringify(LS("private_reserve_onhand_v1")) === JSON.stringify({ [mixers[0].id]: true }));
 
     } else if (mode === "stale") {
       ok("edited copy active", usingLocalCopy && catalog.recipes.length === N - 1);
@@ -106,10 +114,44 @@ window.addEventListener("load", () => setTimeout(async () => {
       ok("stock alert badge", document.getElementById("stockAlertBadge").textContent === "1");
       ok("restock alert lists the item", document.getElementById("restockAlertSection").textContent.includes(A.name));
       resetAllStockStatuses(); resetAllFilters();
-      toggleShoppingItem(M.id);
-      ok("checklist tick saved", JSON.stringify(LS("private_reserve_shopping_v1")) === JSON.stringify([M.id]));
-      resetChecklist();
-      ok("checklist reset saved", JSON.stringify(LS("private_reserve_shopping_v1")) === "[]");
+      ok("staples default to on hand", mixers.every(m => isOnHand(m.id) === (m.staple === true)));
+      setOnHand(M.id, !isOnHand(M.id));
+      ok("on-hand change saved", LS("private_reserve_onhand_v1")[M.id] === isOnHand(M.id));
+      resetMixersToDefaults();
+      ok("reset mixers to defaults", JSON.stringify(LS("private_reserve_onhand_v1")) === "{}" && isOnHand(M.id) === (M.staple === true));
+
+      // ---------- what can I make tonight ----------
+      const av = { out: new Set(), onHand: defaultOnHand() };
+      ok("can make now (defaults)", filterCount("CAN_MAKE") === countWhere(av, 0), `${filterCount("CAN_MAKE")}/${countWhere(av, 0)}`);
+      ok("one ingredient away (defaults)", filterCount("ONE_AWAY") === countWhere(av, 1), `${filterCount("ONE_AWAY")}/${countWhere(av, 1)}`);
+      ok("card badges match", document.querySelectorAll("#recipeGrid article").length === N
+        && [...document.querySelectorAll("#recipeGrid article")].filter(a => a.textContent.includes("Can make now")).length === countWhere(av, 0));
+      ok("tonight summary shows counts", document.getElementById("tonightSummary").textContent.includes(`${countWhere(av, 0)} can make now`)
+        && document.getElementById("tonightSummary").textContent.includes(`${countWhere(av, 1)} one ingredient away`));
+      setItemStockStatus(A.id, "low");
+      ok("low stock still counts as available", filterCount("CAN_MAKE") === countWhere(av, 0));
+      setItemStockStatus(A.id, "out"); av.out.add(A.id);
+      ok("out of stock removes drinks", filterCount("CAN_MAKE") === countWhere(av, 0) && filterCount("ONE_AWAY") === countWhere(av, 1));
+      setOnHand(M.id, true); av.onHand.add(M.id);
+      ok("mixer on hand adds drinks", filterCount("CAN_MAKE") === countWhere(av, 0) && filterCount("ONE_AWAY") === countWhere(av, 1));
+      const sugg = unlockSuggestions();
+      const top = sugg[0];
+      const wantUnlocks = top ? RAW.recipes.filter(r => { const m = missingRaw(r, av); return m.length === 1 && m[0] === top.item.id; }).length : 0;
+      ok("unlock suggestion counts", !!top && top.unlocks === wantUnlocks && sugg.every((s, i) => i === 0 || sugg[i - 1].unlocks >= s.unlocks), top && `${top.item.id} ${top.unlocks}/${wantUnlocks}`);
+      openShoppingModal();
+      ok("shopping dialog lists suggestions", document.getElementById("unlockSection").textContent.includes(top.item.name));
+      ok("shopping badge counts things to buy", document.getElementById("shoppingBadge").textContent === String(new Set([...Object.keys(stockStatuses), ...sugg.map(s => s.item.id)]).size));
+      const before = filterCount("CAN_MAKE");
+      markAvailable(top.item.id);
+      if (top.item.kind === "mixer") av.onHand.add(top.item.id); else av.out.delete(top.item.id);
+      ok("Got it unlocks exactly those drinks", filterCount("CAN_MAKE") === before + top.unlocks && filterCount("CAN_MAKE") === countWhere(av, 0));
+      closeShoppingModal();
+      const second = unlockSuggestions()[0];
+      if (second) {
+        showOneAwayFor(second.item.id);
+        ok("show one-away drinks for an item", document.getElementById("readinessFilter").value === "ONE_AWAY" && cards() === second.unlocks, `${cards()}/${second.unlocks}`);
+      }
+      resetAllStockStatuses(); resetMixersToDefaults(); resetAllFilters();
       jumpToIngredient(B.id);
       ok("jump to ingredient", selectedIngredients.has(B.id) && cards() === usesOf(B.id));
       resetAllFilters();
@@ -195,21 +237,26 @@ window.addEventListener("load", () => setTimeout(async () => {
       ok("unused item deleted", !itemsById.has("zz-smoke-syrup"));
 
       // ---------- export / import / publish ----------
-      setItemStockStatus(B.id, "out"); toggleShoppingItem(M.id);
+      setItemStockStatus(B.id, "out"); setOnHand(M.id, !isOnHand(M.id));
+      const mWant = isOnHand(M.id);
       downloads = []; exportBackup();
       const backup = JSON.parse(downloads[0].text);
-      ok("backup has catalog, stock, checklist", backup.format === "private-reserve-backup" && backup.catalog.recipes.length === N && backup.stock[B.id] === "out" && backup.shopping.includes(M.id));
+      ok("backup has catalog, stock, mixers on hand", backup.format === "private-reserve-backup" && backup.catalog.recipes.length === N && backup.stock[B.id] === "out" && backup.onHand[M.id] === mWant);
       downloads = []; downloadCatalogJs();
       const js = downloads[0].text;
       ok("catalog.js is header + assignment", js.startsWith("/*") && /\nwindow\.BAR_CATALOG = \{/.test(js) && js.trim().endsWith("};"));
       const m = js.match(/^window\.BAR_CATALOG\s*=\s*/m);
       ok("downloaded catalog.js validates", validateCatalog(JSON.parse(js.slice(m.index + m[0].length).trim().replace(/;$/, ""))).catalog !== null);
 
-      resetToShippedCatalog(); resetAllStockStatuses(); resetChecklist();
+      resetToShippedCatalog(); resetAllStockStatuses(); resetMixersToDefaults();
       ok("back on shipped catalog", !usingLocalCopy && itemsById.get(A.id).kind === A.kind);
       await handleImportFile(fileOf(JSON.stringify(backup), "backup.json"));
-      ok("import restores catalog, stock, checklist", usingLocalCopy && itemsById.get(A.id).name === `Premium ${A.name}` && stockStatuses[B.id] === "out" && checkedShoppingItems.has(M.id));
+      ok("import restores catalog, stock, mixers on hand", usingLocalCopy && itemsById.get(A.id).name === `Premium ${A.name}` && stockStatuses[B.id] === "out" && isOnHand(M.id) === mWant);
       ok("import does not flag the copy as stale", !shippedChangedSinceEdit());
+      const oldStyle = { ...backup, onHand: undefined, shopping: [M.id] };
+      resetMixersToDefaults();
+      await handleImportFile(fileOf(JSON.stringify(oldStyle), "old-backup.json"));
+      ok("older backups' checklist ticks import as on hand", isOnHand(M.id) === true);
       openDataModal();
       await handleImportFile(fileOf("{not json", "bad.json"));
       ok("invalid JSON reported", !document.getElementById("dataErrors").classList.contains("hidden"));
@@ -231,7 +278,7 @@ window.addEventListener("load", () => setTimeout(async () => {
       openRecipeModal(catalog.recipes[0].id);
       ok("recipe modal has edit actions", document.getElementById("modalContent").textContent.includes("Edit Recipe"));
       closeRecipeModal();
-      openShoppingModal(); ok("checklist lists every mixer", document.querySelectorAll("#shoppingChecklist label").length === mixers.length); closeShoppingModal();
+      openShoppingModal(); ok("on-hand list shows every mixer", document.querySelectorAll("#shoppingChecklist label").length === mixers.length); closeShoppingModal();
       openStockDrawer(); ok("stock drawer lists every tracked item", document.querySelectorAll("#stockDrawerList > div").length === tracked.length); closeStockDrawer();
       switchTab("inventory"); switchTab("glassware"); switchTab("menu");
       ok("tabs switch", !document.getElementById("view-menu").classList.contains("hidden"));
