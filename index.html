@@ -94,52 +94,52 @@
 
   <!-- Top Navigation & Header -->
   <header class="sticky top-0 z-30 border-b border-gold/20 bg-obsidian/90 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center text-obsidian shadow-lg shadow-gold/20 shrink-0">
-            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-4">
+      <div class="flex items-center justify-between gap-3 md:gap-4">
+        <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center text-obsidian shadow-lg shadow-gold/20 shrink-0">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M8 22h8M12 15v7M3 4h18l-9 11L3 4z" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M16 4l2-2" stroke-linecap="round"/>
             </svg>
           </div>
-          <div>
-            <p class="text-[11px] uppercase tracking-[0.25em] text-gold font-semibold">Bespoke Home Bar Edition</p>
-            <h1 class="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-white">The Private Reserve Catalog</h1>
+          <div class="min-w-0">
+            <p class="hidden sm:block text-[11px] uppercase tracking-[0.25em] text-gold font-semibold">Bespoke Home Bar Edition</p>
+            <h1 class="font-serif text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight truncate"><span class="sm:hidden">Private Reserve</span><span class="hidden sm:inline">The Private Reserve Catalog</span></h1>
           </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2 no-print">
-          <button onclick="openStockDrawer()" class="px-3.5 py-2 rounded-xl bg-surface hover:bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-medium flex items-center gap-2 transition">
+        <div class="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2 no-print shrink-0">
+          <button onclick="openStockDrawer()" title="Stock Manager" aria-label="Stock Manager" class="p-2 lg:px-3.5 lg:py-2 rounded-xl bg-surface hover:bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-medium flex items-center gap-2 transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-            <span>Stock Manager</span>
+            <span class="hidden lg:inline">Stock Manager</span>
             <span id="stockAlertBadge" class="hidden px-1.5 py-0.5 text-[10px] rounded-full bg-amber-500 text-obsidian font-bold">0</span>
           </button>
-          <button onclick="openShoppingModal()" class="px-3.5 py-2 rounded-xl bg-surface hover:bg-gold/15 border border-gold/30 text-gold text-xs sm:text-sm font-medium flex items-center gap-2 transition">
+          <button onclick="openShoppingModal()" title="Order & Restock List" aria-label="Order & Restock List" class="p-2 lg:px-3.5 lg:py-2 rounded-xl bg-surface hover:bg-gold/15 border border-gold/30 text-gold text-xs sm:text-sm font-medium flex items-center gap-2 transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-            <span>Order & Restock List</span>
+            <span class="hidden lg:inline">Order & Restock List</span>
             <span id="shoppingBadge" class="px-1.5 py-0.5 text-[10px] rounded-full bg-gold text-obsidian font-bold">11</span>
           </button>
-          <button onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-gold hover:bg-gold-light text-obsidian text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-md shadow-gold/10 transition">
+          <button onclick="window.print()" title="Print / Save PDF Menu" aria-label="Print / Save PDF Menu" class="p-2 lg:px-3.5 lg:py-2 rounded-xl bg-gold hover:bg-gold-light text-obsidian text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-md shadow-gold/10 transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-            <span>Print / Save PDF Menu</span>
+            <span class="hidden lg:inline">Print / Save PDF Menu</span>
           </button>
         </div>
       </div>
 
-      <!-- Main Navigation Tabs -->
-      <nav class="flex gap-2 mt-4 pt-3 border-t border-white/10 overflow-x-auto scrollbar-thin no-print" aria-label="Tabs">
-        <button onclick="switchTab('menu')" id="tab-menu" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 bg-gold text-obsidian shadow">
-          <span>Interactive Drink Menu</span>
+      <!-- Main Navigation Tabs (short labels on phones) -->
+      <nav class="flex gap-1.5 sm:gap-2 mt-2.5 pt-2 sm:mt-4 sm:pt-3 border-t border-white/10 overflow-x-auto scrollbar-thin no-print" aria-label="Tabs">
+        <button onclick="switchTab('menu')" id="tab-menu" class="tab-btn whitespace-nowrap shrink-0 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 bg-gold text-obsidian shadow">
+          <span class="sm:hidden">Menu</span><span class="hidden sm:inline">Interactive Drink Menu</span>
           <span class="px-2 py-0.5 text-xs rounded-full bg-obsidian/20 font-bold" id="totalRecipeCount">57</span>
         </button>
-        <button onclick="switchTab('inventory')" id="tab-inventory" class="tab-btn px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 text-gray-300 hover:text-white hover:bg-white/5">
-          <span>Bar Inventory & Stock Status</span>
-          <span class="px-2 py-0.5 text-xs rounded-full bg-white/10 text-gold">23 Items</span>
+        <button onclick="switchTab('inventory')" id="tab-inventory" class="tab-btn whitespace-nowrap shrink-0 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 text-gray-300 hover:text-white hover:bg-white/5">
+          <span class="sm:hidden">Inventory</span><span class="hidden sm:inline">Bar Inventory & Stock Status</span>
+          <span class="px-2 py-0.5 text-xs rounded-full bg-white/10 text-gold"><span id="inventoryTabCount">23</span><span class="hidden sm:inline"> Items</span></span>
         </button>
-        <button onclick="switchTab('glassware')" id="tab-glassware" class="tab-btn px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 text-gray-300 hover:text-white hover:bg-white/5">
-          <span>Glassware & Garnish Guide</span>
-          <span class="px-2 py-0.5 text-xs rounded-full bg-white/10 text-gold">7 Styles</span>
+        <button onclick="switchTab('glassware')" id="tab-glassware" class="tab-btn whitespace-nowrap shrink-0 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 text-gray-300 hover:text-white hover:bg-white/5">
+          <span class="sm:hidden">Glassware</span><span class="hidden sm:inline">Glassware & Garnish Guide</span>
+          <span class="px-2 py-0.5 text-xs rounded-full bg-white/10 text-gold">7<span class="hidden sm:inline"> Styles</span></span>
         </button>
       </nav>
     </div>
@@ -2809,12 +2809,13 @@
       ["menu", "inventory", "glassware"].forEach(t => {
         document.getElementById(`view-${t}`).classList.toggle("hidden", t !== tabName);
         const btn = document.getElementById(`tab-${t}`);
-        if (t === tabName) {
-          btn.className = "tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 bg-gold text-obsidian shadow";
-        } else {
-          btn.className = "tab-btn px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 text-gray-300 hover:text-white hover:bg-white/5";
-        }
+        const base = "tab-btn whitespace-nowrap shrink-0 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-sm transition flex items-center gap-2";
+        btn.className = t === tabName
+          ? `${base} font-semibold bg-gold text-obsidian shadow`
+          : `${base} font-medium text-gray-300 hover:text-white hover:bg-white/5`;
       });
+      // On phones the active tab can sit off-screen in the scrollable tab strip
+      document.getElementById(`tab-${tabName}`).scrollIntoView({ block: "nearest", inline: "nearest" });
     }
 
     function setTypeFilter(type) {
