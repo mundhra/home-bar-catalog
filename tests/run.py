@@ -3,7 +3,7 @@
 Smoke tests for The Private Reserve.
 
     python tests/run.py                 # static checks + every browser scenario
-    python tests/run.py main legacy     # only the named scenarios (or: offline)
+    python tests/run.py main legacy     # only the named scenarios (also: share, offline)
     CHROME=/path/to/chrome python tests/run.py
 
 Needs Python 3.8+ and Chrome, Chromium or Edge. No other dependencies.
@@ -35,7 +35,8 @@ ROOT = Path(__file__).resolve().parent.parent
 TESTS = ROOT / "tests"
 GENERATED = TESTS / ".generated.html"
 SCENARIOS = ["main", "legacy", "stale", "same", "broken"]
-EXTRA = ["offline"]
+HTTP_SCENARIOS = ["share"]      # need real time (canvas, fonts): served over local http
+EXTRA = HTTP_SCENARIOS + ["offline"]
 
 # Runs before any app script: collect errors.
 HEAD_HOOK = """<script>
@@ -211,13 +212,27 @@ class TestServer(http.server.SimpleHTTPRequestHandler):
         pass
 
 
+def start_server():
+    TestServer.offline = False
+    server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(TestServer, directory=str(ROOT)))
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    return server, f"http://127.0.0.1:{server.server_address[1]}"
+
+
+def run_http_scenario(browser, scenario):
+    server, base = start_server()
+    try:
+        with tempfile.TemporaryDirectory(prefix="bar-tests-") as profile:
+            return results_from(*dump_dom(browser, f"{base}/tests/{GENERATED.name}#{scenario}", profile))
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
 def run_offline(browser):
     """Install the service worker over http, stop the server, reopen the page offline."""
     expected = len(load_catalog()["recipes"])
-    TestServer.offline = False
-    server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(TestServer, directory=str(ROOT)))
-    base = f"http://127.0.0.1:{server.server_address[1]}"
-    threading.Thread(target=server.serve_forever, daemon=True).start()
+    server, base = start_server()
     try:
         with tempfile.TemporaryDirectory(prefix="bar-tests-") as profile:
             lines = results_from(*dump_dom(browser, f"{base}/tests/{GENERATED.name}#pwa-install", profile))
@@ -247,7 +262,12 @@ def main():
     build_page()
     try:
         for scenario in wanted:
-            lines = run_offline(browser) if scenario == "offline" else run_scenario(browser, scenario)
+            if scenario == "offline":
+                lines = run_offline(browser)
+            elif scenario in HTTP_SCENARIOS:
+                lines = run_http_scenario(browser, scenario)
+            else:
+                lines = run_scenario(browser, scenario)
             bad = [l for l in lines if not l.startswith("PASS")]
             print(f"[{scenario}] {len(lines) - len(bad)} passed, {len(bad)} failed")
             for l in bad:

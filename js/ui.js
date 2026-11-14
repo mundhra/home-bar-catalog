@@ -189,9 +189,10 @@ function openRecipeModal(id) {
 
       <div class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-white/10 no-print">
         <button onclick="deleteRecipe('${r.id}')" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-red-300 hover:bg-red-500/15 border border-red-500/30 transition">Delete</button>
-        <div class="flex gap-2">
-          <button onclick="openRecipeEditor('duplicate', '${r.id}')" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-gray-200 bg-white/5 hover:bg-white/15 border border-white/10 transition">Duplicate</button>
-          <button onclick="openRecipeEditor('edit', '${r.id}')" class="px-4 py-2 rounded-xl text-xs font-semibold bg-gold hover:bg-gold-light text-obsidian transition">Edit Recipe</button>
+        <div class="w-full sm:w-auto grid grid-cols-3 sm:flex gap-2">
+          <button onclick="openShareDialog('${r.id}')" class="px-3 py-2 rounded-xl text-xs font-semibold text-gold bg-gold/10 hover:bg-gold/20 border border-gold/30 transition"><span class="sm:hidden">Share</span><span class="hidden sm:inline">Share as Image</span></button>
+          <button onclick="openRecipeEditor('duplicate', '${r.id}')" class="px-3 py-2 rounded-xl text-xs font-semibold text-gray-200 bg-white/5 hover:bg-white/15 border border-white/10 transition">Duplicate</button>
+          <button onclick="openRecipeEditor('edit', '${r.id}')" class="px-3 py-2 rounded-xl text-xs font-semibold bg-gold hover:bg-gold-light text-obsidian transition"><span class="sm:hidden">Edit</span><span class="hidden sm:inline">Edit Recipe</span></button>
         </div>
       </div>
     </div>`;

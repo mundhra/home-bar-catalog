@@ -75,6 +75,44 @@ window.addEventListener("load", () => setTimeout(async () => {
     } else if (mode === "same") {
       ok("copy identical to shipped is dropped on load", !usingLocalCopy && LS("private_reserve_catalog_v1") === null);
 
+    } else if (mode === "share") {
+      // Over http with the clock held: canvas, image decoding and fonts are real-time work.
+      const release = holdClock();
+      const dims = async blob => { const b = await createImageBitmap(blob); return [b.width, b.height]; };
+      const first = catalog.recipes[0];
+      const blob = await renderRecipeImage(first.id);
+      const [w, h] = await dims(blob);
+      ok("renders a PNG card", blob.type === "image/png" && blob.size > 30000, `${blob.type} ${blob.size}`);
+      ok("card is 1080 wide, at least 4:5", w === 1080 && h >= 1350, `${w}x${h}`);
+
+      const long = JSON.parse(JSON.stringify(first));
+      long.id = "zz-long-share"; long.name = "An Unusually Long Cocktail Name That Has To Wrap Over Several Lines";
+      long.steps = Array.from({ length: 14 }, (_, i) => `Step ${i + 1}: stir gently for twenty seconds, then taste and adjust the balance before moving on.`);
+      commitCatalog({ ...catalog, recipes: [...catalog.recipes, long] });
+      const [, hLong] = await dims(await renderRecipeImage("zz-long-share"));
+      ok("long recipes get a taller card", hLong > h + 400, `${hLong} vs ${h}`);
+      resetToShippedCatalog();
+
+      let shared = null, downloaded = null;
+      Object.defineProperty(navigator, "canShare", { configurable: true, value: () => true });
+      Object.defineProperty(navigator, "share", { configurable: true, value: async data => { shared = data; } });
+      window.downloadBlob = (name, b) => { downloaded = { name, b }; };
+      await openShareDialog(first.id);
+      const img = document.getElementById("shareImage");
+      if (img && !img.complete) await img.decode().catch(() => {});
+      ok("preview dialog shows the image", isModalOpen("shareModal") && !!img && img.naturalWidth === 1080);
+      ok("Share button offered when the device can share files", document.getElementById("shareModalBody").textContent.includes("Share…"));
+      await shareShareImage();
+      ok("Share passes the PNG file", !!shared && shared.files.length === 1 && shared.files[0].name === `${first.id}.png` && shared.files[0].type === "image/png");
+      downloadShareImage();
+      ok("Download saves recipe-id.png", !!downloaded && downloaded.name === `${first.id}.png` && downloaded.b.size === blob.size);
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      ok("Escape closes the share dialog", !isModalOpen("shareModal"));
+      openRecipeModal(first.id);
+      ok("recipe view has Share as Image", document.getElementById("modalContent").textContent.includes("Share as Image"));
+      closeRecipeModal();
+      release();
+
     } else if (mode === "pwa-install") {
       const release = holdClock();
       // Served over http by tests/run.py. Network requests keep Chrome's virtual clock

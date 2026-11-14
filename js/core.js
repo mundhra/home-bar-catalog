@@ -77,7 +77,9 @@ function removeKey(key) {
   try { localStorage.removeItem(key); } catch (e) { /* storage unavailable */ }
 }
 function downloadFile(filename, text, mime) {
-  const blob = new Blob([text], { type: mime });
+  downloadBlob(filename, new Blob([text], { type: mime }));
+}
+function downloadBlob(filename, blob) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

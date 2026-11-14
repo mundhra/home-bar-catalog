@@ -11,6 +11,7 @@ document.addEventListener("keydown", (e) => {
   closeShoppingModal();
   closeStockDrawer();
   closeDataModal();
+  closeShareDialog();
 });
 
 // =========================================================================

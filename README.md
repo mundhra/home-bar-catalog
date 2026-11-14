@@ -19,6 +19,7 @@ A single-file web app that catalogs a personal home bar and serves **57 recipes*
 * **What can I make tonight?** Every card says *✓ Can make now*, *Need: Fresh Lime Juice* or *Missing 2*, based on your stock levels and the mixers you have on hand. The line above the grid shows how many drinks you can make now and how many are one ingredient away; tap either to filter.
 * **Shopping & mixers on hand:** tick the mixers and juices in the fridge (staples like soda and tonic start ticked). The dialog ranks the single items that would unlock the most drinks ("Fresh Lime Juice: unlocks 10 drinks") with a *Got it* button, and lists bottles marked Low or Out.
 * **Edit in the app:** add, edit, duplicate and delete recipes and inventory items, with export/import backups to move between devices. See *Editing Recipes & Inventory*.
+* **Share a recipe as an image:** *Share as Image* in any recipe makes a 1080-px-wide card (name, glass illustration, ingredients, method, garnish) and opens the phone's share sheet. Desktop browsers offer Download and Copy instead. Works offline.
 * **Print / PDF:** print styles render a clean, light menu (`Ctrl+P` → *Save as PDF*).
 
 ---
@@ -112,6 +113,7 @@ js/render.js        drink grid, inventory, stock drawer, checklist, filter chips
 js/ui.js            tabs, filters, recipe modal, dialogs
 js/editors.js       recipe builder + inventory item editor
 js/data-panel.js    export / import / download catalog.js / reset
+js/share.js         recipe card image (canvas) + share / download / copy
 js/main.js          key handling and start-up (loaded last)
 sw.js               service worker (offline support)
 manifest.webmanifest, icons/   home-screen app name, colours and icons
@@ -127,13 +129,14 @@ These are plain scripts, not ES modules: browsers block modules on `file://`, an
 
 ```
 python tests/run.py               # everything
-python tests/run.py main          # one scenario: main | legacy | stale | same | broken | offline
+python tests/run.py main          # one scenario: main | legacy | stale | same | broken | share | offline
 ```
 
 Needs Python 3.8+ and Chrome, Chromium or Edge (set `CHROME=/path/to/browser` if it isn't found). No packages to install.
 
 * **Static checks:** pasted `... existing code ...` placeholders, the same function or variable declared twice across `js/`, `<script src>` files that don't exist, files the page loads that are missing from the service worker's `PRECACHE`, and a `data/catalog.js` that isn't valid.
 * **Browser scenarios** in headless Chrome, each with empty storage: rendering, filters, Bar-Ready, stock and checklist saving, the recipe and item editors, HTML escaping, export/import/download, migration of old stock data, and stale or broken catalogs.
+* **Share:** renders recipe cards (PNG, 1080 wide, taller for long recipes) and checks the preview, Share, Download and Escape.
 * **Offline:** serves the site on a local port, lets the service worker install, then cuts the network and checks every precached file is served, the styles apply and every recipe renders.
 * Expected values are computed from `data/catalog.js`, so the tests keep passing as you add or change recipes.
 * GitHub Actions runs the same tests on every push and pull request, after checking `css/app.css` is up to date (`.github/workflows/tests.yml`). Check it's green before relying on a deploy.
