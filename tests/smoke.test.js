@@ -397,6 +397,33 @@ window.addEventListener("load", () => setTimeout(async () => {
       recipePrefs = {}; savePrefs(); renderRecipes();
       ok("picks disappear when likes are cleared", strip.classList.contains("hidden"));
 
+      // ---------- discover (recipe library) ----------
+      const LIB = window.BAR_LIBRARY.recipes;
+      ok("library loads and validates", libraryRecipes.length === LIB.length && libraryErrors.length === 0, `${libraryRecipes.length}/${LIB.length}`);
+      const disc = discoverableRecipes();
+      ok("Discover tab count", document.getElementById("discoverTabCount").textContent === String(disc.length));
+      switchTab("discover");
+      ok("Discover shows library drinks", document.querySelectorAll("#discoverGrid article").length === disc.length);
+      document.getElementById("discoverReady").value = "CAN"; renderDiscover();
+      ok("Discover 'Can make now' filter", document.querySelectorAll("#discoverGrid article").length === disc.filter(canMakeNow).length);
+      document.getElementById("discoverReady").value = "ALL"; renderDiscover();
+      ok("library tiles have no heart", !document.querySelector("#discoverGrid button[aria-pressed]"));
+      const libR = disc[0];
+      openRecipeModal(libR.id);
+      const lt = document.getElementById("modalContent").textContent;
+      ok("library recipe view: Add button, credit, no editing", lt.includes("Add to my drinks") && lt.includes("via Bar Assistant")
+        && !lt.includes("Edit Recipe") && !document.querySelector('#modalContent button[aria-label^="Rate"]'));
+      ok("library recipe doesn't change the address", !location.hash.includes(libR.id));
+      addLibraryRecipe(libR.id);
+      ok("adding puts it in your drinks", !!recipeById(libR.id) && usingLocalCopy && discoverableRecipes().length === disc.length - 1
+        && document.getElementById("modalContent").textContent.includes("Edit Recipe"));
+      ok("added recipe keeps its source", recipeById(libR.id).source === libR.source);
+      openRecipeEditor("edit", libR.id); saveRecipeEditor();
+      ok("editing keeps the source", recipeById(libR.id).source === libR.source);
+      closeRecipeModal(); switchTab("menu");
+      resetToShippedCatalog();
+      ok("reset brings it back to Discover", discoverableRecipes().length === disc.length);
+
       // ---------- party menus ----------
       const ids3 = RAW.recipes.slice(0, 3).map(r => r.id);
       openMenuEditor();

@@ -15,6 +15,8 @@ function refreshAllViews() {
   renderStockDrawer();
   renderShoppingChecklist();
   renderParty();
+  loadLibrary();
+  renderDiscover();
   if (isModalOpen("dataModal")) renderDataModal();
 }
 
@@ -141,61 +143,64 @@ function renderRecipes() {
     return;
   }
 
-  grid.innerHTML = filtered.map(r => {
-    const { lowItems, outItems } = getRecipeStockAnalysis(r);
-    const isOut = outItems.length > 0;
-    const isLow = !isOut && lowItems.length > 0;
+  grid.innerHTML = filtered.map(r => recipeTileHtml(r)).join("");
+}
 
-    const typeBadgeColor = r.type === "Mocktail"
-      ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-      : r.type === "Wine & Low-ABV"
-        ? "bg-purple-500/15 text-purple-300 border-purple-500/30"
-        : "bg-gold/15 text-gold border-gold/30";
+// One drink tile, shared by the drink grid and Discover (library: no heart).
+function recipeTileHtml(r, { library = false } = {}) {
+  const { lowItems, outItems } = getRecipeStockAnalysis(r);
+  const isOut = outItems.length > 0;
+  const isLow = !isOut && lowItems.length > 0;
 
-    const missing = missingItems(r);
-    const readyBadge = missing.length === 0
-      ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold">✓ Can make now</span>`
-      : missing.length === 1
-        ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/25 truncate max-w-full">Need: ${esc(missing[0].name)}</span>`
-        : `<span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10">Missing ${missing.length}</span>`;
+  const typeBadgeColor = r.type === "Mocktail"
+    ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+    : r.type === "Wine & Low-ABV"
+      ? "bg-purple-500/15 text-purple-300 border-purple-500/30"
+      : "bg-gold/15 text-gold border-gold/30";
 
-    // Tile = enough to choose a drink. Amounts, glass/technique, ice and stock
-    // details live in the full spec (openRecipeModal).
-    const names = [];
-    r.ingredients.forEach(i => {
-      const it = chosenCandidate(i); // shows the substitute you'd actually use
-      const label = it ? it.name : (i.name || "");
-      if (!label || names.some(n => n.label === label)) return;
-      const st = isTracked(it) ? getItemStockStatus(it.id) : null;
-      const missingMixer = !!it && !isTracked(it) && !isOnHand(it.id);
-      const style = (i.optional ? "italic " : "") + (st === "out" ? "line-through text-red-300/80"
-        : st === "low" ? "text-amber-200"
-        : missingMixer || i.optional ? "text-gray-500"
-        : "text-gray-300");
-      names.push({ label, style });
-    });
-    const ingredientLine = names.map(n => `<span class="${n.style}">${esc(n.label)}</span>`).join('<span class="text-gray-600"> · </span>');
+  const missing = missingItems(r);
+  const readyBadge = missing.length === 0
+    ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold">✓ Can make now</span>`
+    : missing.length === 1
+      ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/25 truncate max-w-full">Need: ${esc(missing[0].name)}</span>`
+      : `<span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10">Missing ${missing.length}</span>`;
 
-    return `
-      <article onclick="openRecipeModal('${r.id}')" class="glass-card rounded-2xl p-4 flex items-start gap-3 cursor-pointer group ${isOut ? 'opacity-60 border-red-500/30 grayscale-[35%]' : isLow ? 'border-amber-500/35' : ''}">
-        <div class="min-w-0 flex-1 space-y-1.5">
-          <div class="flex items-start gap-1.5">
-            <div class="flex flex-wrap items-center gap-1.5 min-w-0">
-              <span class="text-[10px] px-2 py-0.5 rounded-full border font-semibold ${typeBadgeColor}">${esc(r.type)}</span>
-              ${readyBadge}
-              ${ratingOf(r.id) ? `<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-gold/10 text-gold border border-gold/25" title="Your rating">★ ${ratingOf(r.id)}</span>` : ""}
-            </div>
-            ${heartButton(r.id, "ml-auto -mt-1 -mr-1")}
+  // Tile = enough to choose a drink. Amounts, glass/technique, ice and stock
+  // details live in the full spec (openRecipeModal).
+  const names = [];
+  r.ingredients.forEach(i => {
+    const it = chosenCandidate(i); // shows the substitute you'd actually use
+    const label = it ? it.name : (i.name || "").replace(/\s*\(.*\)\s*$/, ""); // tiles drop "(1:1 sugar and water)"-style hints
+    if (!label || names.some(n => n.label === label)) return;
+    const st = isTracked(it) ? getItemStockStatus(it.id) : null;
+    const missingMixer = !!it && !isTracked(it) && !isOnHand(it.id);
+    const style = (i.optional ? "italic " : "") + (st === "out" ? "line-through text-red-300/80"
+      : st === "low" ? "text-amber-200"
+      : missingMixer || i.optional ? "text-gray-500"
+      : "text-gray-300");
+    names.push({ label, style });
+  });
+  const ingredientLine = names.map(n => `<span class="${n.style}">${esc(n.label)}</span>`).join('<span class="text-gray-600"> · </span>');
+
+  return `
+    <article onclick="openRecipeModal('${r.id}')" class="glass-card rounded-2xl p-4 flex items-start gap-3 cursor-pointer group ${isOut ? 'opacity-60 border-red-500/30 grayscale-[35%]' : isLow ? 'border-amber-500/35' : ''}">
+      <div class="min-w-0 flex-1 space-y-1.5">
+        <div class="flex items-start gap-1.5">
+          <div class="flex flex-wrap items-center gap-1.5 min-w-0">
+            <span class="text-[10px] px-2 py-0.5 rounded-full border font-semibold ${typeBadgeColor}">${esc(r.type)}</span>
+            ${readyBadge}
+            ${ratingOf(r.id) ? `<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-gold/10 text-gold border border-gold/25" title="Your rating">★ ${ratingOf(r.id)}</span>` : ""}
           </div>
-          <div>
-            <p class="text-[10px] uppercase tracking-wider text-gold/90 font-medium">${esc(r.vibe)}</p>
-            <h3 class="font-serif text-xl font-bold text-white group-hover:text-gold transition leading-snug">${esc(r.name)}</h3>
-          </div>
-          <p class="text-xs leading-relaxed line-clamp-2">${ingredientLine}</p>
+          ${library ? "" : heartButton(r.id, "ml-auto -mt-1 -mr-1")}
         </div>
-        <div class="shrink-0 self-center [&>svg]:w-14 [&>svg]:h-16" aria-hidden="true">${renderGlassSVG(r.glass, r.colors, r.garnishType, r.id)}</div>
-      </article>`;
-  }).join("");
+        <div>
+          <p class="text-[10px] uppercase tracking-wider text-gold/90 font-medium">${esc(r.vibe)}</p>
+          <h3 class="font-serif text-xl font-bold text-white group-hover:text-gold transition leading-snug">${esc(r.name)}</h3>
+        </div>
+        <p class="text-xs leading-relaxed line-clamp-2">${ingredientLine}</p>
+      </div>
+      <div class="shrink-0 self-center [&>svg]:w-14 [&>svg]:h-16" aria-hidden="true">${renderGlassSVG(r.glass, r.colors, r.garnishType, r.id)}</div>
+    </article>`;
 }
 
 // Heart toggle used on tiles and in the recipe view.

@@ -317,7 +317,7 @@ function renderGuestView(menu, { qrLink = null } = {}) {
 function enterGuestMode(menu) {
   guestMenu = menu;
   document.body.classList.add("guest-mode");
-  ["headerActions", "mainNav", "view-menu", "view-inventory", "view-glassware", "view-party"]
+  ["headerActions", "mainNav", "view-menu", "view-inventory", "view-glassware", "view-party", "view-discover"]
     .forEach(id => document.getElementById(id).classList.add("hidden"));
   document.getElementById("view-guest").classList.remove("hidden");
   document.title = `${menu.title} · The Private Reserve`;

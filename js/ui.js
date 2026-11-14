@@ -6,7 +6,7 @@
 // INTERACTION HANDLERS (tabs, filters, modals)
 // =========================================================================
 function switchTab(tabName) {
-  ["menu", "inventory", "glassware", "party"].forEach(t => {
+  ["menu", "inventory", "glassware", "party", "discover"].forEach(t => {
     document.getElementById(`view-${t}`).classList.toggle("hidden", t !== tabName);
     const btn = document.getElementById(`tab-${t}`);
     const base = "tab-btn whitespace-nowrap shrink-0 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-sm transition flex items-center gap-2";
@@ -119,14 +119,15 @@ async function copyRecipeLink(id) {
 }
 
 function openRecipeModal(id) {
-  const r = recipeById(id);
+  const fromLibrary = !recipeById(id) && !!libraryRecipeById(id); // Discover: read-only until added
+  const r = recipeById(id) || libraryRecipeById(id);
   if (!r) return;
   const { lowItems, outItems } = getRecipeStockAnalysis(r);
 
   openRecipeId = id;
   const guest = !!guestMenu; // guest menu: read-only, no stock or editing
   const myRating = ratingOf(r.id);
-  const stars = guest ? "" : `
+  const stars = guest || fromLibrary ? "" : `
           <div class="flex items-center gap-0.5 mt-2 no-print" role="group" aria-label="Your rating">
             ${[1, 2, 3, 4, 5].map(n => `<button type="button" onclick="setRating('${r.id}', ${n})" aria-label="Rate ${n} of 5" aria-pressed="${n <= myRating}"
               class="text-xl leading-none px-0.5 transition ${n <= myRating ? "text-gold" : "text-gray-600 hover:text-gold/70"}">★</button>`).join("")}
@@ -212,7 +213,7 @@ function openRecipeModal(id) {
           <h2 class="font-serif text-3xl sm:text-4xl font-bold text-white">${esc(r.name)}</h2>
           ${stars}
         </div>
-        ${guest ? "" : heartButton(r.id, "mt-1")}
+        ${guest || fromLibrary ? "" : heartButton(r.id, "mt-1")}
         <button onclick="closeRecipeModal()" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-gray-300 hover:text-white transition" aria-label="Close">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
@@ -258,9 +259,17 @@ function openRecipeModal(id) {
         <p class="text-sm text-gray-200 leading-relaxed">${esc(r.servingNotes)}</p>
       </div>` : ""}
 
-      ${guest ? "" : similarDrinksHtml(r)}
+      ${sourceHtml(r)}
 
-      ${guest ? "" : `<div class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-white/10 no-print">
+      ${guest || fromLibrary ? "" : similarDrinksHtml(r)}
+
+      ${fromLibrary && !guest ? `
+      <div class="pt-4 border-t border-white/10 no-print space-y-2">
+        <button onclick="addLibraryRecipe('${r.id}')" class="w-full px-4 py-2.5 rounded-xl bg-gold hover:bg-gold-light text-obsidian font-semibold text-sm">+ Add to my drinks</button>
+        <p class="text-[11px] text-gray-400 text-center">Adds it to your catalog on this device, where you can edit, rate and share it.</p>
+      </div>` : ""}
+
+      ${guest || fromLibrary ? "" : `<div class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-white/10 no-print">
         <button onclick="deleteRecipe('${r.id}')" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-red-300 hover:bg-red-500/15 border border-red-500/30 transition">Delete</button>
         <div class="w-full sm:w-auto grid grid-cols-3 sm:flex gap-2">
           <button onclick="openShareDialog('${r.id}')" class="px-3 py-2 rounded-xl text-xs font-semibold text-gold bg-gold/10 hover:bg-gold/20 border border-gold/30 transition"><span class="sm:hidden">Share</span><span class="hidden sm:inline">Share as Image</span></button>
@@ -272,7 +281,7 @@ function openRecipeModal(id) {
 
   showModal("recipeModal");
   // Full path, not a bare "#…": a relative hash would resolve against any <base> element.
-  if (!guest && location.hash !== `#recipe=${id}`) history.replaceState(null, "", `${location.pathname}${location.search}#recipe=${id}`);
+  if (!guest && !fromLibrary && location.hash !== `#recipe=${id}`) history.replaceState(null, "", `${location.pathname}${location.search}#recipe=${id}`);
 }
 
 function closeRecipeModal() {

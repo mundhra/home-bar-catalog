@@ -106,6 +106,13 @@ def static_checks():
         if ident in decls:
             failures += fail(f"{ident} is declared both inline in index.html and in js/")
 
+    lib = (ROOT / "data" / "library.js").read_text(encoding="utf-8")
+    m = re.search(r"^window\.BAR_LIBRARY\s*=\s*", lib, re.M)
+    try:
+        if not m or not isinstance(json.loads(lib[m.end():].strip().rstrip(";")).get("recipes"), list):
+            failures += fail("data/library.js has no recipes list")
+    except json.JSONDecodeError as e:
+        failures += fail(f"data/library.js is not strict JSON after the assignment: {e}")
     try:
         if load_catalog().get("schema") != 1:
             failures += fail("data/catalog.js schema is not 1")
@@ -253,7 +260,8 @@ def run_offline(browser):
     finally:
         server.shutdown()
         server.server_close()
-    rendered = dom.count("<article")
+    grid = dom[dom.find('id="recipeGrid"'):dom.find('id="view-inventory"')]  # the drink grid only (Discover has tiles too)
+    rendered = grid.count("<article")
     lines.append(("PASS" if rendered == expected else "FAIL") + f" index.html opens offline :: {rendered}/{expected} recipes")
     return lines
 

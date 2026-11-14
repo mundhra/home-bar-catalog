@@ -31,7 +31,7 @@ function normalizeIngredient(ing) {
   return out;
 }
 function normalizeRecipe(r) {
-  return {
+  const out = {
     id: r.id, name: str(r.name), type: r.type, vibe: r.vibe, glass: r.glass,
     method: str(r.method), ice: str(r.ice),
     colors: [r.colors[0].toLowerCase(), r.colors[1].toLowerCase()],
@@ -40,6 +40,8 @@ function normalizeRecipe(r) {
     steps: r.steps.map(str).filter(Boolean),
     servingNotes: str(r.servingNotes)
   };
+  if (str(r.source)) out.source = str(r.source).slice(0, 500); // credit/link, e.g. for library recipes
+  return out;
 }
 
 // Validates untrusted catalog data (shipped file, saved copy or an import).
@@ -83,7 +85,7 @@ function validateCatalog(raw) {
     if (!Array.isArray(r.colors) || r.colors.length !== 2 || !r.colors.every(c => typeof c === "string" && HEX_RE.test(c))) {
       err(`${where}: colors must be two #rrggbb values.`);
     }
-    ["method", "ice", "servingNotes"].forEach(f => { if (r[f] != null && typeof r[f] !== "string") err(`${where}: ${f} must be text.`); });
+    ["method", "ice", "servingNotes", "source"].forEach(f => { if (r[f] != null && typeof r[f] !== "string") err(`${where}: ${f} must be text.`); });
     if (!Array.isArray(r.ingredients) || r.ingredients.length === 0) {
       err(`${where}: needs at least one ingredient.`);
     } else {

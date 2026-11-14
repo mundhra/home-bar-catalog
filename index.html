@@ -77,6 +77,10 @@
           <span class="sm:hidden">Party</span><span class="hidden sm:inline">Party Menus</span>
           <span class="px-2 py-0.5 text-xs rounded-full bg-obsidian/20 font-bold" id="partyTabCount">0</span>
         </button>
+        <button onclick="switchTab('discover')" id="tab-discover" class="tab-btn whitespace-nowrap shrink-0 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 text-gray-300 hover:text-white hover:bg-white/5">
+          <span>Discover</span>
+          <span class="px-2 py-0.5 text-xs rounded-full bg-obsidian/20 font-bold" id="discoverTabCount">0</span>
+        </button>
       </nav>
     </div>
   </header>
@@ -276,6 +280,25 @@
       <div id="partyMenus" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
     </section>
 
+    <!-- ==================== TAB 5: DISCOVER (recipe library) ==================== -->
+    <section id="view-discover" class="hidden space-y-6">
+      <div class="glass-card rounded-2xl p-6 border-l-4 border-l-gold space-y-2">
+        <h2 class="font-serif text-2xl sm:text-3xl font-bold text-white">Discover</h2>
+        <p class="text-sm text-gray-300">Classic and contemporary recipes from <a href="https://github.com/bar-assistant/data" target="_blank" rel="noopener" class="text-gold underline">Bar Assistant's open recipe collection</a> (MIT licence), filtered to the kinds of bottles your bar has. Add the ones you like to your drinks.</p>
+        <p class="text-xs text-gray-400">Orange liqueurs (Cointreau, triple sec, curaçao) use your Triple Sec syrup and blue curaçao your Cacao Blue syrup; those lines say "stand-in". Amounts given in oz are shown in ml (1 oz = 30 ml).</p>
+      </div>
+      <div class="glass-card rounded-2xl p-4 flex flex-col sm:flex-row gap-3 no-print">
+        <input id="discoverSearch" oninput="renderDiscover()" placeholder="Search the library…" aria-label="Search the library" class="flex-1 px-3.5 py-2.5 rounded-xl bg-obsidian/90 border border-white/10 focus:border-gold focus:outline-none text-sm text-white placeholder-gray-500" />
+        <select id="discoverReady" onchange="renderDiscover()" aria-label="Filter library" class="px-3.5 py-2.5 rounded-xl bg-obsidian/90 border border-white/10 focus:border-gold focus:outline-none text-sm text-gray-200">
+          <option value="ALL">All library drinks</option>
+          <option value="CAN">Can make now</option>
+          <option value="ONE">One ingredient away</option>
+        </select>
+      </div>
+      <p id="discoverCount" class="text-xs text-gray-400 px-1"></p>
+      <div id="discoverGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </section>
+
     <!-- ==================== GUEST MENU (opened from a #menu= link, or for printing) ==================== -->
     <section id="view-guest" class="hidden space-y-6"></section>
 
@@ -417,6 +440,7 @@
 
   <!-- Catalog data (inventory + recipes), then the app scripts. Order matters. -->
   <script src="data/catalog.js"></script>
+  <script src="data/library.js"></script>
   <script src="js/core.js"></script>
   <script src="js/glassware.js"></script>
   <script src="js/store.js"></script>
@@ -428,6 +452,7 @@
   <script src="js/vendor/qrcode.js"></script>
   <script src="js/party.js"></script>
   <script src="js/recommend.js"></script>
+  <script src="js/library.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

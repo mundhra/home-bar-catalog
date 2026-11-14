@@ -291,7 +291,7 @@ function saveRecipeEditor() {
       if (r.optional) ing.optional = true;
       return ing;
     }),
-    steps: d.steps, servingNotes: d.servingNotes
+    steps: d.steps, servingNotes: d.servingNotes, source: d.source || ""
   };
   const recipes = catalog.recipes.slice();
   if (recipeEditor.mode === "edit") {
